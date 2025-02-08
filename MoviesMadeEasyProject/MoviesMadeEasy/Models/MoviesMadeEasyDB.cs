@@ -105,10 +105,6 @@ public partial class MoviesMadeEasyDB : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_User_Title");
 
-            entity.HasOne(d => d.StreamingServices).WithMany(p => p.Users)
-                .HasForeignKey(d => d.StreamingServicesId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_User_StreamingService");
         });
 
         OnModelCreatingPartial(modelBuilder);

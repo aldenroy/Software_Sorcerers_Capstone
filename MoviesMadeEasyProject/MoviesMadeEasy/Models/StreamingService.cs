@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Microsoft.EntityFrameworkCore;
 namespace MoviesMadeEasy.Models;
 
 public partial class StreamingService
@@ -11,5 +11,4 @@ public partial class StreamingService
 
     public string? Region { get; set; }
 
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

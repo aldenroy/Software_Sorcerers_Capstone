@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Microsoft.AspNetCore.Identity;
 namespace MoviesMadeEasy.Models;
 
-public partial class User
+public partial class User : IdentityUser
 {
     public Guid AspnetIdentityId { get; set; }
 
