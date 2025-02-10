@@ -20,6 +20,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 builder.Services.AddDefaultIdentity<User>(options => 
 {
     options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<UserDbContext>();
 
