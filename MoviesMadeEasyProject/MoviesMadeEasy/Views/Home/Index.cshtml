@@ -22,14 +22,22 @@
 
 <script>
     async function searchMovies() {
-        let query = document.getElementById("searchInput").value.trim();
-        if (query === "") return;
+        let searchInput = document.getElementById("searchInput");
+        let query = searchInput.value.trim();
+        let resultsContainer = document.getElementById("results");
+
+        // Clear previous results
+        resultsContainer.innerHTML = "";
+
+        // Check if the search box is empty
+        if (query === "") {
+            resultsContainer.innerHTML = "<div class='error-message' role='alert'>Please enter a movie title before searching.</div>";
+            searchInput.focus(); // Focus back on input for better UX
+            return;
+        }
 
         let response = await fetch(`/Home/SearchMovies?query=${encodeURIComponent(query)}`);
         let movies = await response.json();
-
-        let resultsContainer = document.getElementById("results");
-        resultsContainer.innerHTML = "";
 
         if (movies.length === 0) {
             resultsContainer.innerHTML = "<div class='no-results' role='alert'>No results found.</div>";
@@ -53,6 +61,7 @@
             resultsContainer.appendChild(movieCard);
         });
     }
+
 
     function handleKeyPress(event) {
         if (event.key === "Enter") {

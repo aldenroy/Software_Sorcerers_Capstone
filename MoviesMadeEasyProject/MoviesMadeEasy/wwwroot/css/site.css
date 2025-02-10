@@ -116,3 +116,10 @@ body {
   font-size: 18px;
   color: #888;
 }
+
+.error-message {
+  color: #d9534f;
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+}
