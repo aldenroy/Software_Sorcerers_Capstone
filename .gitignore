@@ -41,6 +41,13 @@ bld/
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
+# Ignore any serviceDependencies JSON files at the root of Properties
+MoviesMadeEasy/Properties/serviceDependencies*.json
+
+# Ignore everything inside the ServiceDependencies folder
+MoviesMadeEasy/Properties/ServiceDependencies/
+
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
