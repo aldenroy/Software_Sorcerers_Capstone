@@ -407,3 +407,6 @@ FodyWeavers.xsd
 
 # Mac Files
 .DS_Store
+/MoviesMadeEasyProject/MoviesMadeEasy/Properties/serviceDependencies.MoviesMadeEasy - Zip Deploy.json
+/MoviesMadeEasyProject/MoviesMadeEasy/Properties/serviceDependencies.json
+/MoviesMadeEasyProject/MoviesMadeEasy/Properties/ServiceDependencies/MoviesMadeEasy - Zip Deploy
