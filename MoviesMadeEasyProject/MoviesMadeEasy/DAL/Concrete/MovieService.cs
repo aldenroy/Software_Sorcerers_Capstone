@@ -21,7 +21,7 @@ namespace MoviesMadeEasy.DAL.Concrete
         {
             _httpClient = httpClient;
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _apiKey = _configuration["ApiKeys:RapidApiKey"] ?? throw new ArgumentNullException("API Key not found in configuration.");
+            _apiKey = _configuration["RapidApiKey"] ?? throw new ArgumentNullException("API Key not found in configuration.");
             
             _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", _apiKey);
             _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", ApiHost);

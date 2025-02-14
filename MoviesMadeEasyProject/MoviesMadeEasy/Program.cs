@@ -28,10 +28,16 @@ builder.Services.AddScoped<IMovieService, MovieService>(provider =>
 });
 
 
-builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var azurePublish = true;
 
-builder.Services.AddDefaultIdentity<User>(options => 
+var connectionString = builder.Configuration.GetConnectionString(
+    azurePublish ? "AzureConnection" : "DefaultConnection") ??
+    throw new InvalidOperationException("Connection string not found.");
+
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseLazyLoadingProxies().UseSqlServer(connectionString));
+
+builder.Services.AddDefaultIdentity<User>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.User.RequireUniqueEmail = true;
