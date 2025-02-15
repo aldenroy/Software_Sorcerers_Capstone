@@ -6,21 +6,27 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace MoviesMadeEasy.DAL.Concrete
 {
     public class MovieService : IMovieService
     {
         private readonly HttpClient _httpClient;
-        private const string ApiKey = "2f855c58c0msh088be7c2675ba23p1d2815jsn4397c7bac39f"; // Replace with your RapidAPI key
+        private readonly IConfiguration _configuration;
+        private readonly string _apiKey; 
         private const string ApiHost = "streaming-availability.p.rapidapi.com";
 
-        public MovieService(HttpClient httpClient)
+        public MovieService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", ApiKey);
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _apiKey = _configuration["RapidApiKey"] ?? throw new ArgumentNullException("API Key not found in configuration.");
+            
+            _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", _apiKey);
             _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", ApiHost);
         }
+
 
         public async Task<List<MoviesMadeEasy.Models.Movie>> SearchMoviesAsync(string query)
         {
