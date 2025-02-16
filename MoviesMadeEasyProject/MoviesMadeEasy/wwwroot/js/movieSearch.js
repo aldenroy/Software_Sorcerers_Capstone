@@ -20,8 +20,51 @@ async function searchMovies() {
         resultsContainer.innerHTML = "<div class='no-results' role='alert'>No results found.</div>";
         return;
     }
+    
+    // Get sort option from dropdown
+    let sortOption = document.getElementById("sortBy").value;
 
-    movies.forEach(movie => {
+    // Get year filter values (if any)
+    let minYearValue = document.getElementById("minYear").value.trim();
+    let maxYearValue = document.getElementById("maxYear").value.trim();
+
+    let minYear = minYearValue ? parseInt(minYearValue, 10) : null;
+    let maxYear = maxYearValue ? parseInt(maxYearValue, 10) : null;
+
+    // If one value is provided, use it to filter for that specific year.
+    if (minYear !== null && maxYear === null) {
+        maxYear = minYear;
+    } else if (maxYear !== null && minYear === null) {
+        minYear = maxYear;
+    }
+
+    // Filter movies by year range if either min or max is provided
+    let filteredMovies = movies.filter(movie => {
+        let year = movie.releaseYear || 0;
+        let valid = true;
+        if (minYear !== null) {
+            valid = valid && (year >= minYear);
+        }
+        if (maxYear !== null) {
+            valid = valid && (year <= maxYear);
+        }
+        return valid;
+    });
+
+    if (filteredMovies.length === 0) {
+        resultsContainer.innerHTML = "<div class='no-results' role='alert'>No movies match the selection.</div>";
+        return;
+    }
+
+    // Sort the filtered movies
+    if (sortOption === "yearAsc") {
+        filteredMovies.sort((a, b) => (a.releaseYear || 0) - (b.releaseYear || 0));
+    } else if (sortOption === "yearDesc") {
+        filteredMovies.sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
+    }
+
+    // Render movie cards from the filtered & sorted list
+    filteredMovies.forEach(movie => {
         let movieCard = document.createElement("article");
         movieCard.className = "movie-card";
         movieCard.innerHTML = `
