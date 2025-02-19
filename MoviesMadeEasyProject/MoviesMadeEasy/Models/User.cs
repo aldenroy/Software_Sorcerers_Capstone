@@ -16,4 +16,10 @@ public partial class User : IdentityUser
     public virtual Title? RecentlyViewedShow { get; set; }
 
     public virtual StreamingService? StreamingServices { get; set; }
+
+    public string ColorMode { get; set; } = "Light"; // Default to Light
+
+    public string FontSize { get; set; } = "Medium"; // Default to Medium
+    
+    public string FontType { get; set; } = "Standard"; // Default to Standard
 }
