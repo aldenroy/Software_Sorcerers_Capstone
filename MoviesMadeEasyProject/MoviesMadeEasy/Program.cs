@@ -28,7 +28,7 @@ builder.Services.AddScoped<IMovieService, MovieService>(provider =>
 });
 
 
-var azurePublish = true;
+var azurePublish = false;
 
 var connectionString = builder.Configuration.GetConnectionString(
     azurePublish ? "AzureConnection" : "DefaultConnection") ??
