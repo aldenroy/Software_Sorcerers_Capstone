@@ -11,4 +11,10 @@ public partial class StreamingService
 
     public string? Region { get; set; }
 
+    public string? BaseUrl { get; set; }
+
+    public string? LogoUrl { get; set; }
+
+    public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; } = new List<UserStreamingService>();
+
 }

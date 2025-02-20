@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
+using MoviesMadeEasy.Data;
 
 namespace MoviesMadeEasy.Data
 {
@@ -14,17 +15,30 @@ namespace MoviesMadeEasy.Data
 
         public DbSet<StreamingService> StreamingServices { get; set; }
         public DbSet<Title> Titles { get; set; }
+        public DbSet<UserStreamingService> UserStreamingServices { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Configure the relationship between User and StreamingService
-            builder.Entity<User>()
-                .HasOne(u => u.StreamingServices)
-                .WithMany()  
-                .HasForeignKey(u => u.StreamingServicesId)
-                .OnDelete(DeleteBehavior.SetNull); 
+            // Define Many-to-Many Relationship via Join Table
+            builder.Entity<UserStreamingService>()
+                .HasKey(us => new { us.UserId, us.StreamingServiceId }); // Composite key
+
+            builder.Entity<UserStreamingService>()
+                .HasOne(us => us.User)
+                .WithMany(u => u.UserStreamingServices) 
+                .HasForeignKey(us => us.UserId);
+
+            builder.Entity<UserStreamingService>()
+                .HasOne(us => us.StreamingService)
+                .WithMany(s => s.UserStreamingServices) 
+                .HasForeignKey(us => us.StreamingServiceId);
+
+            // Call the separate seeding class
+            StreamingSeedData.SeedStreamingServices(builder);
+
 
             builder.Entity<StreamingService>(entity =>
             {
@@ -40,6 +54,12 @@ namespace MoviesMadeEasy.Data
                 entity.Property(e => e.Region)
                     .HasMaxLength(50)
                     .HasColumnName("region");
+                entity.Property(e => e.BaseUrl)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("base_url");
+                entity.Property(e => e.LogoUrl)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("logo_url");
             });
 
             builder.Entity<Title>(entity =>
