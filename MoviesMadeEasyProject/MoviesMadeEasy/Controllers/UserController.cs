@@ -15,11 +15,10 @@ public class UserController : Controller
         _signInManager = signInManager;
     }
 
-    public async Task<IActionResult> Login(string email, string password, string returnUrl)
+    public async Task<IActionResult> Login()
     {
-        return View(); // Temporary placeholder to make the test fail properly
+        return View();
     }
-
 
     public IActionResult Register()
     {

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MoviesMadeEasy.DAL.Abstract;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MoviesMadeEasy.Controllers
 {
@@ -17,6 +18,13 @@ namespace MoviesMadeEasy.Controllers
         {
             return View();
         }
+
+        [Authorize]
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
+
 
         [HttpGet]
         public async Task<JsonResult> SearchMovies(string query)

@@ -52,6 +52,7 @@ builder.Services.AddDefaultIdentity<User>(options =>
 })
 .AddEntityFrameworkStores<UserDbContext>();
 
+
 builder.Services.AddRazorPages();
 
 
