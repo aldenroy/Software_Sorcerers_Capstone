@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="content">
+    <h1>Hello, @User.Identity?.Name!</h1>
+
+    <h2>Recently Viewed</h2>
+    <div id="recently-viewed" class="movie-placeholder"></div>
+
+    <h2>Current Subscriptions</h2>
+    <div id="subscription-bubble" class="subscription-placeholder"></div>
+</div>
