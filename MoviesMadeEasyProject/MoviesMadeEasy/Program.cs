@@ -1,12 +1,9 @@
 using MoviesMadeEasy.DAL.Abstract; // Add this line
 using MoviesMadeEasy.DAL.Concrete; // Add this line
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.Data;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +32,7 @@ builder.Services.AddScoped<IMovieService, MovieService>(provider =>
     return new MovieService(httpClient, configuration);
 });
 
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
 var azurePublish = false;
 

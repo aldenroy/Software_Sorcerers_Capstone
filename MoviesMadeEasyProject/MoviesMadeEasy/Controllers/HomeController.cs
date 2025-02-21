@@ -2,16 +2,23 @@ using Microsoft.AspNetCore.Mvc;
 using MoviesMadeEasy.DAL.Abstract;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using MoviesMadeEasy.DTOs;
+using Microsoft.AspNetCore.Identity;
+using MoviesMadeEasy.Models;
 
 namespace MoviesMadeEasy.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IMovieService _movieService;
+        private readonly ISubscriptionService _subscriptionService;
+        private readonly UserManager<User> _userManager;
 
-        public HomeController(IMovieService movieService)
+        public HomeController(IMovieService movieService, ISubscriptionService subscriptionService, UserManager<User> userManager)
         {
             _movieService = movieService;
+            _subscriptionService = subscriptionService;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -20,11 +27,27 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [Authorize]
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
-        }
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
 
+            var userId = user.Id;
+            var userSubscriptions = _subscriptionService.GetUserSubscriptions(userId);
+
+            var dto = new DashboardDTO
+            {
+                UserName = userId,
+                HasSubscriptions = userSubscriptions != null && userSubscriptions.Any(),
+                SubscriptionNames = userSubscriptions?.Select(s => s.Name).ToList() ?? new List<string>(),
+                SubscriptionLogos = userSubscriptions?.Select(s => s.LogoUrl).ToList() ?? new List<string>()
+            };
+
+            return View(dto);
+        }
 
         [HttpGet]
         public async Task<JsonResult> SearchMovies(string query)
@@ -44,6 +67,5 @@ namespace MoviesMadeEasy.Controllers
                 return Json(new { }); // Handle errors gracefully
             }
         }
-
     }
 }
