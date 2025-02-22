@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -78,6 +79,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.Use(async (context, next) =>
+{
+    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+    await next();
+});
 
 app.UseAuthentication();
 
