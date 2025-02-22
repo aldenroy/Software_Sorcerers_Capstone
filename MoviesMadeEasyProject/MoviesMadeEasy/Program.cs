@@ -3,6 +3,7 @@ using MoviesMadeEasy.DAL.Concrete; // Add this line
 using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,8 @@ builder.Services.AddScoped<IMovieService, MovieService>(provider =>
     return new MovieService(httpClient, configuration);
 });
 
-builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var azurePublish = false;
 
@@ -40,15 +42,23 @@ var connectionString = builder.Configuration.GetConnectionString(
     azurePublish ? "AzureConnection" : "DefaultConnection") ??
     throw new InvalidOperationException("Connection string not found.");
 
+var authConnectionString = builder.Configuration.GetConnectionString(
+    azurePublish ? "AzureIdentityConnection" : "IdentityConnection") ??
+    throw new InvalidOperationException("Connection string not found.");
+
+
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseLazyLoadingProxies().UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<User>(options =>
+builder.Services.AddDbContext<IdentityDbContext>(options =>
+    options.UseLazyLoadingProxies().UseSqlServer(authConnectionString));
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.User.RequireUniqueEmail = true;
 })
-.AddEntityFrameworkStores<UserDbContext>();
+.AddEntityFrameworkStores<IdentityDbContext>();
 
 
 builder.Services.AddRazorPages();

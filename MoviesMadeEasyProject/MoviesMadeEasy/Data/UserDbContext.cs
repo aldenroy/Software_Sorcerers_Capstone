@@ -1,14 +1,11 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
-using MoviesMadeEasy.Data;
 
 namespace MoviesMadeEasy.Data
 {
-    public class UserDbContext : IdentityDbContext<User>
+    public class UserDbContext : DbContext
     {
-        public UserDbContext (DbContextOptions<UserDbContext> options)
+        public UserDbContext(DbContextOptions<UserDbContext> options)
             : base(options)
         {
         }
@@ -16,30 +13,25 @@ namespace MoviesMadeEasy.Data
         public DbSet<StreamingService> StreamingServices { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<UserStreamingService> UserStreamingServices { get; set; }
-
+        public DbSet<User> Users { get; set; }   
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Define Many-to-Many Relationship via Join Table
+            // Configure join table for UserStreamingService
             builder.Entity<UserStreamingService>()
-                .HasKey(us => new { us.UserId, us.StreamingServiceId }); // Composite key
+                .HasKey(us => new { us.UserId, us.StreamingServiceId });
 
             builder.Entity<UserStreamingService>()
-                .HasOne(us => us.User)
-                .WithMany(u => u.UserStreamingServices) 
-                .HasForeignKey(us => us.UserId);
+                .Ignore(us => us.User);
 
             builder.Entity<UserStreamingService>()
                 .HasOne(us => us.StreamingService)
-                .WithMany(s => s.UserStreamingServices) 
+                .WithMany(s => s.UserStreamingServices)
                 .HasForeignKey(us => us.StreamingServiceId);
 
-            // Call the separate seeding class
-            StreamingSeedData.SeedStreamingServices(builder);
-
-
+            // Configure StreamingService table
             builder.Entity<StreamingService>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -62,6 +54,7 @@ namespace MoviesMadeEasy.Data
                     .HasColumnName("logo_url");
             });
 
+            // Configure Title table
             builder.Entity<Title>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -83,7 +76,56 @@ namespace MoviesMadeEasy.Data
                 entity.Property(e => e.Type)
                     .HasMaxLength(50)
                     .HasColumnName("type");
-                entity.Property(e => e.Year).HasColumnName("year");
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
+            });
+
+            // Configure custom User table
+            builder.Entity<User>(entity =>
+            {
+                entity.ToTable("User");
+
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.Id)
+                      .ValueGeneratedOnAdd()
+                      .HasColumnName("Id");
+
+                // Map AspNetUsersId to the column "AspNetUserId" from your up script
+                entity.Property(u => u.AspNetUserId)
+                      .IsRequired()
+                      .HasColumnName("AspNetUserId");
+
+                entity.Property(u => u.FirstName)
+                      .IsRequired()
+                      .HasColumnName("FirstName");
+
+                entity.Property(u => u.LastName)
+                      .IsRequired()
+                      .HasColumnName("LastName");
+
+                entity.Property(u => u.RecentlyViewedShowId)
+                      .HasColumnName("RecentlyViewedShowId");
+
+                entity.Property(u => u.ColorMode)
+                      .IsRequired()
+                      .HasDefaultValue("")
+                      .HasColumnName("ColorMode");
+
+                entity.Property(u => u.FontSize)
+                      .IsRequired()
+                      .HasDefaultValue("")
+                      .HasColumnName("FontSize");
+
+                entity.Property(u => u.FontType)
+                      .IsRequired()
+                      .HasDefaultValue("")
+                      .HasColumnName("FontType");
+
+                // Explicitly configure the one-to-many relationship with Title:
+                entity.HasOne(u => u.RecentlyViewedShow)
+                    .WithMany(t => t.Users)   
+                    .HasForeignKey(u => u.RecentlyViewedShowId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

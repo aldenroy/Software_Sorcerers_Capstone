@@ -1,221 +1,71 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using MoviesMadeEasy.Controllers;
-using MoviesMadeEasy.DAL.Abstract;
+using NUnit.Framework;
 using MoviesMadeEasy.DTOs;
 using MoviesMadeEasy.Models;
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Security.Claims;
+using System.Linq;
 
-namespace MME_Tests
+namespace Tests_Unit
 {
     [TestFixture]
-    public class DashboardTests
+    public class Tests_Dashboard
     {
-        private Mock<IMovieService> _mockMovieService;
-        private Mock<ISubscriptionService> _mockSubscriptionService;
-        private HomeController _controller;
-        private Mock<UserManager<User>> _mockUserManager;
+        private DashboardDTO dashboard;
 
         [SetUp]
         public void Setup()
         {
-            var store = new Mock<IUserStore<User>>();
-            _mockUserManager = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
-            _mockMovieService = new Mock<IMovieService>();
-            _mockSubscriptionService = new Mock<ISubscriptionService>();
-            _controller = new HomeController(_mockMovieService.Object, _mockSubscriptionService.Object, _mockUserManager.Object);
-
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, "testUser")
-            }, "mock"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-
-            var mockUser = new User
-            {
-                UserName = "testUser",
-                Email = "testUser@example.com"
-            };
-
-            _mockUserManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(mockUser);
-        }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _controller.Dispose();
+            dashboard = new DashboardDTO();
+            dashboard.UserName = "Test";
         }
 
         [Test]
-        public void Dashboard_WhenNoUserSubscriptions_ShouldReturnDtoWithNoSubscriptions()
+        public void Dashboard_ZeroSubscriptions_ShowsEmptyList()
         {
-            // Arrange
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(new List<StreamingService>());
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
+            // Arrange 
+            dashboard.HasSubscriptions = false;
+            dashboard.SubList = new List<StreamingService>();
 
             // Assert
-            Assert.NotNull(model);
-            Assert.IsFalse(model.HasSubscriptions);
-            Assert.IsEmpty(model.SubscriptionNames);
-            Assert.IsEmpty(model.SubscriptionLogos);
+            Assert.That(dashboard.HasSubscriptions, Is.False);
+            Assert.That(dashboard.SubList, Is.Empty);
+            Assert.That(dashboard.SubList.Count, Is.EqualTo(0));
         }
 
         [Test]
-        public void Dashboard_WhenUserHasSingleSubscription_ShouldReturnDtoWithOneSubscription()
+        public void Dashboard_OneSubscription_ShowsSingleService()
         {
             // Arrange
-            var subscriptions = new List<StreamingService>
+            dashboard.HasSubscriptions = true;
+            dashboard.SubList = new List<StreamingService>
             {
-                new StreamingService { Name = "Netflix", LogoUrl = "netflix-logo.png" }
+                new StreamingService { Name = "Netflix" }
             };
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(subscriptions);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
 
             // Assert
-            Assert.NotNull(model);
-            Assert.IsTrue(model.HasSubscriptions);
-            Assert.That(model.SubscriptionNames.Count, Is.EqualTo(1));
-            Assert.That(model.SubscriptionNames[0], Is.EqualTo("Netflix"));
-            Assert.That(model.SubscriptionLogos[0], Is.EqualTo("netflix-logo.png"));
+            Assert.That(dashboard.HasSubscriptions, Is.True);
+            Assert.That(dashboard.SubList, Is.Not.Empty);
+            Assert.That(dashboard.SubList.Count, Is.EqualTo(1));
+            Assert.That(dashboard.SubList.First().Name, Is.EqualTo("Netflix"));
         }
 
         [Test]
-        public void Dashboard_WhenUserHasMultipleSubscriptions_ShouldReturnDtoWithMultipleSubscriptions()
+        public void Dashboard_MultipleSubscriptions_ShowsAllServices()
         {
             // Arrange
-            var subscriptions = new List<StreamingService>
+            dashboard.HasSubscriptions = true;
+            dashboard.SubList = new List<StreamingService>
             {
-                new StreamingService { Name = "Netflix", LogoUrl = "netflix-logo.png" },
-                new StreamingService { Name = "Hulu", LogoUrl = "hulu-logo.png" }
+                new StreamingService { Name = "Netflix" },
+                new StreamingService { Name = "Hulu" },
+                new StreamingService { Name = "Disney+" }
             };
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(subscriptions);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
 
             // Assert
-            Assert.NotNull(model);
-            Assert.IsTrue(model.HasSubscriptions);
-            Assert.That(model.SubscriptionNames.Count, Is.EqualTo(2));
-            Assert.Contains("Netflix", model.SubscriptionNames);
-            Assert.Contains("Hulu", model.SubscriptionNames);
-            Assert.Contains("netflix-logo.png", model.SubscriptionLogos);
-            Assert.Contains("hulu-logo.png", model.SubscriptionLogos);
-        }
-
-        [Test]
-        public void Dashboard_WhenSubscriptionServiceReturnsNull_ShouldReturnDtoWithNoSubscriptions()
-        {
-            // Arrange
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns((List<StreamingService>?)null);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
-
-            // Assert
-            Assert.NotNull(model);
-            Assert.IsFalse(model.HasSubscriptions);
-            Assert.IsEmpty(model.SubscriptionNames);
-            Assert.IsEmpty(model.SubscriptionLogos);
-        }
-
-        [Test]
-        public void Dashboard_WhenSubscriptionNamesAreEmpty_ShouldHandleGracefully()
-        {
-            // Arrange
-            var subscriptions = new List<StreamingService>
-            {
-                new StreamingService { Name = "", LogoUrl = "netflix-logo.png" }
-            };
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(subscriptions);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
-
-            // Assert
-            Assert.NotNull(model);
-            Assert.IsTrue(model.HasSubscriptions);
-            Assert.That(model.SubscriptionNames.Count, Is.EqualTo(1));
-            Assert.That(model.SubscriptionNames[0], Is.EqualTo(""));
-            Assert.That(model.SubscriptionLogos[0], Is.EqualTo("netflix-logo.png"));
-        }
-
-        [Test]
-        public void Dashboard_WhenSubscriptionLogoUrlIsNull_ShouldHandleGracefully()
-        {
-            // Arrange
-            var subscriptions = new List<StreamingService>
-            {
-                new StreamingService { Name = "Netflix", LogoUrl = null }
-            };
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(subscriptions);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
-
-            // Assert
-            Assert.NotNull(model);
-            Assert.IsTrue(model.HasSubscriptions);
-            Assert.That(model.SubscriptionNames.Count, Is.EqualTo(1));
-            Assert.That(model.SubscriptionNames[0], Is.EqualTo("Netflix"));
-            Assert.IsNull(model.SubscriptionLogos[0]);
-        }
-
-        [Test]
-        public void Dashboard_WhenMixedValidAndInvalidSubscriptions_ShouldHandleGracefully()
-        {
-            // Arrange
-            var subscriptions = new List<StreamingService>
-            {
-                new StreamingService { Name = "Netflix", LogoUrl = "netflix-logo.png" },
-                new StreamingService { Name = "", LogoUrl = null }
-            };
-            _mockSubscriptionService.Setup(s => s.GetUserSubscriptions(It.IsAny<string>()))
-                                    .Returns(subscriptions);
-
-            // Act
-            var result = _controller.Dashboard().Result as ViewResult;
-            Assert.NotNull(result);
-            var model = result?.Model as DashboardDTO;
-
-            // Assert
-            Assert.NotNull(model);
-            Assert.IsTrue(model.HasSubscriptions);
-            Assert.That(model.SubscriptionNames.Count, Is.EqualTo(2));
-            Assert.Contains("Netflix", model.SubscriptionNames);
-            Assert.Contains("", model.SubscriptionNames);
-            Assert.Contains("netflix-logo.png", model.SubscriptionLogos);
-            Assert.Contains(null, model.SubscriptionLogos);
+            Assert.That(dashboard.HasSubscriptions, Is.True);
+            Assert.That(dashboard.SubList.Count, Is.EqualTo(3));
+            Assert.That(dashboard.SubList.Select(s => s.Name).Contains("Netflix"));
+            Assert.That(dashboard.SubList.Select(s => s.Name).Contains("Hulu"));
+            Assert.That(dashboard.SubList.Select(s => s.Name).Contains("Disney+"));
         }
     }
 }

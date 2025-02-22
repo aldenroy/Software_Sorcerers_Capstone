@@ -1,32 +1,31 @@
 @model MoviesMadeEasy.DTOs.DashboardDTO
-
 @{
     ViewData["Title"] = "Dashboard";
 }
-
 <div class="content">
     <h1>Hello, @Model.UserName!</h1>
-
     <h2>Recently Viewed</h2>
     <div id="recently-viewed" class="movie-placeholder"></div>
-
     <h2>Current Subscriptions</h2>
     <div id="subscription-bubble" class="subscription-placeholder">
-        @if (Model.HasSubscriptions)
-
+        @if (Model.HasSubscriptions && Model.SubList != null && Model.SubList.Any())
         {
-            @for (var i = 0; i < Model.SubscriptionNames.Count; i++)
-
+            @foreach (var service in Model.SubList)
             {
                 <div class="subscription-item">
-                    <img src="@Model.SubscriptionLogos[i]" alt="@Model.SubscriptionNames[i]" class="subscription-logo" />
-                    <p>@Model.SubscriptionNames[i]</p>
+                    @if (!string.IsNullOrEmpty(service.LogoUrl))
+                    {
+                        <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
+                    }
+                    <div class="service-name">@service.Name</div>
+                    @if (!string.IsNullOrEmpty(service.Region))
+                    {
+                        <div class="service-region">@service.Region</div>
+                    }
                 </div>
             }
         }
-
         else
-
         {
             <div class="overlay-message">
                 No subscriptions. <a href="/Subscriptions/Add">add</a> subscriptions now?
@@ -34,4 +33,3 @@
         }
     </div>
 </div>
-

@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Identity;
 
 namespace MME_Tests
 {
@@ -16,18 +15,13 @@ namespace MME_Tests
     public class HomeControllerTests
     {
         private Mock<IMovieService> _mockMovieService;
-        private Mock<ISubscriptionService> _mockSubscriptionService;
         private HomeController _controller;
-        private Mock<UserManager<User>> _mockUserManager;
 
         [SetUp]
         public void Setup()
         {
-            var store = new Mock<IUserStore<User>>();
-            _mockUserManager = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
             _mockMovieService = new Mock<IMovieService>();
-            _mockSubscriptionService = new Mock<ISubscriptionService>();
-            _controller = new HomeController(_mockMovieService.Object, _mockSubscriptionService.Object, _mockUserManager.Object);
+            _controller = new HomeController(_mockMovieService.Object);
         }
 
         [TearDown]
@@ -56,6 +50,7 @@ namespace MME_Tests
         [Test]
         public async Task SearchMovies_EmptyQuery_ReturnsEmptyJsonObject()
         {
+
             var query = "";
 
             var result = await _controller.SearchMovies(query) as JsonResult;
