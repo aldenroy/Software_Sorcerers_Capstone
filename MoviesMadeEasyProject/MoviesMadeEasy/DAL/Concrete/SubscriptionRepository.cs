@@ -27,5 +27,10 @@ namespace MoviesMadeEasy.DAL.Concrete
 
             return userSubscriptions;
         }
+
+        public List<StreamingService> GetAvailableStreamingServices(int userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
