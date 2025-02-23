@@ -8,5 +8,6 @@ namespace MoviesMadeEasy.DTOs
         public string UserName { get; set; } 
         public bool HasSubscriptions { get; set; } 
         public List<StreamingService> SubList { get; set; }
+        public List<StreamingService> AvailableServices { get; set; }
     }
 }

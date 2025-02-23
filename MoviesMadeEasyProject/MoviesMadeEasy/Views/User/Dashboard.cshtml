@@ -29,19 +29,18 @@
                             {
                                 <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
                             }
-                            <div class="service-name">@service.Name</div>
-                            @if (!string.IsNullOrEmpty(service.Region))
-                            {
-                                <div class="service-region">@service.Region</div>
-                            }
                         </li>
                     }
                 </ul>
             }
             else
             {
-                <div class="overlay-message text-center" aria-live="polite">
-                    <p>No subscriptions. <a href="/Subscriptions/Add" aria-label="Add a new subscription">Add</a> subscriptions now?</p>
+                <div id="subscription-bubble" class="subscription-placeholder" 
+                     role="region" aria-labelledby="subscription-title">
+                    <div class="overlay-message text-center" aria-live="polite">
+                        <p>No subscriptions. <a href="@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })" 
+                                                aria-label="Add a new subscription">Add</a> subscriptions now?</p>
+                    </div>
                 </div>
             }
         </div>

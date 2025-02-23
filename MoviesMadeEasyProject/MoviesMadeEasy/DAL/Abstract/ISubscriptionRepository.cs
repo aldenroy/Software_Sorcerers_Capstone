@@ -7,5 +7,6 @@ namespace MoviesMadeEasy.DAL.Abstract
     {
         List<StreamingService> GetUserSubscriptions(int userId);
         List<StreamingService> GetAvailableStreamingServices(int userId);
+        void AddUserSubscriptions(int userId, List<int> selectedServiceIds);
     }
 }

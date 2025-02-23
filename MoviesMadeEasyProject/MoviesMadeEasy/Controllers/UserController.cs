@@ -61,10 +61,36 @@ namespace MoviesMadeEasy.Controllers
                 return RedirectToAction("Error");
             }
         }
-        public IActionResult AddSubscriptionForm(int userId)
+        public IActionResult AddSubscriptionForm(DashboardDTO dto)
         {
-            var availableServices = _subscriptionService.GetAvailableStreamingServices(userId);
-            return View(availableServices);
+            dto.AvailableServices = _subscriptionService.GetAvailableStreamingServices(dto.UserId);
+
+            return View(dto);
+        }
+
+        [HttpPost]
+        public IActionResult SaveSubscriptions(int userId, string selectedServices)
+        {
+            if (string.IsNullOrEmpty(selectedServices))
+            {
+                return RedirectToAction("AddSubscriptionForm", new { userId });
+            }
+
+            var selectedServiceIds = selectedServices.Split(',').Select(int.Parse).ToList();
+
+            _subscriptionService.AddUserSubscriptions(userId, selectedServiceIds);
+
+            var userSubscriptions = _subscriptionService.GetUserSubscriptions(userId);
+
+            var dto = new DashboardDTO
+            {
+                UserId = userId,
+                UserName = "", // or get it via another means or pass it as a hidden field
+                HasSubscriptions = userSubscriptions != null && userSubscriptions.Any(),
+                SubList = userSubscriptions?.ToList() ?? new List<StreamingService>()
+            };
+
+            return View("Dashboard", dto);
         }
 
 

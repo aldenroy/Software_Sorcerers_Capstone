@@ -2,27 +2,29 @@
 .subscription-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* Centers items horizontally */
-    gap: 20px; /* Adds spacing between cards */
+    justify-content: center; 
+    gap: 20px; 
     padding: 20px;
 }
 
 /* Ensure cards are properly formatted */
 .card {
     text-align: center;
-    width: 18rem; /* Keeps uniform card size */
+    width: 18rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 /* Improve focus visibility for accessibility */
 .card:focus,
 .card:hover {
-    outline: 3px solid #007bff; /* Highlight focus for accessibility */
+    outline: 3px solid #007bff; 
 }
 
 /* Ensure images are properly sized */
 .card-img-top {
     width: 100%;
-    height: auto; /* Maintain aspect ratio */
+    height: auto; 
 }
 
 /* Styling for buttons (if needed) */
@@ -40,4 +42,11 @@ button {
 button:hover, button:focus {
     background-color: #0056b3;
     outline: 3px solid #ffcc00;
+}
+
+.card.selected {
+    border: 3px solid #007bff; 
+    box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.4); 
+    transform: scale(1.05); 
+    background-color: rgba(0, 123, 255, 0.1); 
 }

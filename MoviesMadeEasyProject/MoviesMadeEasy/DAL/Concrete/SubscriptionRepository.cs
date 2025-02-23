@@ -9,6 +9,7 @@ namespace MoviesMadeEasy.DAL.Concrete
     {
         private readonly DbSet<UserStreamingService> _uss;
         private readonly DbSet<StreamingService> _streamingServices;
+        private UserDbContext _context;
 
         public List<StreamingService> StreamingServices { get; }
 
@@ -16,6 +17,7 @@ namespace MoviesMadeEasy.DAL.Concrete
         {
             _uss = context.UserStreamingServices;
             _streamingServices = context.StreamingServices;
+            _context = context;
         }
 
 
@@ -40,6 +42,26 @@ namespace MoviesMadeEasy.DAL.Concrete
                 .ToList();
 
             return toAddSubsList;
+        }
+
+        public void AddUserSubscriptions(int userId, List<int> selectedServiceIds)
+        {
+            var userExists = _context.Users.Any(u => u.Id == userId);
+            if (!userExists)
+            {
+                throw new InvalidOperationException("User does not exist.");
+            }
+
+            var newSubscriptions = selectedServiceIds
+                .Select(id => new UserStreamingService
+                {
+                    UserId = userId,
+                    StreamingServiceId = id
+                })
+                .ToList();
+
+            _uss.AddRange(newSubscriptions);
+            _context.SaveChanges();
         }
     }
 }

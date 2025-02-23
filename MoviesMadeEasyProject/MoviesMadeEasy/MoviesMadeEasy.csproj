@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\addStreamingService.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Data\seed.sql" />
   </ItemGroup>
 
@@ -36,6 +40,10 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\addStreamingService.js" />
   </ItemGroup>
 
 </Project>
