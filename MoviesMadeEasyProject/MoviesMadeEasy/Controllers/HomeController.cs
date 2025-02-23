@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MoviesMadeEasy.DAL.Abstract;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MoviesMadeEasy.Controllers
@@ -19,23 +21,45 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> SearchMovies(string query)
+        public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    return Json(new { }); // Ensure consistent return type
+                    return Json(new { });
                 }
 
                 var movies = await _movieService.SearchMoviesAsync(query);
+
+                // Filter by minYear and maxYear
+                if (minYear.HasValue)
+                {
+                    movies = movies.Where(m => m.ReleaseYear >= minYear.Value).ToList();
+                }
+                if (maxYear.HasValue)
+                {
+                    movies = movies.Where(m => m.ReleaseYear <= maxYear.Value).ToList();
+                }
+
+                // Sort movies
+                movies = sortBy switch
+                {
+                    "yearAsc"         => movies.OrderBy(m => m.ReleaseYear).ToList(),
+                    "yearDesc"        => movies.OrderByDescending(m => m.ReleaseYear).ToList(),
+                    "titleAsc"        => movies.OrderBy(m => m.Title).ToList(),
+                    "titleDesc"       => movies.OrderByDescending(m => m.Title).ToList(),
+                    "ratingHighLow"   => movies.OrderByDescending(m => m.Rating).ToList(),
+                    "ratingLowHigh"   => movies.OrderBy(m => m.Rating).ToList(),
+                    _                 => movies
+                };
+
                 return Json(movies);
             }
             catch (Exception)
             {
-                return Json(new { }); // Handle errors gracefully
+                return Json(new { });
             }
         }
-
     }
 }
