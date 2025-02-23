@@ -45,11 +45,13 @@ namespace MoviesMadeEasy.Controllers
                 // Sort movies
                 movies = sortBy switch
                 {
-                    "titleAsc" => movies.OrderBy(m => m.Title).ToList(),
-                    "titleDesc" => movies.OrderByDescending(m => m.Title).ToList(),
-                    "yearAsc" => movies.OrderBy(m => m.ReleaseYear).ToList(),
-                    "yearDesc" => movies.OrderByDescending(m => m.ReleaseYear).ToList(),
-                    _ => movies
+                    "yearAsc"         => movies.OrderBy(m => m.ReleaseYear).ToList(),
+                    "yearDesc"        => movies.OrderByDescending(m => m.ReleaseYear).ToList(),
+                    "titleAsc"        => movies.OrderBy(m => m.Title).ToList(),
+                    "titleDesc"       => movies.OrderByDescending(m => m.Title).ToList(),
+                    "ratingHighLow"   => movies.OrderByDescending(m => m.Rating).ToList(),
+                    "ratingLowHigh"   => movies.OrderBy(m => m.Rating).ToList(),
+                    _                 => movies
                 };
 
                 return Json(movies);

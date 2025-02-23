@@ -50,6 +50,7 @@ async function searchMovies() {
                     <div class="movie-details">
                         <h5>${movie.title} <span class="movie-year">(${movie.releaseYear || 'N/A'})</span></h5>
                         <p class="movie-genres">Genres: ${movie.genres?.join(", ") || 'Unknown'}</p>
+                        <p class="movie-rating">Rating: ${movie.rating || 'N/A'}</p>
                         <button class="btn btn-primary">View Details</button>
                         <button class="btn btn-outline-secondary">More Like This</button>
                     </div>
