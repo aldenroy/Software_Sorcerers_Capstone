@@ -72,7 +72,7 @@ CREATE TABLE [dbo].[UserStreamingServices] (
 );
 GO
 
--- Foreign key linking UserStreamingServices to custom User table
+-- Foreign key linking UserStreamingServices to User table
 ALTER TABLE [dbo].[UserStreamingServices]
     WITH CHECK ADD CONSTRAINT [FK_UserStreamingServices_User_UserId]
     FOREIGN KEY ([UserId])
@@ -95,3 +95,4 @@ GO
 ALTER TABLE [dbo].[UserStreamingServices]
     CHECK CONSTRAINT [FK_UserStreamingServices_StreamingService_StreamingServiceId];
 GO
+

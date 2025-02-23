@@ -4,7 +4,7 @@ using MoviesMadeEasy.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Tests_Unit
+namespace MME_Tests
 {
     [TestFixture]
     public class Tests_Dashboard

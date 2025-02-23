@@ -45,7 +45,7 @@ var connectionString = builder.Configuration.GetConnectionString(
 
 var authConnectionString = builder.Configuration.GetConnectionString(
     azurePublish ? "AzureIdentityConnection" : "IdentityConnection") ??
-    throw new InvalidOperationException("Connection string not found.");
+    throw new InvalidOperationException("Identity Connection string not found.");
 
 
 builder.Services.AddDbContext<UserDbContext>(options =>
