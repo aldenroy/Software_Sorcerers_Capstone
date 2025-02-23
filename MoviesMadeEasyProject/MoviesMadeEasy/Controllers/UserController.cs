@@ -41,8 +41,13 @@ namespace MoviesMadeEasy.Controllers
                 var user = _userRepository.GetUser(identityUser.Id);
                 var userSubscriptions = _subscriptionService.GetUserSubscriptions(user.Id);
 
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
                 var dto = new DashboardDTO
                 {
+                    UserId = user.Id,
                     UserName = $"{user.FirstName}",
                     HasSubscriptions = userSubscriptions != null && userSubscriptions.Any(),
                     SubList = userSubscriptions?.ToList() ?? new List<StreamingService>()
@@ -56,6 +61,12 @@ namespace MoviesMadeEasy.Controllers
                 return RedirectToAction("Error");
             }
         }
+        public IActionResult AddSubscriptionForm(int userId)
+        {
+            var availableServices = _subscriptionService.GetAvailableStreamingServices(userId);
+            return View(availableServices);
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

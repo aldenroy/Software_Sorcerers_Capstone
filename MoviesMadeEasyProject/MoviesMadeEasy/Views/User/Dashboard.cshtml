@@ -12,9 +12,10 @@
     
     <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
 
-    <button id="add-subscription-btn" aria-label="Add a new streaming service">
+    <button id="add-subscription-btn" aria-label="Add a new streaming service" onclick="location.href='@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })'">
         Add Streaming Services
     </button>
+
 
     <div id="circle-center">
         <div id="subscription-bubble" class="subscription-placeholder" role="region" aria-labelledby="subscription-title">

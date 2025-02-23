@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace ShowCatalog.DAL.Abstract
+namespace MoviesMadeEasy.DAL.Abstract
 {
     /// <summary>
     /// Interface for common and CRUD operations on entities

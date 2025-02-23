@@ -2,7 +2,6 @@
 using MoviesMadeEasy.DAL.Abstract;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
-using ShowCatalog.DAL.Concrete;
 
 namespace MoviesMadeEasy.DAL.Concrete;
 

@@ -10,10 +10,10 @@ namespace MoviesMadeEasy.Data
         {
         }
 
-        public DbSet<StreamingService> StreamingServices { get; set; }
-        public DbSet<Title> Titles { get; set; }
-        public DbSet<UserStreamingService> UserStreamingServices { get; set; }
-        public DbSet<User> Users { get; set; }   
+        public virtual DbSet<StreamingService> StreamingServices { get; set; }
+        public virtual DbSet<Title> Titles { get; set; }
+        public virtual DbSet<UserStreamingService> UserStreamingServices { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -24,12 +24,15 @@ namespace MoviesMadeEasy.Data
                 .HasKey(us => new { us.UserId, us.StreamingServiceId });
 
             builder.Entity<UserStreamingService>()
-                .Ignore(us => us.User);
+                .HasOne(us => us.User)
+                .WithMany(u => u.UserStreamingServices)
+                .HasForeignKey(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserStreamingService>()
                 .HasOne(us => us.StreamingService)
                 .WithMany(s => s.UserStreamingServices)
-                .HasForeignKey(us => us.StreamingServiceId);
+                .HasForeignKey(us => us.StreamingServiceId); // Ensure this is INT
 
             // Configure StreamingService table
             builder.Entity<StreamingService>(entity =>
@@ -38,17 +41,21 @@ namespace MoviesMadeEasy.Data
                 entity.ToTable("StreamingService");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd() // Allow EF to handle IDENTITY columns
                     .HasColumnName("id");
+
                 entity.Property(e => e.Name)
                     .HasMaxLength(255)
                     .HasColumnName("name");
+
                 entity.Property(e => e.Region)
                     .HasMaxLength(50)
                     .HasColumnName("region");
+
                 entity.Property(e => e.BaseUrl)
                     .HasColumnType("nvarchar(max)")
                     .HasColumnName("base_url");
+
                 entity.Property(e => e.LogoUrl)
                     .HasColumnType("nvarchar(max)")
                     .HasColumnName("logo_url");
@@ -63,19 +70,24 @@ namespace MoviesMadeEasy.Data
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
+
                 entity.Property(e => e.ExternalId)
                     .HasMaxLength(255)
                     .HasColumnName("external_id");
+
                 entity.Property(e => e.LastUpdated)
                     .HasDefaultValueSql("(getdate())")
                     .HasColumnType("datetime")
                     .HasColumnName("last_updated");
+
                 entity.Property(e => e.TitleName)
                     .HasMaxLength(255)
                     .HasColumnName("title_name");
+
                 entity.Property(e => e.Type)
                     .HasMaxLength(50)
                     .HasColumnName("type");
+
                 entity.Property(e => e.Year)
                     .HasColumnName("year");
             });
@@ -123,7 +135,7 @@ namespace MoviesMadeEasy.Data
 
                 // Explicitly configure the one-to-many relationship with Title:
                 entity.HasOne(u => u.RecentlyViewedShow)
-                    .WithMany(t => t.Users)   
+                    .WithMany(t => t.Users)
                     .HasForeignKey(u => u.RecentlyViewedShowId)
                     .OnDelete(DeleteBehavior.Restrict);
             });

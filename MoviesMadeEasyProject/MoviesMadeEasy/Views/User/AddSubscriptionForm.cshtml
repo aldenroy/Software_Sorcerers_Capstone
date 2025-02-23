@@ -1,0 +1,33 @@
+﻿@model List<MoviesMadeEasy.Models.StreamingService>
+@{
+    ViewData["Title"] = "Available Subscriptions";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/AddSubscriptionForm.css">
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center my-4">Select a Subscription Service</h1>
+    <div class="subscription-container">
+        @foreach (var service in Model)
+        {
+            <div class="card" style="width: 18rem;">
+                <img class="card-img-top" src="@service.LogoUrl" alt="@service.Name logo">
+                <div class="card-body">
+                    <p class="card-text">@service.Name</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+</body>
+</html>
+
+
+<!-- Credit: Bootstrap Cards - https://getbootstrap.com/docs/4.0/components/card/ -->

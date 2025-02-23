@@ -1,7 +1,4 @@
-﻿--CREATE DATABASE MoviesMadeEasyDb;
---GO
-
-USE [MoviesMadeEasyDB];
+﻿USE [MoviesMadeEasyDB];
 GO
 
 ----------------------------------------------------------
@@ -28,13 +25,12 @@ GO
 ----------------------------------------------------------
 
 CREATE TABLE [dbo].[StreamingService] (
-    [id]       UNIQUEIDENTIFIER NOT NULL,
+    [id]       INT IDENTITY(1,1) PRIMARY KEY,
     [name]     NVARCHAR(255)    NOT NULL,
     [region]   NVARCHAR(50)     NULL,
     [base_url] NVARCHAR(MAX)    NULL,
-    [logo_url] NVARCHAR(MAX)    NULL,
- CONSTRAINT [PK_StreamingService] PRIMARY KEY CLUSTERED ([id] ASC)
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY];
+    [logo_url] NVARCHAR(MAX)    NULL
+);
 GO
 
 ----------------------------------------------------------
@@ -54,7 +50,6 @@ CREATE TABLE [dbo].[User] (
 );
 GO
 
-
 -- Foreign key linking RecentlyViewedShowId to Title table
 ALTER TABLE [dbo].[User]
     WITH CHECK ADD CONSTRAINT [FK_User_Title_RecentlyViewedShowId]
@@ -72,7 +67,7 @@ GO
 
 CREATE TABLE [dbo].[UserStreamingServices] (
     [UserId]              INT              NOT NULL, 
-    [StreamingServiceId]  UNIQUEIDENTIFIER NOT NULL,
+    [StreamingServiceId]  INT              NOT NULL,
  CONSTRAINT [PK_UserStreamingServices] PRIMARY KEY CLUSTERED ([UserId] ASC, [StreamingServiceId] ASC)
 );
 GO

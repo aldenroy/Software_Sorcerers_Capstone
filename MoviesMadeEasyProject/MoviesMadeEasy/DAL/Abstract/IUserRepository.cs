@@ -1,5 +1,5 @@
 ﻿using MoviesMadeEasy.Models;
-using ShowCatalog.DAL.Abstract;
+using MoviesMadeEasy.DAL.Abstract;
 
 namespace MoviesMadeEasy.DAL.Abstract
 {

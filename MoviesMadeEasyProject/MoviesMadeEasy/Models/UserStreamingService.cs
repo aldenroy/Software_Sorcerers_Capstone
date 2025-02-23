@@ -7,6 +7,6 @@ public class UserStreamingService
     public int UserId { get; set; }
     public virtual User User { get; set; }
 
-    public Guid StreamingServiceId { get; set; }
+    public int StreamingServiceId { get; set; }
     public virtual StreamingService StreamingService { get; set; }
 }

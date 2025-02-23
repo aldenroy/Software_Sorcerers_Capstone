@@ -5,7 +5,7 @@ namespace MoviesMadeEasy.Models;
 
 public partial class StreamingService
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -18,3 +18,5 @@ public partial class StreamingService
     public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; } = new List<UserStreamingService>();
 
 }
+
+

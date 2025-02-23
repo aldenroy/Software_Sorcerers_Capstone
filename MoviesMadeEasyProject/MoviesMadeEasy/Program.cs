@@ -80,12 +80,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.Use(async (context, next) =>
-{
-    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
-    await next();
-});
-
 app.UseAuthentication();
 
 app.UseAuthorization();

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using MoviesMadeEasy.Models;
-using ShowCatalog.DAL.Abstract;
+﻿using MoviesMadeEasy.Models;
+
 
 namespace MoviesMadeEasy.DAL.Abstract
 {

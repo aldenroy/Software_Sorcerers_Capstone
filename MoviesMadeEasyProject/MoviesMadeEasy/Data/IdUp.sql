@@ -1,5 +1,5 @@
 ﻿--CREATE DATABASE [MoviesMadeEasyAuthDb];
-
+--GO
 
 USE [MoviesMadeEasyAuthDb];
 
