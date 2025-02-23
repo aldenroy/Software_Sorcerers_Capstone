@@ -153,3 +153,9 @@ body {
   width: 3rem;
   height: 3rem;
 }
+
+#sortBy {
+  max-width: 150px;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}

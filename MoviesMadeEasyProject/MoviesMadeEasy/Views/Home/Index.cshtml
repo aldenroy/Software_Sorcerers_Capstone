@@ -16,13 +16,23 @@
 <div class="search-container">
     <label for="searchInput" class="visually-hidden">Search for a movie</label>
     <input type="text" id="searchInput" class="search-box" placeholder="Enter movie title..." onkeypress="handleKeyPress(event)" aria-label="Search for a movie" />
-        <select id="sortBy" aria-label="Sort movies by year">
+
+    <!-- Sorting Options -->
+    <select id="sortBy" class="form-select" onchange="searchMovies()" aria-label="Sort movies">
         <option value="default">Sort by</option>
         <option value="yearAsc">Year Ascending</option>
         <option value="yearDesc">Year Descending</option>
+        <option value="titleAsc">Title (A-Z)</option>
+        <option value="titleDesc">Title (Z-A)</option>
+        <option value="ratingHighLow">Rating: High to Low</option>
+        <option value="ratingLowHigh">Rating: Low to High</option>
     </select>
+    @* Will create new query params in javascript to help bring logic here. *@
+
+    <!-- Year Filters -->
     <input type="number" id="minYear" class="form-control" placeholder="Min Year" aria-label="Minimum year" min="1600" max="2100" style="max-width: 100px;" />
     <input type="number" id="maxYear" class="form-control" placeholder="Max Year" aria-label="Maximum year" min="1600" max="2100" style="max-width: 100px;"/>
+
     <button class="search-btn" onclick="searchMovies()" aria-label="Search movies">Search</button>
 </div>
 
@@ -33,7 +43,6 @@
     </div>
 </div>
 <section id="results" aria-live="polite" role="status"></section>
-
 
 <!-- Load JavaScript via Partial View -->
 @await Html.PartialAsync("_MovieSearchScript")
