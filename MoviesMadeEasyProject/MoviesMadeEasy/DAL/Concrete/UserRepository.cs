@@ -14,7 +14,11 @@ public class UserRepository : Repository<User>, IUserRepository
     }
     public User GetUser(string aspNetUserId)
     {
-        var user = _users.FirstOrDefault(u => u.AspNetUserId == aspNetUserId);
-        return user;
+        return _users.FirstOrDefault(u => u.AspNetUserId == aspNetUserId);
+        
+    }
+    public User GetUser(int userId)
+    {
+        return _users.FirstOrDefault(u => u.Id == userId);
     }
 }

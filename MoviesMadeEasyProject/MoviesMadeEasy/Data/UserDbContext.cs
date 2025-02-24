@@ -19,7 +19,6 @@ namespace MoviesMadeEasy.Data
         {
             base.OnModelCreating(builder);
 
-            // Configure join table for UserStreamingService
             builder.Entity<UserStreamingService>()
                 .HasKey(us => new { us.UserId, us.StreamingServiceId });
 
@@ -32,16 +31,16 @@ namespace MoviesMadeEasy.Data
             builder.Entity<UserStreamingService>()
                 .HasOne(us => us.StreamingService)
                 .WithMany(s => s.UserStreamingServices)
-                .HasForeignKey(us => us.StreamingServiceId); // Ensure this is INT
+                .HasForeignKey(us => us.StreamingServiceId); 
 
-            // Configure StreamingService table
+
             builder.Entity<StreamingService>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.ToTable("StreamingService");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd() // Allow EF to handle IDENTITY columns
+                    .ValueGeneratedOnAdd() 
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -61,7 +60,6 @@ namespace MoviesMadeEasy.Data
                     .HasColumnName("logo_url");
             });
 
-            // Configure Title table
             builder.Entity<Title>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -92,7 +90,6 @@ namespace MoviesMadeEasy.Data
                     .HasColumnName("year");
             });
 
-            // Configure custom User table
             builder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
@@ -102,7 +99,6 @@ namespace MoviesMadeEasy.Data
                       .ValueGeneratedOnAdd()
                       .HasColumnName("Id");
 
-                // Map AspNetUsersId to the column "AspNetUserId" from your up script
                 entity.Property(u => u.AspNetUserId)
                       .IsRequired()
                       .HasColumnName("AspNetUserId");
@@ -133,7 +129,6 @@ namespace MoviesMadeEasy.Data
                       .HasDefaultValue("")
                       .HasColumnName("FontType");
 
-                // Explicitly configure the one-to-many relationship with Title:
                 entity.HasOne(u => u.RecentlyViewedShow)
                     .WithMany(t => t.Users)
                     .HasForeignKey(u => u.RecentlyViewedShowId)

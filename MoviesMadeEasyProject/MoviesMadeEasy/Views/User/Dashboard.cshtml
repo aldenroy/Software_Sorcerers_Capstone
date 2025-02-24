@@ -1,21 +1,26 @@
 @model MoviesMadeEasy.DTOs.DashboardDTO
+
 @{
     ViewData["Title"] = "Dashboard";
 }
+
+
+<link rel="stylesheet" href="~/css/dashboard.css" />
+
+
 <div class="content">
     <h1>Hello, @Model.UserName!</h1>
     
     <h2 class="dashtitles">Recently Viewed</h2>
     <div id="recently-viewed" class="movie-placeholder" role="region" aria-labelledby="recently-viewed-title">
-        <!--TODO: Fill in recently viewed movies here-->
     </div>
     
     <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
 
-    <button id="add-subscription-btn" aria-label="Add a new streaming service" onclick="location.href='@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })'">
+    <button id="add-subscription-btn" aria-label="Add a new streaming service"
+            onclick="location.href='@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })'">
         Add Streaming Services
     </button>
-
 
     <div id="circle-center">
         <div id="subscription-bubble" class="subscription-placeholder" role="region" aria-labelledby="subscription-title">
@@ -38,8 +43,10 @@
                 <div id="subscription-bubble" class="subscription-placeholder" 
                      role="region" aria-labelledby="subscription-title">
                     <div class="overlay-message text-center" aria-live="polite">
-                        <p>No subscriptions. <a href="@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })" 
-                                                aria-label="Add a new subscription">Add</a> subscriptions now?</p>
+                        <p>No subscriptions. <a href="@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })"
+                                                aria-label="Add a new subscription">
+                            Add
+                        </a> subscriptions now?</p>
                     </div>
                 </div>
             }

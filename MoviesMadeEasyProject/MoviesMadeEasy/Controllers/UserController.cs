@@ -39,12 +39,14 @@ namespace MoviesMadeEasy.Controllers
                 }
 
                 var user = _userRepository.GetUser(identityUser.Id);
-                var userSubscriptions = _subscriptionService.GetUserSubscriptions(user.Id);
 
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
+
+                var userSubscriptions = _subscriptionService.GetUserSubscriptions(user.Id);
+
                 var dto = new DashboardDTO
                 {
                     UserId = user.Id,
@@ -82,10 +84,12 @@ namespace MoviesMadeEasy.Controllers
 
             var userSubscriptions = _subscriptionService.GetUserSubscriptions(userId);
 
+            var user = _userRepository.GetUser(userId);
+
             var dto = new DashboardDTO
             {
                 UserId = userId,
-                UserName = "", // or get it via another means or pass it as a hidden field
+                UserName = user != null ? user.FirstName : "",
                 HasSubscriptions = userSubscriptions != null && userSubscriptions.Any(),
                 SubList = userSubscriptions?.ToList() ?? new List<StreamingService>()
             };

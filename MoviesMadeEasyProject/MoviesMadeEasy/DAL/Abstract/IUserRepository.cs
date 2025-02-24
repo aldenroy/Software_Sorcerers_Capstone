@@ -6,6 +6,7 @@ namespace MoviesMadeEasy.DAL.Abstract
     public interface IUserRepository : IRepository<User>
     {
         User GetUser(string aspNetUserId);
+        User GetUser(int userId);
 
     }
 }
