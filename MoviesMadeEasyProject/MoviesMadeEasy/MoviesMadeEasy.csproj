@@ -6,6 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>44df2963-8032-41a6-8c67-c23c1360839c</UserSecretsId>
   </PropertyGroup>
+	
+	<ItemGroup>
+    <None Remove="Data\seed.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\Seed.sql" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
@@ -26,4 +34,7 @@
     <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
 </Project>

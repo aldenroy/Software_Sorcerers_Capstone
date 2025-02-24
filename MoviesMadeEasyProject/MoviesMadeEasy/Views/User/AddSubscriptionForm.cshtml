@@ -1,0 +1,35 @@
+﻿@model MoviesMadeEasy.DTOs.DashboardDTO
+
+@{ 
+    ViewData["Title"] = "Available Subscriptions";
+}
+
+<link rel="stylesheet" href="~/css/AddSubscriptionForm.css" />
+
+<h1 class="text-center my-4">Select a Subscription Service</h1>
+
+<form id="subscriptionForm" method="post" action="/User/SaveSubscriptions">
+    <input type="hidden" asp-for="UserId" />
+
+    <div class="subscription-container">
+        @foreach (var service in Model.AvailableServices)
+        {
+            <div class="card" data-id="@service.Id">
+                <img class="card-img-top" src="@service.LogoUrl" alt="@service.Name logo" />
+                <div class="card-body text-center">
+                    <p class="card-text">@service.Name</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <input type="hidden" name="selectedServices" id="selectedServices" />
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary">Save Selection</button>
+    </div>
+</form>
+
+<script src="~/js/addStreamingService.js"></script>
+
+<!-- Credit: Bootstrap Cards - https://getbootstrap.com/docs/4.0/components/card/ -->
