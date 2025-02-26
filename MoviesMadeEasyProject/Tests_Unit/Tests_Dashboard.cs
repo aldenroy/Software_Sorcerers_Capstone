@@ -60,7 +60,7 @@ namespace MME_Tests
         }
 
         [Test]
-        public void Dashboard_GetAvailableStreamingServices_UserHasNoSubscriptions_ReturnsAllServices()
+        public void GetAvailableStreamingServices_UserHasNoSubscriptions_ReturnsAllServices()
         {
             int userId = 1;
             var result = _repository.GetAvailableStreamingServices(userId);
@@ -85,12 +85,65 @@ namespace MME_Tests
         }
 
         [Test]
+        public void GetAvailableStreamingServices_UserSubscribedToAll_ReturnsEmptyList()
+        {
+            int userId = 1;
+            foreach (var service in _streamingServices)
+            {
+                service.UserStreamingServices.Add(new UserStreamingService { UserId = userId });
+            }
+            var result = _repository.GetAvailableStreamingServices(userId);
+            Assert.IsEmpty(result);
+        }
+
+        [Test]
         public void GetAvailableStreamingServices_ReturnsListInAlphabeticalOrder()
         {
             int userId = 1;
             var result = _repository.GetAvailableStreamingServices(userId);
             var expectedOrder = result.OrderBy(s => s.Name).ToList();
             Assert.IsTrue(result.SequenceEqual(expectedOrder));
+        }
+
+        [Test]
+        public void AddUserSubscriptions_NullOrEmptyList_DoesNotThrowException()
+        {
+            int userId = 1;
+            Assert.DoesNotThrow(() => _repository.AddUserSubscriptions(userId, new List<int>()));
+            Assert.DoesNotThrow(() => _repository.AddUserSubscriptions(userId, null));
+        }
+
+        [Test]
+        public void GetAvailableStreamingServices_NoStreamingServices_ReturnsEmptyList()
+        {
+            _streamingServices.Clear();
+            var result = _repository.GetAvailableStreamingServices(1);
+            Assert.IsEmpty(result);
+        }
+
+        [Test]
+        public void GetAvailableStreamingServices_NonExistentUser_ReturnsAllServices()
+        {
+            int userId = 99;
+            var result = _repository.GetAvailableStreamingServices(userId);
+            Assert.AreEqual(4, result.Count);
+        }
+
+        [Test]
+        public void AddUserSubscriptions_NonExistentUser_ThrowsException()
+        {
+            int userId = 99;
+            var ex = Assert.Throws<InvalidOperationException>(() => _repository.AddUserSubscriptions(userId, new List<int> { 1 }));
+            Assert.That(ex.Message, Is.EqualTo("User does not exist."));
+        }
+
+        [Test]
+        public void AddUserSubscriptions_AlreadySubscribedService_DoesNotAddDuplicate()
+        {
+            int userId = 1;
+            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
+            _repository.AddUserSubscriptions(userId, new List<int> { 1 });
+            Assert.AreEqual(1, _userStreamingServices.Count(us => us.UserId == userId && us.StreamingServiceId == 1));
         }
 
         [Test]
