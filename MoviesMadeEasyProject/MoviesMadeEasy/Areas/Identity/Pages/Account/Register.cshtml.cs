@@ -31,7 +31,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-        private readonly UserDbContext _userContext;
+        private readonly IdentityDbContext _identityContext;
+        private readonly UserDbContext _userDbContext;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -39,7 +40,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            UserDbContext userContext)
+            IdentityDbContext identityContext,
+            UserDbContext userDbContext)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -47,7 +49,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
-            _userContext = userContext;
+            _identityContext = identityContext;
+            _userDbContext = userDbContext;
         }
 
         [BindProperty]
@@ -115,8 +118,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                         LastName = Input.LastName
                     };
 
-                    _userContext.Add(newEntry);
-                    await _userContext.SaveChangesAsync();
+                    _userDbContext.Add(newEntry);
+                    await _userDbContext.SaveChangesAsync();
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
