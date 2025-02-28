@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
-namespace MoviesMadeEasy.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public partial class User : IdentityUser
+namespace MoviesMadeEasy.Models
 {
-    public string FirstName { get; set; }
+    public class User
+    {
+        public int Id { get; set; }
 
-    public string LastName { get; set; }
+        public string AspNetUserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public Guid? RecentlyViewedShowId { get; set; }
 
-    public Guid? StreamingServicesId { get; set; }
+        public string ColorMode { get; set; } = "";
+        public string FontSize { get; set; } = "";
+        public string FontType { get; set; } = "";
 
-    public Guid? RecentlyViewedShowId { get; set; }
-
-    public virtual Title? RecentlyViewedShow { get; set; }
-
-    public virtual StreamingService? StreamingServices { get; set; }
-
-    public string ColorMode { get; set; } = "Light"; // Default to Light
-
-    public string FontSize { get; set; } = "Medium"; // Default to Medium
-    
-    public string FontType { get; set; } = "Standard"; // Default to Standard
+        public virtual Title RecentlyViewedShow { get; set; }
+        public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; }
+    }
 }
