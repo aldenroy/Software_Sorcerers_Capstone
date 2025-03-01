@@ -5,9 +5,9 @@ async function searchMovies() {
     let loadingSpinner = document.getElementById("loadingSpinner");
 
     // Get filter and sorting values
-    let sortOption = document.getElementById("sortBy").value;
-    let minYear = document.getElementById("minYear").value.trim();
-    let maxYear = document.getElementById("maxYear").value.trim();
+    let sortOption = document.getElementById("sortBy")?.value || "default";
+    let minYear = document.getElementById("minYear")?.value?.trim();
+    let maxYear = document.getElementById("maxYear")?.value?.trim();
 
     // Clear previous results
     resultsContainer.innerHTML = "";
