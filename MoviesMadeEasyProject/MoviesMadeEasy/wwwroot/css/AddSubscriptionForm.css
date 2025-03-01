@@ -15,7 +15,7 @@
 
 .card:focus,
 .card:hover {
-    outline: 3px solid #007bff; 
+    outline: 3px dashed #737b87; 
 }
 
 .card-img-top {
@@ -23,25 +23,28 @@
     height: auto; 
 }
 
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
+#save {
+    background-color: #333;
+    color: #fff;
     font-size: 1rem;
-    cursor: pointer;
+    padding: 10px 15px;
+    border: none;
     border-radius: 5px;
+    cursor: pointer;
     outline: none;
+    margin: 10px 10px 25px 10px;
 }
 
-button:hover, button:focus {
-    background-color: #0056b3;
-    outline: 3px solid #ffcc00;
+#save:hover {
+    background-color: #fff;
+    color: #000000;
+    border: 2px dashed #000000;
 }
 
 .card.selected {
-    border: 3px solid #007bff; 
-    box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.4); 
-    transform: scale(1.05); 
-    background-color: rgba(0, 123, 255, 0.1); 
+    border: 5px dashed #000000;
+    box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.4);
+    transform: scale(1.05);
+    background-color: black;
+    color: white;
 }
