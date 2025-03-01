@@ -14,6 +14,13 @@
     <div id="recently-viewed" class="movie-placeholder" role="region" aria-labelledby="recently-viewed-title"></div>
 
     <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
+    
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info" role="alert">
+            @TempData["Message"]
+        </div>
+    }
 
     <button id="add-subscription-btn" class="btn btn-primary mb-3" aria-label="Add a new streaming service"
             onclick="location.href='@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })'">
@@ -40,15 +47,7 @@
             {
                 <div id="subscription-bubble" class="subscription-placeholder text-center "
                      role="region" aria-labelledby="subscription-title">
-                    <div class="overlay-message text-center" aria-live="polite">
-                        <p>
-                            No subscriptions.
-                            <a href="@Url.Action("AddSubscriptionForm", "User", new { userId = Model.UserId })"
-                               class="btn btn-outline-primary btn-sm" aria-label="Add a new subscription">
-                                Add subscriptions now?
-                            </a>
-                        </p>
-                    </div>
+                    <p>No subscriptions.</p>
                 </div>
             }
         </div>

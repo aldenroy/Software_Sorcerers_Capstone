@@ -4,8 +4,19 @@ using MoviesMadeEasy.DAL.Concrete;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.DTOs;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using MoviesMadeEasy.DAL.Abstract;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Logging;
+using MoviesMadeEasy.Controllers;
+
 namespace MME_Tests
 {
+    // Subscription Repository Tests
     [TestFixture]
     public class StreamingServiceAndDashboardTests
     {
@@ -13,7 +24,6 @@ namespace MME_Tests
         private SubscriptionRepository _repository;
         private List<StreamingService> _streamingServices;
         private List<UserStreamingService> _userStreamingServices;
-        private DashboardDTO _dashboard;
 
         [SetUp]
         public void Setup()
@@ -46,6 +56,14 @@ namespace MME_Tests
                 }
             };
 
+            var users = new List<User>
+            {
+                new User { Id = 1, FirstName = "Test" }
+            }.AsQueryable();
+
+            var mockUsersDbSet = MockHelper.GetMockDbSet(users);
+            _mockContext.Setup(c => c.Users).Returns(mockUsersDbSet.Object);
+
             _userStreamingServices = new List<UserStreamingService>();
 
             var mockStreamingServicesDbSet = MockHelper.GetMockDbSet(_streamingServices.AsQueryable());
@@ -55,8 +73,6 @@ namespace MME_Tests
             _mockContext.Setup(c => c.UserStreamingServices).Returns(mockUserStreamingServicesDbSet.Object);
 
             _repository = new SubscriptionRepository(_mockContext.Object);
-
-            _dashboard = new DashboardDTO { UserName = "Test" };
         }
 
         [Test]
@@ -145,6 +161,109 @@ namespace MME_Tests
             _repository.AddUserSubscriptions(userId, new List<int> { 1 });
             Assert.AreEqual(1, _userStreamingServices.Count(us => us.UserId == userId && us.StreamingServiceId == 1));
         }
+    }
+
+    // User Controller Tests
+    [TestFixture]
+    public class UserControllerTests
+    {
+        private Mock<IUserRepository> _userRepositoryMock;
+        private Mock<ISubscriptionRepository> _subscriptionServiceMock;
+        private MoviesMadeEasy.Controllers.UserController _controller;
+        private DashboardDTO _dashboard;
+
+        [SetUp]
+        public void Setup()
+        {
+            var dummyLogger = Mock.Of<ILogger<UserController>>();
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _subscriptionServiceMock = new Mock<ISubscriptionRepository>();
+            _controller = new MoviesMadeEasy.Controllers.UserController(dummyLogger, null, _userRepositoryMock.Object, _subscriptionServiceMock.Object);
+            _dashboard = new DashboardDTO { UserName = "Test" };
+            var httpContext = new DefaultHttpContext();
+            _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _controller.Dispose();
+        }
+
+        [Test]
+        public void AddSubscriptionForm_PopulatesAvailableServices()
+        {
+            var dto = new DashboardDTO { UserId = 1 };
+            var availableServices = new List<StreamingService> { new StreamingService { Name = "Netflix" } };
+            _subscriptionServiceMock.Setup(s => s.GetAvailableStreamingServices(1)).Returns(availableServices);
+
+            var result = _controller.AddSubscriptionForm(dto) as ViewResult;
+            var model = result.Model as DashboardDTO;
+
+            Assert.IsNotNull(model);
+            Assert.AreEqual(availableServices, model.AvailableServices);
+        }
+
+        [Test]
+        public void SaveSubscriptions_WithEmptySelectedServices_RedirectsToAddSubscriptionForm()
+        {
+            int userId = 1;
+            string selectedServices = "";
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as RedirectToActionResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual("AddSubscriptionForm", result.ActionName);
+            Assert.AreEqual(userId, result.RouteValues["userId"]);
+        }
+
+        [Test]
+        public void SaveSubscriptions_WithValidSelectedServices_ReturnsDashboardView()
+        {
+            int userId = 1;
+            string selectedServices = "1,2";
+            var subscriptions = new List<StreamingService>
+            {
+                new StreamingService { Name = "Netflix" },
+                new StreamingService { Name = "Hulu" }
+            };
+            var user = new User { Id = userId, FirstName = "TestUser" };
+
+            _subscriptionServiceMock.Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
+            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(user);
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Dashboard", result.ViewName);
+            var model = result.Model as DashboardDTO;
+            Assert.IsNotNull(model);
+            Assert.AreEqual(userId, model.UserId);
+            Assert.AreEqual(user.FirstName, model.UserName);
+            Assert.IsTrue(model.HasSubscriptions);
+            Assert.AreEqual(2, model.SubList.Count);
+        }
+
+        [Test]
+        public void SaveSubscriptions_UserNotFound_ReturnsDashboardViewWithEmptyUserName()
+        {
+            int userId = 1;
+            string selectedServices = "1";
+            var subscriptions = new List<StreamingService>
+            {
+                new StreamingService { Name = "Netflix" }
+            };
+
+            _subscriptionServiceMock.Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
+            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns((User)null);
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Dashboard", result.ViewName);
+            var model = result.Model as DashboardDTO;
+            Assert.IsNotNull(model);
+            Assert.AreEqual(userId, model.UserId);
+            Assert.AreEqual("", model.UserName);
+        }
 
         [Test]
         public void Dashboard_ZeroSubscriptions_ShowsEmptyList()
@@ -186,5 +305,51 @@ namespace MME_Tests
             Assert.That(_dashboard.SubList.Select(s => s.Name).Contains("Hulu"));
             Assert.That(_dashboard.SubList.Select(s => s.Name).Contains("Disney+"));
         }
+
+        [Test]
+        public void SaveSubscriptions_WhenExceptionThrown_DisplaysErrorMessageAndReturnsAddSubscriptionForm()
+        {
+            int userId = 1;
+            string selectedServices = "1,2";
+
+            _subscriptionServiceMock
+                .Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()))
+                .Throws(new Exception("Test exception"));
+            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(new User { Id = userId, FirstName = "TestUser" });
+
+            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("AddSubscriptionForm", result.ViewName);
+            Assert.IsTrue(_controller.TempData.ContainsKey("Message"));
+            Assert.AreEqual("There was an issue adding your subscription. Please try again later.", _controller.TempData["Message"]);
+        }
+
+
+        [Test]
+        public void SaveSubscriptions_Success_ShouldSetTempDataMessageAndReturnDashboardView()
+        {
+            int userId = 1;
+            string selectedServices = "1,2,3";
+            var user = new User { Id = userId, FirstName = "TestUser" };
+
+            _userRepositoryMock.Setup(repo => repo.GetUser(userId)).Returns(user);
+            _subscriptionServiceMock.Setup(service => service.GetUserSubscriptions(userId))
+                .Returns(new List<StreamingService>());
+            _subscriptionServiceMock.Setup(service => service.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices);
+
+
+            Assert.AreEqual("Subscriptions added successfully!", _controller.TempData["Message"]);
+            var viewResult = result as ViewResult;
+            Assert.IsNotNull(viewResult, "Expected a ViewResult.");
+            Assert.AreEqual("Dashboard", viewResult.ViewName);
+        }
+
+
     }
 }
