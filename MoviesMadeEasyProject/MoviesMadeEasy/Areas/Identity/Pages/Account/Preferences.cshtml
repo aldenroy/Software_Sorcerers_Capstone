@@ -1,0 +1,42 @@
+@page
+@model RegisterPreferencesModel
+
+<h2 id="preferences-heading" class="row d-flex align-items-center justify-content-center mb-4">Choose Your Preferences</h2>
+
+<div class="row d-flex align-items-center justify-content-center">
+    <div class="col-12 col-md-6 col-lg-4">
+        <form method="post" aria-labelledby="preferences-heading">
+            <div class="form-group mb-3">
+                <label for="ColorMode" id="colorModeLabel" class="control-label">Color Theme</label>
+                <select asp-for="Input.ColorMode" class="form-control" id="ColorMode" aria-describedby="colorModeLabel">
+                    <option value="Light" selected="@(Model.Input.ColorMode == "Light")">Light</option>
+                    <option value="Dark" selected="@(Model.Input.ColorMode == "Dark")">Dark</option>
+                    <option value="High Contrast" selected="@(Model.Input.ColorMode == "High Contrast")">High Contrast</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="FontSize" id="fontSizeLabel" class="control-label">Text Size</label>
+                <select asp-for="Input.FontSize" class="form-control" id="FontSize" aria-describedby="fontSizeLabel">
+                    <option value="Small" selected="@(Model.Input.FontSize == "Small")">Small</option>
+                    <option value="Medium" selected="@(Model.Input.FontSize == "Medium")">Medium</option>
+                    <option value="Large" selected="@(Model.Input.FontSize == "Large")">Large</option>
+                    <option value="Extra Large" selected="@(Model.Input.FontSize == "Extra Large")">Extra Large</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="FontType" id="fontTypeLabel" class="control-label">Font Type</label>
+                <select asp-for="Input.FontType" class="form-control" id="FontType" aria-describedby="fontTypeLabel">
+                    <option value="Standard" selected="@(Model.Input.FontType == "Standard")">Standard</option>
+                    <option value="Open Dyslexic" selected="@(Model.Input.FontType == "Open Dyslexic")">Open Dyslexic</option>
+                </select>
+            </div>
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary" aria-label="Save Preferences">Save Preferences</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/User/Dashboard';">Skip</button>
+            </div>
+        </form>
+    </div>
+</div>

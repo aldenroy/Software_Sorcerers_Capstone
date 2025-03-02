@@ -121,6 +121,12 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                     _userDbContext.Add(newEntry);
                     await _userDbContext.SaveChangesAsync();
 
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    return RedirectToPage("/Account/Preferences");
+
+                    #region Email Confirmation (commented out for future use)
+                    /*
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -142,10 +148,19 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         return LocalRedirect(returnUrl);
                     }
+                    */
+                    #endregion
                 }
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    if (error.Code == "DuplicateUserName")  // Skips DuplicateUserName error
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
 
