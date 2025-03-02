@@ -18,7 +18,7 @@
     <input type="text" id="searchInput" class="search-box" placeholder="Enter movie title..." onkeypress="handleKeyPress(event)" aria-label="Search for a movie" />
 
     <!-- Sorting Options -->
-    <select id="sortBy" class="form-select" onchange="searchMovies()" aria-label="Sort movies">
+    <select id="sortBy" class="form-select" disabled onchange="searchMovies()"  aria-label="Sort movies">
         <option value="default">Sort by</option>
         <option value="yearAsc">Year Ascending</option>
         <option value="yearDesc">Year Descending</option>
@@ -30,8 +30,8 @@
     @* Will create new query params in javascript to help bring logic here. *@
 
     <!-- Year Filters -->
-    <input type="number" id="minYear" class="form-control" placeholder="Min Year" aria-label="Minimum year" min="1600" max="2100" style="max-width: 100px;" />
-    <input type="number" id="maxYear" class="form-control" placeholder="Max Year" aria-label="Maximum year" min="1600" max="2100" style="max-width: 100px;"/>
+    <input type="number" id="minYear" class="form-control" disabled placeholder="Min Year" aria-label="Minimum year" min="1600" max="2100" style="max-width: 100px;" />
+    <input type="number" id="maxYear" class="form-control"  disabled placeholder="Max Year" aria-label="Maximum year" min="1600" max="2100" style="max-width: 100px;"/>
 
     <button class="search-btn" onclick="searchMovies()" aria-label="Search movies">Search</button>
 </div>

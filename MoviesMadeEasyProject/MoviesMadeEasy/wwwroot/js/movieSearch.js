@@ -5,9 +5,9 @@ async function searchMovies() {
     let loadingSpinner = document.getElementById("loadingSpinner");
 
     // Get filter and sorting values
-    let sortOption = document.getElementById("sortBy").value;
-    let minYear = document.getElementById("minYear").value.trim();
-    let maxYear = document.getElementById("maxYear").value.trim();
+    let sortOption = document.getElementById("sortBy")?.value || "default";
+    let minYear = document.getElementById("minYear")?.value?.trim();
+    let maxYear = document.getElementById("maxYear")?.value?.trim();
 
     // Clear previous results
     resultsContainer.innerHTML = "";
@@ -58,6 +58,7 @@ async function searchMovies() {
             </article>
         `).join('');
 
+        enableFilters();
     } catch (error) {
         loadingSpinner.style.display = "none";
         resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching movie data. Please try again later.</div>";
@@ -65,6 +66,19 @@ async function searchMovies() {
     }
 }
 
+function enableFilters() {
+    searchExecuted = true;
+    document.getElementById("sortBy").disabled = false;
+    document.getElementById("minYear").disabled = false;
+    document.getElementById("maxYear").disabled = false;
+}
+
+function handleFilterInteraction(event) {
+    if (!searchExecuted) {
+        event.preventDefault();
+        alert("Please perform a search to use filters");
+    }
+}
 document.addEventListener("DOMContentLoaded", () => {
     let searchInput = document.getElementById("searchInput");
 
@@ -75,6 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
             searchMovies();
         }
     });
+
+    document.getElementById("sortBy").addEventListener("click", handleFilterInteraction);
+    document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
+    document.getElementById("maxYear").addEventListener("focus", handleFilterInteraction);
 });
 
 module.exports = { searchMovies };
