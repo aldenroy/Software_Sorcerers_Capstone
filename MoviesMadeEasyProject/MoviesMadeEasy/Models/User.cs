@@ -13,9 +13,9 @@ namespace MoviesMadeEasy.Models
         public string LastName { get; set; }
         public Guid? RecentlyViewedShowId { get; set; }
 
-        public string ColorMode { get; set; } = "";
-        public string FontSize { get; set; } = "";
-        public string FontType { get; set; } = "";
+        public string ColorMode { get; set; } = "Light";
+        public string FontSize { get; set; } = "Medium";
+        public string FontType { get; set; } = "Standard";
 
         public virtual Title RecentlyViewedShow { get; set; }
         public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; }
