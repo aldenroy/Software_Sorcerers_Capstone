@@ -63,7 +63,7 @@ describe("Movie querying for Avengers", () => {
 
   test('movies are sorted by title in descending order', async () => {
       // Mock fetch for this test
-      global.fetch = jest.fn(() =>
+        global.fetch = jest.fn(() =>
           Promise.resolve({
               json: () => Promise.resolve([
                   { title: "Ultimate Avengers: The Movie", releaseYear: 2006, genres: ["Action", "Animation"], rating: 70 },
@@ -72,6 +72,7 @@ describe("Movie querying for Avengers", () => {
               ]),
           })
       );
+    
 
       document.getElementById('sortBy').value = 'titleDesc';
       await searchMovies();

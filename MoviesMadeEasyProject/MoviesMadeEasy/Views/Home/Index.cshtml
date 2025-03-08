@@ -44,7 +44,26 @@
 </div>
 <section id="results" aria-live="polite" role="status"></section>
 
+<div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Movie Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalPoster" src="" alt="Movie Poster" class="img-fluid">
+                <div class="modal-text-content">
+                    <p id="modalGenres"></p>
+                    <p id="modalRating"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Load JavaScript via Partial View -->
 @await Html.PartialAsync("_MovieSearchScript")
+@await Html.PartialAsync("_ModalOpenScript")
 
 </body>
