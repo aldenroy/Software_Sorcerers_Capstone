@@ -4,7 +4,7 @@
     ViewData["Title"] = "Available Subscriptions";
 }
 
-<link rel="stylesheet" href="~/css/AddSubscriptionForm.css" />
+<link rel="stylesheet" href="~/css/subscriptionForm.css" />
 
 <h1 class="text-center my-4">Select a Subscription Service</h1>
 
@@ -17,9 +17,11 @@
 
 <form id="subscriptionForm" method="post" action="/User/SaveSubscriptions">
     <input type="hidden" asp-for="UserId" />
+    
+    <input type="hidden" id="preSelectedServices" value="@Model.PreSelectedServiceIds" />
 
     <div class="subscription-container">
-        @foreach (var service in Model.AvailableServices)
+        @foreach (var service in Model.AllServicesList)
         {
             <div class="card" data-id="@service.Id">
                 <img class="card-img-top" src="@service.LogoUrl" alt="@service.Name logo" />

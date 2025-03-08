@@ -76,49 +76,27 @@ namespace MME_Tests
         }
 
         [Test]
-        public void GetAvailableStreamingServices_UserHasNoSubscriptions_ReturnsAllServices()
+        public void GetAllServices_ReturnsAllServices()
         {
-            int userId = 1;
-            var result = _repository.GetAvailableStreamingServices(userId);
-            Assert.AreEqual(4, result.Count);
+            var result = _repository.GetAllServices().ToList();
+
+            Assert.AreEqual(4, result.Count, "Expected all 4 services to be returned.");
             Assert.IsTrue(result.Any(s => s.Name == "Netflix"));
             Assert.IsTrue(result.Any(s => s.Name == "Hulu"));
             Assert.IsTrue(result.Any(s => s.Name == "Disney+"));
             Assert.IsTrue(result.Any(s => s.Name == "Amazon Prime Video"));
         }
 
-        [Test]
-        public void GetAvailableStreamingServices_UserSubscribedToNetflix_ReturnsAllButNetflix()
-        {
-            int userId = 1;
-            _streamingServices.First(s => s.Name == "Netflix").UserStreamingServices
-                .Add(new UserStreamingService { UserId = userId });
-            var result = _repository.GetAvailableStreamingServices(userId);
-            Assert.IsFalse(result.Any(s => s.Name == "Netflix"));
-            Assert.IsTrue(result.Any(s => s.Name == "Hulu"));
-            Assert.IsTrue(result.Any(s => s.Name == "Disney+"));
-            Assert.IsTrue(result.Any(s => s.Name == "Amazon Prime Video"));
-        }
 
         [Test]
-        public void GetAvailableStreamingServices_UserSubscribedToAll_ReturnsEmptyList()
+        public void GetAllServices_ReturnsListInAlphabeticalOrder()
         {
-            int userId = 1;
-            foreach (var service in _streamingServices)
-            {
-                service.UserStreamingServices.Add(new UserStreamingService { UserId = userId });
-            }
-            var result = _repository.GetAvailableStreamingServices(userId);
-            Assert.IsEmpty(result);
-        }
+            var result = _repository.GetAllServices().ToList();
 
-        [Test]
-        public void GetAvailableStreamingServices_ReturnsListInAlphabeticalOrder()
-        {
-            int userId = 1;
-            var result = _repository.GetAvailableStreamingServices(userId);
             var expectedOrder = result.OrderBy(s => s.Name).ToList();
-            Assert.IsTrue(result.SequenceEqual(expectedOrder));
+
+            Assert.IsTrue(result.SequenceEqual(expectedOrder),
+                "The list of streaming services is not in alphabetical order.");
         }
 
         [Test]
@@ -129,21 +107,6 @@ namespace MME_Tests
             Assert.DoesNotThrow(() => _repository.AddUserSubscriptions(userId, null));
         }
 
-        [Test]
-        public void GetAvailableStreamingServices_NoStreamingServices_ReturnsEmptyList()
-        {
-            _streamingServices.Clear();
-            var result = _repository.GetAvailableStreamingServices(1);
-            Assert.IsEmpty(result);
-        }
-
-        [Test]
-        public void GetAvailableStreamingServices_NonExistentUser_ReturnsAllServices()
-        {
-            int userId = 99;
-            var result = _repository.GetAvailableStreamingServices(userId);
-            Assert.AreEqual(4, result.Count);
-        }
 
         [Test]
         public void AddUserSubscriptions_NonExistentUser_ThrowsException()
@@ -190,28 +153,15 @@ namespace MME_Tests
             _controller.Dispose();
         }
 
-        [Test]
-        public void AddSubscriptionForm_PopulatesAvailableServices()
-        {
-            var dto = new DashboardDTO { UserId = 1 };
-            var availableServices = new List<StreamingService> { new StreamingService { Name = "Netflix" } };
-            _subscriptionServiceMock.Setup(s => s.GetAvailableStreamingServices(1)).Returns(availableServices);
-
-            var result = _controller.AddSubscriptionForm(dto) as ViewResult;
-            var model = result.Model as DashboardDTO;
-
-            Assert.IsNotNull(model);
-            Assert.AreEqual(availableServices, model.AvailableServices);
-        }
 
         [Test]
-        public void SaveSubscriptions_WithEmptySelectedServices_RedirectsToAddSubscriptionForm()
+        public void SaveSubscriptions_WithEmptySelectedServices_RedirectsToSubscriptionForm()
         {
             int userId = 1;
             string selectedServices = "";
             var result = _controller.SaveSubscriptions(userId, selectedServices) as RedirectToActionResult;
             Assert.IsNotNull(result);
-            Assert.AreEqual("AddSubscriptionForm", result.ActionName);
+            Assert.AreEqual("SubscriptionForm", result.ActionName);
             Assert.AreEqual(userId, result.RouteValues["userId"]);
         }
 
@@ -307,7 +257,7 @@ namespace MME_Tests
         }
 
         [Test]
-        public void SaveSubscriptions_WhenExceptionThrown_DisplaysErrorMessageAndReturnsAddSubscriptionForm()
+        public void SaveSubscriptions_WhenExceptionThrown_DisplaysErrorMessageAndReturnsSubscriptionForm()
         {
             int userId = 1;
             string selectedServices = "1,2";
@@ -322,7 +272,7 @@ namespace MME_Tests
             var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("AddSubscriptionForm", result.ViewName);
+            Assert.AreEqual("SubscriptionForm", result.ViewName);
             Assert.IsTrue(_controller.TempData.ContainsKey("Message"));
             Assert.AreEqual("There was an issue adding your subscription. Please try again later.", _controller.TempData["Message"]);
         }
@@ -349,7 +299,6 @@ namespace MME_Tests
             Assert.IsNotNull(viewResult, "Expected a ViewResult.");
             Assert.AreEqual("Dashboard", viewResult.ViewName);
         }
-
 
     }
 }

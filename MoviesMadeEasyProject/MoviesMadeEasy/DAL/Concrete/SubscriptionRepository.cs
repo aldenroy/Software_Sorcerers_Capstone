@@ -11,8 +11,6 @@ namespace MoviesMadeEasy.DAL.Concrete
         private readonly DbSet<StreamingService> _streamingServices;
         private readonly UserDbContext _context;
 
-        public List<StreamingService> StreamingServices { get; }
-
         public SubscriptionRepository(UserDbContext context) : base(context)
         {
             _uss = context.UserStreamingServices;
@@ -20,10 +18,13 @@ namespace MoviesMadeEasy.DAL.Concrete
             _context = context;
         }
 
+        public IEnumerable<StreamingService> GetAllServices()
+        {
+            return _streamingServices.OrderBy(s => s.Name).ToList();
+        }
 
         public List<StreamingService> GetUserSubscriptions(int userId)
         {
-            // Query to get all streaming services for a specific user
             var userSubscriptions = _uss
                 .Include(us => us.StreamingService)  
                 .Where(us => us.UserId == userId)    
@@ -33,21 +34,9 @@ namespace MoviesMadeEasy.DAL.Concrete
             return userSubscriptions;
         }
 
-        public List<StreamingService> GetAvailableStreamingServices(int userId)
-        {
-
-            var toAddSubsList = _streamingServices
-                .Include(ss => ss.UserStreamingServices)
-                .Where(ss => ss.UserStreamingServices.All(us => us.UserId != userId))
-                .OrderBy(ss => ss.Name)
-                .ToList();
-
-            return toAddSubsList;
-        }
-
         private HashSet<int> GetUserExistingSubscriptions(int userId)
         {
-            return _context.UserStreamingServices
+            return _uss
                 .Where(us => us.UserId == userId)
                 .Select(us => us.StreamingServiceId)
                 .ToHashSet();
