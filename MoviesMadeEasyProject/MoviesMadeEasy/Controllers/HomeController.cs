@@ -54,7 +54,17 @@ namespace MoviesMadeEasy.Controllers
                     _                 => movies
                 };
 
-                return Json(movies);
+                var movieResults = movies.Select(movie => new 
+                {
+                    title = movie.Title,
+                    releaseYear = movie.ReleaseYear,
+                    posterUrl = movie.ImageSet?.VerticalPoster?.W240 ?? "https://via.placeholder.com/150", // Example fallback if null
+                    genres = movie.Genres.Select(g => g.Name).ToList(),
+                    rating = movie.Rating
+                }).ToList();
+
+                
+                return Json(movieResults);
             }
             catch (Exception)
             {

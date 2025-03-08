@@ -21,50 +21,60 @@ async function searchMovies() {
     }
 
     // Construct query parameters
-    //did this so I can add new stuff to help do the logic in the controller.
     let queryParams = new URLSearchParams({
         query: query,
         sortBy: sortOption
     });
 
     // Add minYear and maxYear if they are provided
-    // Again another think to help in the controller logic. Gets from dropdown
     if (minYear) queryParams.append("minYear", minYear);
     if (maxYear) queryParams.append("maxYear", maxYear);
 
     try {
-        let response = await fetch(`/Home/SearchMovies?${queryParams.toString()}`);
-        let movies = await response.json();
+        let response = await fetch(`/Home/SearchIndex?${queryParams.toString()}`);
+        let index = await response.json();
 
         loadingSpinner.style.display = "none";
 
-        if (!movies || movies.length === 0) {
+        if (!index || index.length === 0) {
             resultsContainer.innerHTML = "<div class='no-results' role='alert'>No results found.</div>";
             return;
         }
 
-        resultsContainer.innerHTML = movies.map(movie => `
-            <article class="movie-card">
-                <div class="movie-row" aria-label="Search results card for ${movie.title}">
-                    <img src="${movie.posterUrl || 'https://via.placeholder.com/150'}" class="movie-poster" alt="${movie.title} movie poster">
-                    <div class="movie-details">
-                        <h5>${movie.title} <span class="movie-year">(${movie.releaseYear || 'N/A'})</span></h5>
-                        <p class="movie-genres">Genres: ${movie.genres?.join(", ") || 'Unknown'}</p>
-                        <p class="movie-rating">Rating: ${movie.rating || 'N/A'}</p>
-                        <button class="btn btn-primary">View Details</button>
-                        <button class="btn btn-outline-secondary">More Like This</button>
+        resultsContainer.innerHTML = index.map(item => {
+            // Assuming each genre is an object with a 'name' property
+            let genres = item.genres && item.genres.length > 0 
+                         ? item.genres.map(genre => genre.name).join(", ") 
+                         : 'Unknown';
+
+            return `
+                <article class="movie-card">
+                    <div class="movie-row" aria-label="Search results card for ${item.title}">
+                        <img src="${item.posterUrl || 'https://via.placeholder.com/150'}" class="movie-poster" alt="${item.title} movie poster">
+                        <div class="movie-details">
+                            <h5>${item.title} <span class="movie-year">(${item.releaseYear || 'N/A'})</span></h5>
+                            
+                            <!-- Display genres here -->
+                            <p class="movie-genres">Genres: ${genres}</p>
+                            
+                            <p class="movie-rating">Rating: ${item.rating || 'N/A'}</p>
+                            <button class="btn btn-primary">View Details</button>
+                            <button class="btn btn-outline-secondary">More Like This</button>
+                        </div>
                     </div>
-                </div>
-            </article>
-        `).join('');
+                </article>
+            `;
+        }).join('');
 
         enableFilters();
     } catch (error) {
         loadingSpinner.style.display = "none";
-        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching movie data. Please try again later.</div>";
-        console.error("Error fetching movies:", error);
+        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
+        console.error("Error fetching index:", error);
     }
 }
+
+
 
 function enableFilters() {
     searchExecuted = true;
