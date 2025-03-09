@@ -86,7 +86,6 @@ async function searchMovies() {
 
 
 
-
 function enableFilters() {
     searchExecuted = true;
     document.getElementById("sortBy").disabled = false;
