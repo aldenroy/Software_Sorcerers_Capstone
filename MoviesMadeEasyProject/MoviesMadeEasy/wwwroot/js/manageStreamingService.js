@@ -1,10 +1,13 @@
-﻿function addStreamingService() {
+﻿function manageStreamingService() {
     let selectedServices = new Set();
+    const preselectedServices = new Set();
 
     const preSelectedInput = document.getElementById('preSelectedServices');
     if (preSelectedInput && preSelectedInput.value.trim() !== "") {
         preSelectedInput.value.split(',').forEach(id => {
-            selectedServices.add(id.trim());
+            const trimmedId = id.trim();
+            preselectedServices.add(trimmedId);
+            selectedServices.add(trimmedId);
         });
     }
 
@@ -12,6 +15,23 @@
     const form = document.getElementById('subscriptionForm');
     if (form) {
         form.setAttribute('data-original-selection', originalSelection);
+    }
+
+    function updateCardAppearance(card) {
+        let serviceId = card.getAttribute('data-id');
+        if (preselectedServices.has(serviceId)) {
+            if (!selectedServices.has(serviceId)) {
+                card.classList.add('marked-for-deletion');
+            } else {
+                card.classList.remove('marked-for-deletion');
+            }
+        } else {
+            if (selectedServices.has(serviceId)) {
+                card.classList.add('marked-for-addition');
+            } else {
+                card.classList.remove('marked-for-addition');
+            }
+        }
     }
 
     function toggleSelection(card) {
@@ -24,6 +44,7 @@
         selectedServices.add(serviceId);
         card.classList.add('selected');
       }
+      updateCardAppearance(card);
   
       document.getElementById('selectedServices').value = Array.from(selectedServices).join(',');
     }
@@ -36,13 +57,14 @@
       card.addEventListener("click", function () {
         toggleSelection(this);
       });
+      updateCardAppearance(card);
     });
 
     document.getElementById('selectedServices').value = Array.from(selectedServices).join(',');
   }
   
 document.addEventListener("DOMContentLoaded", function () {
-    addStreamingService();
+    manageStreamingService();
 
     const form = document.getElementById('subscriptionForm');
     form.addEventListener('submit', function (event) {
@@ -55,5 +77,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
   
-  module.exports = { addStreamingService };
+  module.exports = { manageStreamingService };
   

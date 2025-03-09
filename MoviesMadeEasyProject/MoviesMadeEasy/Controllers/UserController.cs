@@ -90,7 +90,7 @@ namespace MoviesMadeEasy.Controllers
 
                 _subscriptionService.AddUserSubscriptions(userId, selectedServiceIds);
 
-                TempData["Message"] = "Subscriptions added successfully!";
+                TempData["Message"] = "Subscriptions managed successfully!";
 
                 var dto = BuildDashboardDTO(userId);
                 return View("Dashboard", dto);

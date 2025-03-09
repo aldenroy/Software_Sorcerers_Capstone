@@ -85,8 +85,7 @@
 }
 
 .subscription-item:hover {
-    width: 200px;
-    height: 170px;
+    transform: scale(1.1);
     box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
 }
 

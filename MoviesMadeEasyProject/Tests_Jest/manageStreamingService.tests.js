@@ -2,12 +2,12 @@
  * @jest-environment jsdom
  */
 
-const { addStreamingService } = require("../MoviesMadeEasy/wwwroot/js/addStreamingService");
+const { manageStreamingService } = require("../MoviesMadeEasy/wwwroot/js/manageStreamingService");
 require("@testing-library/jest-dom");
 
 function initializeModule() {
   jest.resetModules();
-  require('../MoviesMadeEasy/wwwroot/js/addStreamingService.js');
+  require('../MoviesMadeEasy/wwwroot/js/manageStreamingService.js');
   document.dispatchEvent(new Event('DOMContentLoaded'));
 }
 
@@ -28,7 +28,6 @@ function setupDOM(preSelectedVal) {
     <input type="hidden" id="preSelectedServices" value="${preSelectedValue}" />
   `;
 }
-
 
 describe('Subscription Selection Functionality', () => {
     beforeEach(() => {
@@ -51,7 +50,6 @@ describe('Subscription Selection Functionality', () => {
       const hiddenInput = document.getElementById('selectedServices');
   
       card.click();
-  
       expect(card.classList.contains('selected')).toBe(true);
       expect(hiddenInput.value).toBe("1");
     });
@@ -88,8 +86,8 @@ describe('Subscription Selection Functionality', () => {
       window.alert = jest.fn();
 
       const card = document.querySelector('.card[data-id="1"]');
-      card.click();
 
+      card.click();
       const form = document.getElementById('subscriptionForm');
       const submitEvent = new Event('submit', { cancelable: true });
       submitEvent.preventDefault = jest.fn();
@@ -143,8 +141,93 @@ describe('Subscription Selection Functionality', () => {
       expect(hiddenInput.value).toBe("2");
   
       card1.click();
-
       expect(hiddenInput.value).toBe("2,1");
     });
+
+    test('with no preselected cards, a card should be marked for addition when selected', () => {
+        const card = document.querySelector('.card[data-id="1"]');
+
+        expect(card.classList.contains('marked-for-addition')).toBe(false);
+
+        card.click();
+        expect(card.classList.contains('selected')).toBe(true);
+        expect(card.classList.contains('marked-for-addition')).toBe(true);
+    });
+
+    test('with a preselected service, a card should not show a marker until toggled', () => {
+        setupDOM("1");
+        initializeModule();
+
+        const card = document.querySelector('.card[data-id="1"]');
+
+        expect(card.classList.contains('selected')).toBe(true);
+        expect(card.classList.contains('marked-for-deletion')).toBe(false);
+    });
+
+    test('when a preselected card is clicked (deselected), it should show deletion marker', () => {
+        setupDOM("1");
+        initializeModule();
+
+        const card = document.querySelector('.card[data-id="1"]');
+
+        card.click();
+        expect(card.classList.contains('selected')).toBe(false);
+        expect(card.classList.contains('marked-for-deletion')).toBe(true);
+    });
+
+    test('when a non-preselected card is clicked, it should show addition marker', () => {
+        setupDOM("2");
+        initializeModule();
+
+        const card = document.querySelector('.card[data-id="1"]');
+
+        card.click();
+        expect(card.classList.contains('selected')).toBe(true);
+        expect(card.classList.contains('marked-for-addition')).toBe(true);
+    });
+
+    test('clicking a preselected card twice should revert to original state (no deletion marker)', () => {
+        setupDOM("1");
+        initializeModule();
+
+        const preCard = document.querySelector('.card[data-id="1"]');
+        expect(preCard.classList.contains('marked-for-deletion')).toBe(false);
+
+        preCard.click();
+        expect(preCard.classList.contains('marked-for-deletion')).toBe(true);
+
+        preCard.click();
+        expect(preCard.classList.contains('selected')).toBe(true);
+        expect(preCard.classList.contains('marked-for-deletion')).toBe(false);
+    });
+
+    test('clicking a non-preselected card twice should revert to original state (no addition marker)', () => {
+        setupDOM("2");
+        initializeModule();
+
+        const nonPreCard = document.querySelector('.card[data-id="1"]');
+        expect(nonPreCard.classList.contains('marked-for-addition')).toBe(false);
+
+        nonPreCard.click();
+        expect(nonPreCard.classList.contains('marked-for-addition')).toBe(true);
+
+        nonPreCard.click();
+        expect(nonPreCard.classList.contains('selected')).toBe(false);
+        expect(nonPreCard.classList.contains('marked-for-addition')).toBe(false);
+    });
+
+    test('should alert "No changes were made" when submitted without changes', () => {
+        setupDOM("1,2");
+        initializeModule();
+
+        window.alert = jest.fn();
+        const form = document.getElementById('subscriptionForm');
+        const submitEvent = new Event('submit', { cancelable: true });
+
+        submitEvent.preventDefault = jest.fn();
+        form.dispatchEvent(submitEvent);
+        expect(window.alert).toHaveBeenCalledWith("No changes were made");
+    });
+
   });
   

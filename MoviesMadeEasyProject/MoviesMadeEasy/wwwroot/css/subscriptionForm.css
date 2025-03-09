@@ -1,8 +1,8 @@
 ﻿.subscription-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; 
-    gap: 20px; 
+    justify-content: center;
+    gap: 20px;
     padding: 20px;
 }
 
@@ -11,23 +11,25 @@
     width: 18rem;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    margin: 10px;
 }
 
 .card:focus,
 .card:hover {
-    outline: 3px dashed #737b87; 
+    outline: 5px dashed #737b87;
+    transform: scale(1.05);
 }
 
 .card-img-top {
     width: 100%;
-    height: auto; 
+    height: auto;
 }
 
 #save {
     background-color: #333;
     color: #fff;
-    font-size: 1rem;
-    padding: 10px 15px;
+    font-size: 1.25rem;
+    padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -47,4 +49,33 @@
     transform: scale(1.05);
     background-color: black;
     color: white;
+}
+
+#manageDescription {
+    padding: 30px;
+    margin-bottom: 20px;
+    max-width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.2rem;
+    border: 4px double #333;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+#manageDescription .disclaimer {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    color: red;
+}
+
+.card.marked-for-addition {
+    border: 5px outset green;
+    border-radius: 20px; 
+}
+
+.card.marked-for-deletion {
+    border: 6px inset red;
+    border-radius: 0px;
 }
