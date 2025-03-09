@@ -31,7 +31,7 @@ async function searchMovies() {
     if (maxYear) queryParams.append("maxYear", maxYear);
 
     try {
-        let response = await fetch(`/Home/SearchIndex?${queryParams.toString()}`);
+        let response = await fetch(`/Home/SearchMovies?${queryParams.toString()}`);
         let index = await response.json();
 
         loadingSpinner.style.display = "none";
@@ -44,8 +44,8 @@ async function searchMovies() {
         resultsContainer.innerHTML = index.map(item => {
             // Assuming each genre is an object with a 'name' property
             let genres = item.genres && item.genres.length > 0 
-                         ? item.genres.map(genre => genre.name).join(", ") 
-                         : 'Unknown';
+                ? item.genres.join(", ") 
+                : 'Unknown';
 
             return `
                 <article class="movie-card">
@@ -71,8 +71,12 @@ async function searchMovies() {
         loadingSpinner.style.display = "none";
         resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
         console.error("Error fetching index:", error);
+        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
+        console.error("Error fetching index:", error);
     }
 }
+
+
 
 
 
