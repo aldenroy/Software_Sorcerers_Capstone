@@ -99,7 +99,7 @@ namespace MoviesMadeEasy.Controllers
             {
                 _logger.LogError(ex, "Error saving subscriptions for userId: {userId}", userId);
 
-                TempData["Message"] = "There was an issue adding your subscription. Please try again later.";
+                TempData["Message"] = "There was an issue managing your subscription. Please try again later.";
 
                 var dto = BuildDashboardDTO(userId);
                 return View("SubscriptionForm", dto);
