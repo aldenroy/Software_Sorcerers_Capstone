@@ -4,9 +4,9 @@
     ViewData["Title"] = "Available Subscriptions";
 }
 
-<link rel="stylesheet" href="~/css/AddSubscriptionForm.css" />
+<link rel="stylesheet" href="~/css/subscriptionForm.css" />
 
-<h1 class="text-center my-4">Select a Subscription Service</h1>
+<h1 class="text-center my-4">Manage Subscription Services</h1>
 
 @if (TempData["Message"] != null)
 {
@@ -15,11 +15,21 @@
     </div>
 }
 
+<p id="manageDescription">
+    Welcome to Managing Your Streaming Services. Our Software Sorcers have worked their magic to
+    preselect your current streaming services. Please review and update your selections so we can record your 
+    subscription services in our enchanted spell book—ensuring our magic boxes effortlessly guide you to the shows you seek.
+    <span class="disclaimer">Disclaimer: Unsubscribing here will not cancel your actual service subscriptions.</span>
+</p>
+
+
 <form id="subscriptionForm" method="post" action="/User/SaveSubscriptions">
     <input type="hidden" asp-for="UserId" />
+    
+    <input type="hidden" id="preSelectedServices" value="@Model.PreSelectedServiceIds" />
 
     <div class="subscription-container">
-        @foreach (var service in Model.AvailableServices)
+        @foreach (var service in Model.AllServicesList)
         {
             <div class="card" data-id="@service.Id">
                 <img class="card-img-top" src="@service.LogoUrl" alt="@service.Name logo" />
@@ -37,6 +47,6 @@
     </div>
 </form>
 
-<script src="~/js/addStreamingService.js"></script>
+<script src="~/js/manageStreamingService.js"></script>
 
 <!-- Credit: Bootstrap Cards - https://getbootstrap.com/docs/4.0/components/card/ -->
