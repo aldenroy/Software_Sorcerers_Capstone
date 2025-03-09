@@ -164,3 +164,58 @@ body {
   background-color: #e9ecef;
   cursor: default;
 }
+
+#movieModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+#movieModal .modal-header {
+  width: 100%;
+  border-bottom: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+#movieModal .modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#movieModal .modal-body {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 0;
+  width: 100%;
+}
+
+#movieModal .modal-body img {
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+}
+
+#movieModal .modal-body p {
+  margin: 0;
+  font-size: 16px;
+}
+
+#movieModal .modal-body p#modalGenres {
+  font-style: italic;
+  color: #555;
+}
+
+#movieModal .modal-body p#modalRating {
+  font-weight: bold;
+  color: #333;
+}
+
+#movieModal .modal-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
