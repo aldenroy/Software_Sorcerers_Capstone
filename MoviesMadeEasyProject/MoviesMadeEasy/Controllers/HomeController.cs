@@ -59,8 +59,15 @@ namespace MoviesMadeEasy.Controllers
                     title = movie.Title,
                     releaseYear = movie.ReleaseYear,
                     posterUrl = movie.ImageSet?.VerticalPoster?.W240 ?? "https://via.placeholder.com/150", // Example fallback if null
-                    genres = movie.Genres.Select(g => g.Name).ToList(),
-                    rating = movie.Rating
+                    genres = movie.Genres?.Select(g => g.Name).ToList() ?? new List<string>(), // Handle null genres
+                    rating = movie.Rating,
+                    overview = movie.Overview,
+                    services = movie.StreamingOptions?
+                        .SelectMany(kvp => kvp.Value) // Flatten the lists of StreamingOption
+                        .Select(option => option.Service?.Name) // Select the Name property from each Service
+                        .Where(name => name != null) // Filter out null values (if any)
+                        .Distinct() // Remove duplicates (if needed)
+                        .ToList() ?? new List<string>() // Handle null StreamingOptions
                 }).ToList();
 
                 
