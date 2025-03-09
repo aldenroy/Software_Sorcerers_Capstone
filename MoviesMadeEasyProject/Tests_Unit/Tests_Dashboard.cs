@@ -274,7 +274,7 @@ namespace MME_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("SubscriptionForm", result.ViewName);
             Assert.IsTrue(_controller.TempData.ContainsKey("Message"));
-            Assert.AreEqual("There was an issue adding your subscription. Please try again later.", _controller.TempData["Message"]);
+            Assert.AreEqual("There was an issue managing your subscription. Please try again later.", _controller.TempData["Message"]);
         }
 
 
@@ -294,7 +294,7 @@ namespace MME_Tests
             var result = _controller.SaveSubscriptions(userId, selectedServices);
 
 
-            Assert.AreEqual("Subscriptions added successfully!", _controller.TempData["Message"]);
+            Assert.AreEqual("Subscriptions managed successfully!", _controller.TempData["Message"]);
             var viewResult = result as ViewResult;
             Assert.IsNotNull(viewResult, "Expected a ViewResult.");
             Assert.AreEqual("Dashboard", viewResult.ViewName);
