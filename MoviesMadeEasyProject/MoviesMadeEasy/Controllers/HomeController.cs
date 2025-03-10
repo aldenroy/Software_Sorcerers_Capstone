@@ -3,17 +3,30 @@ using MoviesMadeEasy.DAL.Abstract;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using MoviesMadeEasy.DTOs;
 
 namespace MoviesMadeEasy.Controllers
 {
     public class HomeController : BaseController
     {
         private readonly IMovieService _movieService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<BaseController> _logger;
 
-        public HomeController(IMovieService movieService, ILogger<BaseController> logger) : base(null, null, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
+        public HomeController(
+            IMovieService movieService, 
+            UserManager<IdentityUser> userManager, 
+            IUserRepository userRepository, 
+            ILogger<BaseController> logger) : base(userManager, userRepository, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
         {
             _movieService = movieService;
+            _userManager = userManager;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
