@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using MoviesMadeEasy.DTOs;
 using MoviesMadeEasy.DAL.Abstract;
+using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MoviesMadeEasy.Controllers
 {
-    public class UserController : Controller
+    public class UserController : BaseController
     {
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
@@ -19,7 +21,7 @@ namespace MoviesMadeEasy.Controllers
             ILogger<UserController> logger,
             UserManager<IdentityUser> userManager,
             IUserRepository userRepository,
-            ISubscriptionRepository subscriptionService)
+            ISubscriptionRepository subscriptionService) : base(userManager, userRepository, logger)
         {
             _logger = logger;
             _userManager = userManager;

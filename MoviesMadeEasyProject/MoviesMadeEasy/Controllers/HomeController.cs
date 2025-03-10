@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace MoviesMadeEasy.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IMovieService _movieService;
+        private readonly ILogger<BaseController> _logger;
 
-        public HomeController(IMovieService movieService)
+        public HomeController(IMovieService movieService, ILogger<BaseController> logger) : base(null, null, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
         {
             _movieService = movieService;
+            _logger = logger;
         }
 
         public IActionResult Index()
