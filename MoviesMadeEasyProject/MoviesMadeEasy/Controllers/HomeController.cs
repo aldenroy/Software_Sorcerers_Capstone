@@ -3,16 +3,31 @@ using MoviesMadeEasy.DAL.Abstract;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using MoviesMadeEasy.DTOs;
 
 namespace MoviesMadeEasy.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IMovieService _movieService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserRepository _userRepository;
+        private readonly ILogger<BaseController> _logger;
 
-        public HomeController(IMovieService movieService)
+        public HomeController(
+            IMovieService movieService, 
+            UserManager<IdentityUser> userManager, 
+            IUserRepository userRepository, 
+            ILogger<BaseController> logger) : base(userManager, userRepository, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
         {
             _movieService = movieService;
+            _userManager = userManager;
+            _userRepository = userRepository;
+            _logger = logger;
         }
 
         public IActionResult Index()
@@ -59,8 +74,15 @@ namespace MoviesMadeEasy.Controllers
                     title = movie.Title,
                     releaseYear = movie.ReleaseYear,
                     posterUrl = movie.ImageSet?.VerticalPoster?.W240 ?? "https://via.placeholder.com/150", // Example fallback if null
-                    genres = movie.Genres.Select(g => g.Name).ToList(),
-                    rating = movie.Rating
+                    genres = movie.Genres?.Select(g => g.Name).ToList() ?? new List<string>(), // Handle null genres
+                    rating = movie.Rating,
+                    overview = movie.Overview,
+                    services = movie.StreamingOptions?
+                        .SelectMany(kvp => kvp.Value) // Flatten the lists of StreamingOption
+                        .Select(option => option.Service?.Name) // Select the Name property from each Service
+                        .Where(name => name != null) // Filter out null values (if any)
+                        .Distinct() // Remove duplicates (if needed)
+                        .ToList() ?? new List<string>() // Handle null StreamingOptions
                 }).ToList();
 
                 

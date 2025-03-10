@@ -4,8 +4,13 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@{
+    string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
+}
+
 <link rel="stylesheet" href="~/css/dashboard.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
 
 <div class="content container">
     <h1 id="dashboard-greeting" aria-live="polite">Hello, @Model.UserName!</h1>
@@ -46,7 +51,7 @@
             else
             {
                 <div id="subscription-bubble" class="subscription-placeholder text-center "
-                     role="region" aria-labelledby="subscription-title">
+                    role="region" aria-labelledby="subscription-title">
                     <p>No subscriptions.</p>
                 </div>
             }
