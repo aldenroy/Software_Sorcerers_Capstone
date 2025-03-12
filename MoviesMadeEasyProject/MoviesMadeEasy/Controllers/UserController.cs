@@ -79,18 +79,16 @@ namespace MoviesMadeEasy.Controllers
         [HttpPost]
         public IActionResult SaveSubscriptions(int userId, string selectedServices)
         {
-            if (string.IsNullOrEmpty(selectedServices))
-            {
-                return RedirectToAction("SubscriptionForm", new { userId });
-            }
+            selectedServices = selectedServices ?? "";
 
             try
             {
-                var selectedServiceIds = selectedServices.Split(',')
-                                        .Select(int.Parse)
-                                        .ToList();
+                List<int> selectedServiceIds =
+                    string.IsNullOrWhiteSpace(selectedServices)
+                        ? new List<int>()
+                        : selectedServices.Split(',').Select(int.Parse).ToList();
 
-                _subscriptionService.AddUserSubscriptions(userId, selectedServiceIds);
+                _subscriptionService.UpdateUserSubscriptions(userId, selectedServiceIds);
 
                 TempData["Message"] = "Subscriptions managed successfully!";
 

@@ -18,7 +18,7 @@ namespace MME_Tests
 {
     // Subscription Repository Tests
     [TestFixture]
-    public class StreamingServiceAndDashboardTests
+    public class SubscriptionRepositoryTests
     {
         private Mock<UserDbContext> _mockContext;
         private SubscriptionRepository _repository;
@@ -33,44 +33,37 @@ namespace MME_Tests
 
             _streamingServices = new List<StreamingService>
             {
-                new StreamingService
-                {
-                    Id = 1, Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login",
-                    LogoUrl = "/images/Netflix_Symbol_RGB.png", UserStreamingServices = new List<UserStreamingService>()
-                },
-                new StreamingService
-                {
-                    Id = 2, Name = "Hulu", Region = "US", BaseUrl = "https://auth.hulu.com/web/login",
-                    LogoUrl = "/images/hulu-Green-digital.png", UserStreamingServices = new List<UserStreamingService>()
-                },
-                new StreamingService
-                {
-                    Id = 3, Name = "Disney+", Region = "US", BaseUrl = "https://www.disneyplus.com/login",
-                    LogoUrl = "/images/disney_logo_march_2024_050fef2e.png",
-                    UserStreamingServices = new List<UserStreamingService>()
-                },
-                new StreamingService
-                {
-                    Id = 4, Name = "Amazon Prime Video", Region = "US", BaseUrl = "https://www.amazon.com/ap/signin",
-                    LogoUrl = "/images/AmazonPrimeVideo.png", UserStreamingServices = new List<UserStreamingService>()
-                }
+                new StreamingService { Id = 1, Name = "Netflix" },
+                new StreamingService { Id = 2, Name = "Hulu" },
+                new StreamingService { Id = 3, Name = "Disney+" },
+                new StreamingService { Id = 4, Name = "Amazon Prime Video" }
             };
-
-            var users = new List<User>
-            {
-                new User { Id = 1, FirstName = "Test" }
-            }.AsQueryable();
-
-            var mockUsersDbSet = MockHelper.GetMockDbSet(users);
-            _mockContext.Setup(c => c.Users).Returns(mockUsersDbSet.Object);
 
             _userStreamingServices = new List<UserStreamingService>();
 
             var mockStreamingServicesDbSet = MockHelper.GetMockDbSet(_streamingServices.AsQueryable());
             var mockUserStreamingServicesDbSet = MockHelper.GetMockDbSet(_userStreamingServices.AsQueryable());
 
+            mockUserStreamingServicesDbSet
+                .Setup(x => x.AddRange(It.IsAny<IEnumerable<UserStreamingService>>()))
+                .Callback<IEnumerable<UserStreamingService>>(items =>
+                {
+                    _userStreamingServices.AddRange(items);
+                });
+
+            mockUserStreamingServicesDbSet
+                .Setup(x => x.RemoveRange(It.IsAny<IEnumerable<UserStreamingService>>()))
+                .Callback<IEnumerable<UserStreamingService>>(items =>
+                {
+                    foreach (var item in items.ToList())
+                    {
+                        _userStreamingServices.Remove(item);
+                    }
+                });
+
             _mockContext.Setup(c => c.StreamingServices).Returns(mockStreamingServicesDbSet.Object);
             _mockContext.Setup(c => c.UserStreamingServices).Returns(mockUserStreamingServicesDbSet.Object);
+            _mockContext.Setup(c => c.SaveChanges()).Returns(1);
 
             _repository = new SubscriptionRepository(_mockContext.Object);
         }
@@ -100,29 +93,56 @@ namespace MME_Tests
         }
 
         [Test]
-        public void AddUserSubscriptions_NullOrEmptyList_DoesNotThrowException()
-        {
-            int userId = 1;
-            Assert.DoesNotThrow(() => _repository.AddUserSubscriptions(userId, new List<int>()));
-            Assert.DoesNotThrow(() => _repository.AddUserSubscriptions(userId, null));
-        }
-
-
-        [Test]
-        public void AddUserSubscriptions_NonExistentUser_ThrowsException()
-        {
-            int userId = 99;
-            var ex = Assert.Throws<InvalidOperationException>(() => _repository.AddUserSubscriptions(userId, new List<int> { 1 }));
-            Assert.That(ex.Message, Is.EqualTo("User does not exist."));
-        }
-
-        [Test]
-        public void AddUserSubscriptions_AlreadySubscribedService_DoesNotAddDuplicate()
+        public void UpdateUserSubscriptions_EmptyList_RemovesAllSubscriptions()
         {
             int userId = 1;
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
-            _repository.AddUserSubscriptions(userId, new List<int> { 1 });
-            Assert.AreEqual(1, _userStreamingServices.Count(us => us.UserId == userId && us.StreamingServiceId == 1));
+            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 2 });
+
+            _repository.UpdateUserSubscriptions(userId, new List<int>());
+            var remaining = _userStreamingServices.Where(us => us.UserId == userId).ToList();
+            Assert.IsEmpty(remaining);
+        }
+
+        [Test]
+        public void UpdateUserSubscriptions_AddsNewSubscriptions_WhenNoneExist()
+        {
+            int userId = 1;
+            _userStreamingServices.Clear();
+            _repository.UpdateUserSubscriptions(userId, new List<int> { 1, 3 });
+            var subscriptions = _userStreamingServices.Where(us => us.UserId == userId).ToList();
+            Assert.AreEqual(2, subscriptions.Count);
+            Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 1));
+            Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 3));
+        }
+
+        [Test]
+        public void UpdateUserSubscriptions_AlreadySubscribedService_DoesNotAddDuplicate()
+        {
+            int userId = 1;
+            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
+            _repository.UpdateUserSubscriptions(userId, new List<int> { 1 });
+            var subscriptions = _userStreamingServices.Where(us => us.UserId == userId && us.StreamingServiceId == 1).ToList();
+            Assert.AreEqual(1, subscriptions.Count);
+        }
+
+        [Test]
+        public void UpdateUserSubscriptions_RemovesUnselectedSubscriptions()
+        {
+            int userId = 1;
+            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
+            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 2 });
+            _repository.UpdateUserSubscriptions(userId, new List<int> { 2 });
+            var subscriptions = _userStreamingServices.Where(us => us.UserId == userId).ToList();
+            Assert.AreEqual(1, subscriptions.Count);
+            Assert.AreEqual(2, subscriptions.First().StreamingServiceId);
+        }
+
+        [Test]
+        public void UpdateUserSubscriptions_NonExistentUser_DoesNotThrowException()
+        {
+            int userId = 99;
+            Assert.DoesNotThrow(() => _repository.UpdateUserSubscriptions(userId, new List<int> { 1 }));
         }
     }
 
@@ -153,18 +173,6 @@ namespace MME_Tests
             _controller.Dispose();
         }
 
-
-        [Test]
-        public void SaveSubscriptions_WithEmptySelectedServices_RedirectsToSubscriptionForm()
-        {
-            int userId = 1;
-            string selectedServices = "";
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as RedirectToActionResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual("SubscriptionForm", result.ActionName);
-            Assert.AreEqual(userId, result.RouteValues["userId"]);
-        }
-
         [Test]
         public void SaveSubscriptions_WithValidSelectedServices_ReturnsDashboardView()
         {
@@ -177,7 +185,7 @@ namespace MME_Tests
             };
             var user = new User { Id = userId, FirstName = "TestUser" };
 
-            _subscriptionServiceMock.Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock.Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
             _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
             _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(user);
 
@@ -202,7 +210,7 @@ namespace MME_Tests
                 new StreamingService { Name = "Netflix" }
             };
 
-            _subscriptionServiceMock.Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock.Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
             _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
             _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns((User)null);
 
@@ -263,7 +271,7 @@ namespace MME_Tests
             string selectedServices = "1,2";
 
             _subscriptionServiceMock
-                .Setup(s => s.AddUserSubscriptions(userId, It.IsAny<List<int>>()))
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()))
                 .Throws(new Exception("Test exception"));
             _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(new User { Id = userId, FirstName = "TestUser" });
 
@@ -288,7 +296,7 @@ namespace MME_Tests
             _userRepositoryMock.Setup(repo => repo.GetUser(userId)).Returns(user);
             _subscriptionServiceMock.Setup(service => service.GetUserSubscriptions(userId))
                 .Returns(new List<StreamingService>());
-            _subscriptionServiceMock.Setup(service => service.AddUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock.Setup(service => service.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
 
 
             var result = _controller.SaveSubscriptions(userId, selectedServices);
@@ -298,6 +306,52 @@ namespace MME_Tests
             var viewResult = result as ViewResult;
             Assert.IsNotNull(viewResult, "Expected a ViewResult.");
             Assert.AreEqual("Dashboard", viewResult.ViewName);
+        }
+
+        [Test]
+        public void SaveSubscriptions_WithNullSelectedServices_ProcessesDeletion()
+        {
+            int userId = 1;
+            string selectedServices = null; 
+
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)))
+                .Verifiable();
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId))
+                .Returns(new List<StreamingService>());
+            _userRepositoryMock
+                .Setup(r => r.GetUser(userId))
+                .Returns(new User { Id = userId, FirstName = "TestUser" });
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+
+            Assert.IsNotNull(result, "Expected a ViewResult when selectedServices is null.");
+            Assert.AreEqual("Dashboard", result.ViewName, "Expected the Dashboard view to be returned.");
+            _subscriptionServiceMock.Verify(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)), Times.Once);
+        }
+
+        [Test]
+        public void SaveSubscriptions_WithWhitespaceOnlySelectedServices_ProcessesDeletion()
+        {
+            int userId = 1;
+            string selectedServices = "  ";
+
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)))
+                .Verifiable();
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId))
+                .Returns(new List<StreamingService>());
+            _userRepositoryMock
+                .Setup(r => r.GetUser(userId))
+                .Returns(new User { Id = userId, FirstName = "TestUser" });
+
+            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+
+            Assert.IsNotNull(result, "Expected a ViewResult when selectedServices is whitespace.");
+            Assert.AreEqual("Dashboard", result.ViewName, "Expected the Dashboard view to be returned.");
+            _subscriptionServiceMock.Verify(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)), Times.Once);
         }
 
     }

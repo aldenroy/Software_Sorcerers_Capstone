@@ -22,7 +22,7 @@ namespace MME_Tests
         public void Setup()
         {
             _mockMovieService = new Mock<IMovieService>();
-            _homeController = new HomeController(_mockMovieService.Object);
+            //_homeController = new HomeController(_mockMovieService.Object);
         }
 
         [TearDown]
