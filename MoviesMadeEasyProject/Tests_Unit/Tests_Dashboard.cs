@@ -354,5 +354,39 @@ namespace MME_Tests
             _subscriptionServiceMock.Verify(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)), Times.Once);
         }
 
+        [Test]
+        public void Cancel_RedirectsToDashboard()
+        {
+            var result = _controller.Cancel() as RedirectToActionResult;
+
+            Assert.IsNotNull(result, "Expected a RedirectToActionResult from Cancel action.");
+            Assert.AreEqual("Dashboard", result.ActionName, "Cancel should redirect to the Dashboard action.");
+        }
+
+        [Test]
+        public void Cancel_DoesNotSubmitFormChanges_UserSubscriptionsRemainUnchanged()
+        {
+            int userId = 1;
+            var originalSubscriptions = new List<StreamingService>
+            {
+                new StreamingService { Id = 1, Name = "Netflix" },
+                new StreamingService { Id = 2, Name = "Hulu" }
+            };
+
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId))
+                .Returns(originalSubscriptions);
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(It.IsAny<int>(), It.IsAny<List<int>>()))
+                .Verifiable();
+            _controller.Cancel();
+            _subscriptionServiceMock.Verify(
+                s => s.UpdateUserSubscriptions(It.IsAny<int>(), It.IsAny<List<int>>()),
+                Times.Never);
+
+            var subscriptionsAfterCancel = _subscriptionServiceMock.Object.GetUserSubscriptions(userId);
+            Assert.AreEqual(originalSubscriptions.Count, subscriptionsAfterCancel.Count);
+        }
+
     }
 }

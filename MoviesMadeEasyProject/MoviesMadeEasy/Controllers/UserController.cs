@@ -106,6 +106,12 @@ namespace MoviesMadeEasy.Controllers
             }
         }
 
+        public IActionResult Cancel()
+        {
+            return RedirectToAction("Dashboard");
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
