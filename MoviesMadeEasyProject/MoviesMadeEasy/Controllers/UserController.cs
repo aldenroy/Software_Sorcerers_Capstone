@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using MoviesMadeEasy.DTOs;
 using MoviesMadeEasy.DAL.Abstract;
+using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MoviesMadeEasy.Controllers
 {
-    public class UserController : Controller
+    public class UserController : BaseController
     {
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
@@ -19,7 +21,7 @@ namespace MoviesMadeEasy.Controllers
             ILogger<UserController> logger,
             UserManager<IdentityUser> userManager,
             IUserRepository userRepository,
-            ISubscriptionRepository subscriptionService)
+            ISubscriptionRepository subscriptionService) : base(userManager, userRepository, logger)
         {
             _logger = logger;
             _userManager = userManager;
@@ -77,18 +79,16 @@ namespace MoviesMadeEasy.Controllers
         [HttpPost]
         public IActionResult SaveSubscriptions(int userId, string selectedServices)
         {
-            if (string.IsNullOrEmpty(selectedServices))
-            {
-                return RedirectToAction("SubscriptionForm", new { userId });
-            }
+            selectedServices = selectedServices ?? "";
 
             try
             {
-                var selectedServiceIds = selectedServices.Split(',')
-                                        .Select(int.Parse)
-                                        .ToList();
+                List<int> selectedServiceIds =
+                    string.IsNullOrWhiteSpace(selectedServices)
+                        ? new List<int>()
+                        : selectedServices.Split(',').Select(int.Parse).ToList();
 
-                _subscriptionService.AddUserSubscriptions(userId, selectedServiceIds);
+                _subscriptionService.UpdateUserSubscriptions(userId, selectedServiceIds);
 
                 TempData["Message"] = "Subscriptions managed successfully!";
 
@@ -105,6 +105,12 @@ namespace MoviesMadeEasy.Controllers
                 return View("SubscriptionForm", dto);
             }
         }
+
+        public IActionResult Cancel()
+        {
+            return RedirectToAction("Dashboard");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

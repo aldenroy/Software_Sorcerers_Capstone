@@ -4,6 +4,10 @@
     ViewData["Title"] = "Available Subscriptions";
 }
 
+@{
+    string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
+}
+
 <link rel="stylesheet" href="~/css/subscriptionForm.css" />
 
 <h1 class="text-center my-4">Manage Subscription Services</h1>
@@ -31,7 +35,7 @@
     <div class="subscription-container">
         @foreach (var service in Model.AllServicesList)
         {
-            <div class="card" data-id="@service.Id">
+            <div class="card" data-id="@service.Id" tabindex="0" aria-checked="false">
                 <img class="card-img-top" src="@service.LogoUrl" alt="@service.Name logo" />
                 <div class="card-body text-center">
                     <p class="card-text">@service.Name</p>
@@ -43,7 +47,8 @@
     <input type="hidden" name="selectedServices" id="selectedServices" />
 
     <div class="text-center mt-4">
-        <button id="save" type="submit" class="btn btn-primary">Save Selection</button>
+        <button type="submit" class="btn-action">Save Selection</button>
+        <a href="@Url.Action("Cancel", "User")" class="btn-action">Cancel</a>
     </div>
 </form>
 

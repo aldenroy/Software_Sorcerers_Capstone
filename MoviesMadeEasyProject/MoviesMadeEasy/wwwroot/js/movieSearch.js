@@ -45,21 +45,27 @@ async function searchMovies() {
         }
 
         resultsContainer.innerHTML = index.map(item => {
-            // Assuming each genre is an object with a 'name' property
             let genres = item.genres && item.genres.length > 0 
                 ? item.genres.join(", ") 
                 : 'Unknown';
-
+        
+            // Ensure overview and services are correctly mapped
+            let overview = item.overview || 'N/A';
+            let services = item.services && item.services.length > 0 
+                ? item.services.join(', ') 
+                : 'N/A';
+            console.log(overview)
+            console.log(services)
+        
             return `
-                <article class="movie-card">
+                <article class="movie-card" 
+                        data-overview="${overview}" 
+                        data-streaming="${services}">
                     <div class="movie-row" aria-label="Search results card for ${item.title}">
                         <img src="${item.posterUrl || 'https://via.placeholder.com/150'}" class="movie-poster" alt="${item.title} movie poster">
                         <div class="movie-details">
                             <h5>${item.title} <span class="movie-year">(${item.releaseYear || 'N/A'})</span></h5>
-                            
-                            <!-- Display genres here -->
                             <p class="movie-genres">Genres: ${genres}</p>
-                            
                             <p class="movie-rating">Rating: ${item.rating || 'N/A'}</p>
                             <button class="btn btn-primary">View Details</button>
                             <button class="btn btn-outline-secondary">More Like This</button>
@@ -80,8 +86,13 @@ async function searchMovies() {
         console.error("Error fetching index:", error);
         resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
         console.error("Error fetching index:", error);
+        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
+        console.error("Error fetching index:", error);
     }
 }
+
+
+
 
 
 
@@ -138,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("sortBy").addEventListener("change", updateClearFiltersVisibility);
     document.getElementById("minYear").addEventListener("input", updateClearFiltersVisibility);
     document.getElementById("maxYear").addEventListener("input", updateClearFiltersVisibility);
-    
+
     document.getElementById("sortBy").addEventListener("click", handleFilterInteraction);
     document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
     document.getElementById("maxYear").addEventListener("focus", handleFilterInteraction);

@@ -25,7 +25,7 @@
     height: auto;
 }
 
-#save {
+.btn-action {
     background-color: #333;
     color: #fff;
     font-size: 1.25rem;
@@ -35,14 +35,17 @@
     cursor: pointer;
     outline: none;
     margin: 10px 10px 25px 10px;
+    text-decoration: none;
+    display: inline-block;
 }
 
-#save:hover {
+.btn-action:focus,
+.btn-action:hover { 
     background-color: #fff;
     color: #000000;
     border: 2px dashed #000000;
 }
-
+                        
 .card.selected {
     border: 5px solid blue;
     box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.4);

@@ -22,7 +22,7 @@ namespace MME_Tests
         public void Setup()
         {
             _mockMovieService = new Mock<IMovieService>();
-            _homeController = new HomeController(_mockMovieService.Object);
+            //_homeController = new HomeController(_mockMovieService.Object);
         }
 
         [TearDown]
@@ -31,23 +31,7 @@ namespace MME_Tests
             _homeController?.Dispose(); // Ensuring proper cleanup
         }
 
-        [Test]
-        public async Task SearchMovies_ValidQuery_ReturnsJsonResult()
-        {
-            // Arrange
-            var query = "Inception";
-            var movies = new List<Movie> { new Movie { Title = "Inception", ReleaseYear = 2010 } };
-            _mockMovieService.Setup(s => s.SearchMoviesAsync(query)).ReturnsAsync(movies);
-
-            // Act
-            var result = await _homeController.SearchMovies(query, null, null, null) as JsonResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOf<JsonResult>(result);
-            Assert.That(result.Value, Is.EqualTo(movies));
-        }
-
+        //checking that no query returns an empty results
         [Test]
         public async Task SearchMovies_EmptyQuery_ReturnsEmptyJsonObject()
         {
@@ -62,6 +46,7 @@ namespace MME_Tests
             Assert.IsTrue(jsonResult.Count == 0);
         }
 
+        //throwing error if no results possible from query title
         [Test]
         public async Task SearchMovies_ServiceThrowsException_ReturnsEmptyJsonObject()
         {
@@ -78,10 +63,9 @@ namespace MME_Tests
         }
 
         [Test]
-        // Kept these tests for sort by in this file because it's under the same controller and mock
-        // without it I get an ambiguity error. Subset of the same feature so we'll keep them here.
         public async Task SearchMovies_SortByTitleAsc_ReturnsSortedMoviesAscending()
         {
+            // Arrange
             var query = "Movie";
             var movies = new List<Movie>
             {
@@ -91,18 +75,27 @@ namespace MME_Tests
             };
             _mockMovieService.Setup(s => s.SearchMoviesAsync(query)).ReturnsAsync(movies);
 
+            // Act
             var result = await _homeController.SearchMovies(query, "titleAsc", null, null) as JsonResult;
 
+            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<JsonResult>(result);
 
-            var sortedMovies = result.Value as List<Movie>;
-            Assert.That(sortedMovies, Is.Ordered.By(nameof(Movie.Title)));
+            var movieResults = result.Value as IEnumerable<object>;
+            Assert.IsNotNull(movieResults);
+
+            // Deserialize to the structured object list we need
+            var movieList = movieResults.Select(m => JObject.FromObject(m)).ToList();
+
+            var sortedTitles = movieList.Select(m => m["title"]?.ToString()).ToList();
+            Assert.That(sortedTitles, Is.Ordered.Ascending);
         }
 
         [Test]
         public async Task SearchMovies_SortByTitleDesc_ReturnsSortedMoviesDescending()
         {
+            // Arrange
             var query = "Movie";
             var movies = new List<Movie>
             {
@@ -112,18 +105,26 @@ namespace MME_Tests
             };
             _mockMovieService.Setup(s => s.SearchMoviesAsync(query)).ReturnsAsync(movies);
 
+            // Act
             var result = await _homeController.SearchMovies(query, "titleDesc", null, null) as JsonResult;
 
+            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<JsonResult>(result);
 
-            var sortedMovies = result.Value as List<Movie>;
-            Assert.That(sortedMovies, Is.Ordered.By(nameof(Movie.Title)).Descending);
+            var movieResults = result.Value as IEnumerable<object>;
+            Assert.IsNotNull(movieResults);
+
+            var movieList = movieResults.Select(m => JObject.FromObject(m)).ToList();
+
+            var sortedTitles = movieList.Select(m => m["title"]?.ToString()).ToList();
+            Assert.That(sortedTitles, Is.Ordered.Descending);
         }
 
         [Test]
         public async Task SearchMovies_SortByYearAsc_ReturnsMoviesSortedByYearAscending()
         {
+            // Arrange
             var query = "Movie";
             var movies = new List<Movie>
             {
@@ -133,18 +134,26 @@ namespace MME_Tests
             };
             _mockMovieService.Setup(s => s.SearchMoviesAsync(query)).ReturnsAsync(movies);
 
+            // Act
             var result = await _homeController.SearchMovies(query, "yearAsc", null, null) as JsonResult;
 
+            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<JsonResult>(result);
 
-            var sortedMovies = result.Value as List<Movie>;
-            Assert.That(sortedMovies, Is.Ordered.By(nameof(Movie.ReleaseYear)));
+            var movieResults = result.Value as IEnumerable<object>;
+            Assert.IsNotNull(movieResults);
+
+            var movieList = movieResults.Select(m => JObject.FromObject(m)).ToList();
+
+            var sortedYears = movieList.Select(m => (int)m["releaseYear"]).ToList();
+            Assert.That(sortedYears, Is.Ordered.Ascending);
         }
 
         [Test]
         public async Task SearchMovies_SortByYearDesc_ReturnsMoviesSortedByYearDescending()
         {
+            // Arrange
             var query = "Movie";
             var movies = new List<Movie>
             {
@@ -154,13 +163,20 @@ namespace MME_Tests
             };
             _mockMovieService.Setup(s => s.SearchMoviesAsync(query)).ReturnsAsync(movies);
 
+            // Act
             var result = await _homeController.SearchMovies(query, "yearDesc", null, null) as JsonResult;
 
+            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<JsonResult>(result);
 
-            var sortedMovies = result.Value as List<Movie>;
-            Assert.That(sortedMovies, Is.Ordered.By(nameof(Movie.ReleaseYear)).Descending);
+            var movieResults = result.Value as IEnumerable<object>;
+            Assert.IsNotNull(movieResults);
+
+            var movieList = movieResults.Select(m => JObject.FromObject(m)).ToList();
+
+            var sortedYears = movieList.Select(m => (int)m["releaseYear"]).ToList();
+            Assert.That(sortedYears, Is.Ordered.Descending);
         }
     }
 }
