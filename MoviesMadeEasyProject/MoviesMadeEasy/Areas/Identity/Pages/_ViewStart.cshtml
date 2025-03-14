@@ -1,4 +1,42 @@
-
+@using MoviesMadeEasy.DAL.Abstract
 @{
     Layout = "/Views/Shared/_Layout.cshtml";
+    ViewData["ColorMode"] = "light"; // Default
+
+    if (User.Identity.IsAuthenticated)
+    {
+        var userManager = Context.RequestServices.GetService(typeof(UserManager<IdentityUser>)) as UserManager<IdentityUser>;
+        var userRepository = Context.RequestServices.GetService(typeof(IUserRepository)) as IUserRepository;
+
+        if (userManager != null && userRepository != null)
+        {
+            var identityUser = await userManager.GetUserAsync(User);
+            if (identityUser != null)
+            {
+                var user = userRepository.GetUser(identityUser.Id);
+                if (user != null)
+                {
+                    string colorMode = !string.IsNullOrWhiteSpace(user.ColorMode) 
+                        ? user.ColorMode.ToLower().Trim() 
+                        : "light";
+
+                    string normalizedColorMode = colorMode.ToLower();
+
+                    // Map "High Contrast" to "high-contrast" for CSS class purposes
+                    if (colorMode == "high contrast")
+                    {
+                        normalizedColorMode = "high-contrast";
+                    }
+                    // Ensure the value is "light", "dark", or "high contrast"
+                    if (normalizedColorMode != "light" && normalizedColorMode != "dark" && normalizedColorMode != "high-contrast")
+                    {
+                        colorMode = "light"; // Default to light if invalid value
+                        normalizedColorMode = "light";
+                    }
+                    
+                    ViewData["ColorMode"] = normalizedColorMode;
+                }
+            }
+        }
+    }
 }
