@@ -48,14 +48,22 @@ namespace MoviesMadeEasy.Controllers
                                 string colorMode = !string.IsNullOrWhiteSpace(user.ColorMode) 
                                     ? user.ColorMode.ToLower().Trim() 
                                     : "light";
-                                    
-                                // Ensure the value is either "light" or "dark"
-                                if (colorMode != "light" && colorMode != "dark")
+
+                                string normalizedColorMode = colorMode.ToLower();
+
+                                // Map "High Contrast" to "high-contrast" for CSS class purposes
+                                if (colorMode == "high contrast")
+                                {
+                                    normalizedColorMode = "high-contrast";
+                                }
+                                // Ensure the value is "light", "dark", or "high contrast"
+                                if (normalizedColorMode != "light" && normalizedColorMode != "dark" && normalizedColorMode != "high-contrast")
                                 {
                                     colorMode = "light"; // Default to light if invalid value
+                                    normalizedColorMode = "light";
                                 }
                                 
-                                ViewData["ColorMode"] = colorMode;
+                                ViewData["ColorMode"] = normalizedColorMode;
                                 _logger.LogInformation($"Set color mode to: {colorMode}");
                             }
                             else

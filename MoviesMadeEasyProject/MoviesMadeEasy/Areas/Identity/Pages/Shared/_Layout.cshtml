@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html data-theme="@ViewData["ColorMode"]">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Identity</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="/">Home</a>
+    </nav>
+    
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    <script>
+        document.documentElement.setAttribute("data-theme", "@ViewData["ColorMode"]");
+    </script>
+</body>
+</html>
