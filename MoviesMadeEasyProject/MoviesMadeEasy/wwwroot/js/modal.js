@@ -17,11 +17,10 @@ document.addEventListener("DOMContentLoaded", function () {
             let genres = movieCard.querySelector(".movie-genres").textContent.replace("Genres: ", "");
             let rating = movieCard.querySelector(".movie-rating").textContent.replace("Rating: ", "");
             
-            // Correctly retrieving overview and streaming services from dataset
             let overview = movieCard.getAttribute("data-overview") || "No overview available.";
             let streamingServices = movieCard.getAttribute("data-streaming") || "Not available on streaming platforms.";
 
-            // Populate the modal with movie details
+            //populate the modal with movie details
             document.getElementById("modalTitle").textContent = title;
             document.getElementById("modalPoster").src = posterUrl;
             document.getElementById("modalGenres").textContent = `Genres: ${genres}`;

@@ -22,12 +22,13 @@
     
     @if (TempData["Message"] != null)
     {
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
             @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <button id="add-subscription-btn" class="btn btn-primary mb-3" aria-label="Add a new streaming service"
+    <button id="add-subscription-btn" class="btn btn-primary mb-3" aria-label="Manage streaming service"
             onclick="location.href='@Url.Action("SubscriptionForm", "User", new { userId = Model.UserId })'">
         Manage Streaming Services
     </button>
@@ -39,7 +40,7 @@
                 <ul class="d-flex flex-wrap justify-content-center gap-3 list-unstyled" aria-label="Subscription services list">
                     @foreach (var service in Model.SubList)
                     {
-                        <li class="subscription-item d-flex align-items-center justify-content-center ">
+                        <li class="subscription-item d-flex align-items-center justify-content-center" tabindex="0">
                             @if (!string.IsNullOrEmpty(service.LogoUrl))
                             {
                                 <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
@@ -58,3 +59,6 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+

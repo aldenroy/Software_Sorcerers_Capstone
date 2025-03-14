@@ -5,239 +5,144 @@
 const { searchMovies } = require("../MoviesMadeEasy/wwwroot/js/movieSearch");
 require("@testing-library/jest-dom");
 
-
-describe("Movie querying for Avengers", () => {
-  // Mock the DOM
-  beforeAll(() => {
-      document.body.innerHTML = `
-          <input id="searchInput" value="Avengers" />
-          <select id="sortBy">
-              <option value="default">Sort by</option>
-              <option value="titleAsc">Title (A-Z)</option>
-              <option value="titleDesc">Title (Z-A)</option>
-          </select>
-          <div id="results"></div>
-          <div id="loadingSpinner"></div>
-      `;
+describe("Movie querying", () => {
+  // Set up the DOM before each test
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <input id="searchInput" value="Avengers" />
+      <select id="sortBy">
+        <option value="default">Sort by</option>
+        <option value="titleAsc">Title (A-Z)</option>
+        <option value="titleDesc">Title (Z-A)</option>
+      </select>
+      <div id="results"></div>
+      <div id="loadingSpinner"></div>
+      <input id="minYear" />
+      <input id="maxYear" />
+    `;
   });
 
   // Clean up after each test
   afterEach(() => {
-      jest.clearAllMocks();
-      document.getElementById('results').innerHTML = ''; // Clear results
+    jest.clearAllMocks();
+    document.getElementById("results").innerHTML = ""; // Clear results
   });
 
   function decodeHtmlEntities(html) {
-      const textArea = document.createElement('textarea');
-      textArea.innerHTML = html;
-      return textArea.value;
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = html;
+    return textArea.value;
   }
 
-  test('movies are sorted by title in ascending order', async () => {
-      //mock it
-      global.fetch = jest.fn(() =>
-          Promise.resolve({
-              json: () => Promise.resolve([
-                  { title: "Avengers Confidential: Black Widow & Punisher", releaseYear: 2014, genres: ["Action", "Animation"], rating: 57 },
-                  { title: "Avengers from Hell", releaseYear: 1981, genres: ["Horror"], rating: 49 },
-                  { title: "Avengers Grimm", releaseYear: 2015, genres: ["Action", "Adventure", "Fantasy"], rating: 29 }
-              ]),
-          })
-      );
-
-      document.getElementById('sortBy').value = 'titleAsc';
-      await searchMovies();
-
-      const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-      expect(results).toContain('Avengers Confidential: Black Widow & Punisher');
-      expect(results).toContain('Avengers from Hell');
-      expect(results).toContain('Avengers Grimm');
-
-      // Verify the order
-      const firstMovie = results.indexOf('Avengers Confidential: Black Widow & Punisher');
-      const secondMovie = results.indexOf('Avengers from Hell');
-      const thirdMovie = results.indexOf('Avengers Grimm');
-      expect(firstMovie).toBeLessThan(secondMovie);
-      expect(secondMovie).toBeLessThan(thirdMovie);
-  });
-
-  test('movies are sorted by title in descending order', async () => {
-      // Mock fetch for this test
-        global.fetch = jest.fn(() =>
-          Promise.resolve({
-              json: () => Promise.resolve([
-                  { title: "Ultimate Avengers: The Movie", releaseYear: 2006, genres: ["Action", "Animation"], rating: 70 },
-                  { title: "The Avengers", releaseYear: 2012, genres: ["Action", "Adventure", "Sci-Fi"], rating: 85 },
-                  { title: "The Avengers", releaseYear: 1998, genres: ["Action", "Adventure"], rating: 60 }
-              ]),
-          })
-      );
-    
-
-      document.getElementById('sortBy').value = 'titleDesc';
-      await searchMovies();
-
-      const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-      expect(results).toContain('Ultimate Avengers: The Movie');
-      expect(results).toContain('The Avengers');
-      expect(results).toContain('The Avengers');
-
-      // Verify the order
-      const firstMovie = results.indexOf('Ultimate Avengers: The Movie');
-      const secondMovie = results.indexOf('The Avengers');
-      const thirdMovie = results.indexOf('The Avengers');
-      expect(firstMovie).toBeLessThan(secondMovie);
-      expect(secondMovie).toBeLessThanOrEqual(thirdMovie);
-      //same result so <=
-  });  
-});
-
-
-describe("Movie querying for Av", () => {
-  // Mock the DOM
-  beforeAll(() => {
-      document.body.innerHTML = `
-          <input id="searchInput" value="Av" />
-          <select id="sortBy">
-              <option value="default">Sort by</option>
-              <option value="titleAsc">Title (A-Z)</option>
-              <option value="titleDesc">Title (Z-A)</option>
-          </select>
-          <div id="results"></div>
-          <div id="loadingSpinner"></div>
-      `;
-  });
-
-  // Clean up after each test
-  afterEach(() => {
-      jest.clearAllMocks();
-      document.getElementById('results').innerHTML = ''; // Clear results
-  });
-
-  function decodeHtmlEntities(html) {
-      const textArea = document.createElement('textarea');
-      textArea.innerHTML = html;
-      return textArea.value;
-  }
-
-  test('movies are sorted by title in ascending order', async () => {
-      //mock it
-      global.fetch = jest.fn(() =>
-          Promise.resolve({
-              json: () => Promise.resolve([
-                  { title: "Aliens vs Predator: Requiem" },
-                  { title: "Av", },
-                  { title: "AV" }
-              ]),
-          })
-      );
-
-      document.getElementById('sortBy').value = 'titleAsc';
-      await searchMovies();
-
-      const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-      expect(results).toContain('Aliens vs Predator: Requiem');
-      expect(results).toContain('Av');
-      expect(results).toContain('AV');
-
-      // Verify the order
-      const firstMovie = results.indexOf('Aliens vs Predator: Requiem');
-      const secondMovie = results.indexOf('Av');
-      const thirdMovie = results.indexOf('AV');
-      expect(firstMovie).toBeLessThan(secondMovie);
-      expect(secondMovie).toBeLessThan(thirdMovie);
-  });
-
-  test('movies are sorted by title in descending order', async () => {
-      // Mock fetch for this test
-      global.fetch = jest.fn(() =>
-          Promise.resolve({
-              json: () => Promise.resolve([
-                  { title: "The Prey" },
-                  { title: "The Predator" },
-                  { title: "The Hunted" }
-              ]),
-          })
-      );
-
-      document.getElementById('sortBy').value = 'titleDesc';
-      await searchMovies();
-
-      const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-      expect(results).toContain('The Prey');
-      expect(results).toContain('The Predator');
-      expect(results).toContain('The Hunted');
-
-      // Verify the order
-      const firstMovie = results.indexOf('The Prey');
-      const secondMovie = results.indexOf('The Predator');
-      const thirdMovie = results.indexOf('The Hunted');
-      expect(firstMovie).toBeLessThan(secondMovie);
-      expect(secondMovie).toBeLessThanOrEqual(thirdMovie);
-      //same result so <=
-  });  
-});
-
-describe("Movie querying for an empty query", () => {
-  // Mock the DOM
-  beforeAll(() => {
-      document.body.innerHTML = `
-          <input id="searchInput" value="" />
-          <select id="sortBy">
-              <option value="default">Sort by</option>
-              <option value="titleAsc">Title (A-Z)</option>
-              <option value="titleDesc">Title (Z-A)</option>
-          </select>
-          <div id="results"></div>
-          <div id="loadingSpinner"></div>
-      `;
-  });
-
-  // Clean up after each test
-  afterEach(() => {
-      jest.clearAllMocks();
-      document.getElementById('results').innerHTML = ''; // Clear results
-  });
-
-  function decodeHtmlEntities(html) {
-      const textArea = document.createElement('textarea');
-      textArea.innerHTML = html;
-      return textArea.value;
-  }
-
-  test('movies are sorted by title in ascending order', async () => {
-      //mock it
-      global.fetch = jest.fn(() =>
-          Promise.resolve({
-              json: () => Promise.resolve([
-                  { }
-              ]),
-          })
-      );
-
-      document.getElementById('sortBy').value = 'titleAsc';
-      await searchMovies();
-
-      const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-      expect(results).toContain('');
-      //expecting just an empty one here because the error message pops up instead of boxes.
-
-  });
-
-  test('movies are sorted by title in descending order', async () => {
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-            json: () => Promise.resolve([
-                { }
-            ]),
-        })
+  test("movies are sorted by title in ascending order", async () => {
+    // Mock fetch to return a response sorted by title in ascending order
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve([
+            { title: "Avengers Confidential: Black Widow & Punisher", releaseYear: 2014, genres: ["Action", "Animation"], rating: 57 },
+            { title: "Avengers from Hell", releaseYear: 1981, genres: ["Horror"], rating: 49 },
+            { title: "Avengers Grimm", releaseYear: 2015, genres: ["Action", "Adventure", "Fantasy"], rating: 29 },
+          ]),
+      })
     );
 
-    document.getElementById('sortBy').value = 'titleAsc';
+    // Set the sort option to "titleAsc"
+    document.getElementById("sortBy").value = "titleAsc";
+
+    // Call the searchMovies function
     await searchMovies();
 
-    const results = decodeHtmlEntities(document.getElementById('results').innerHTML);
-    expect(results).toContain('');
-    //expecting just an empty one here because the error message pops up instead of boxes.
-  });  
+    // Get the rendered movie titles
+    const renderedTitles = Array.from(document.querySelectorAll(".movie-card h5")).map((el) => el.textContent.trim());
+
+    // Expected order after sorting
+    const expectedTitles = [
+      "Avengers Confidential: Black Widow & Punisher (2014)",
+      "Avengers from Hell (1981)",
+      "Avengers Grimm (2015)",
+    ];
+
+    // Assert that the movies are sorted correctly
+    expect(renderedTitles).toEqual(expectedTitles);
+  });
+
+  test("movies are sorted by title in descending order", async () => {
+    // Mock fetch to return a response sorted by title in descending order
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve([
+            { title: "Avengers Grimm", releaseYear: 2015, genres: ["Action", "Adventure", "Fantasy"], rating: 29 },
+            { title: "Avengers from Hell", releaseYear: 1981, genres: ["Horror"], rating: 49 },
+            { title: "Avengers Confidential: Black Widow & Punisher", releaseYear: 2014, genres: ["Action", "Animation"], rating: 57 },
+          ]),
+      })
+    );
+
+    // Set the sort option to "titleDesc"
+    document.getElementById("sortBy").value = "titleDesc";
+
+    // Call the searchMovies function
+    await searchMovies();
+
+    // Get the rendered movie titles
+    const renderedTitles = Array.from(document.querySelectorAll(".movie-card h5")).map((el) => el.textContent.trim());
+
+    // Expected order after sorting
+    const expectedTitles = [
+      "Avengers Grimm (2015)",
+      "Avengers from Hell (1981)",
+      "Avengers Confidential: Black Widow & Punisher (2014)",
+    ];
+
+    // Assert that the movies are sorted correctly
+    expect(renderedTitles).toEqual(expectedTitles);
+  });
+
+  test("empty query shows error message", async () => {
+    // Set the search input to empty
+    document.getElementById("searchInput").value = "";
+
+    // Call the searchMovies function
+    await searchMovies();
+
+    // Get the results container content
+    const results = decodeHtmlEntities(document.getElementById("results").innerHTML);
+
+    // Assert that the error message is displayed
+    expect(results).toContain("Please enter a movie title before searching.");
+  });
+
+  test("error handling for fetch failure", async () => {
+    // Mock fetch to simulate an error
+    global.fetch = jest.fn(() => Promise.reject(new Error("Failed to fetch")));
+
+    // Call the searchMovies function
+    await searchMovies();
+
+    // Get the results container content
+    const results = decodeHtmlEntities(document.getElementById("results").innerHTML);
+
+    // Assert that the error message is displayed
+    expect(results).toContain("An error occurred while fetching data. Please try again later.");
+  });
+
+  test("no results found message", async () => {
+    // Mock fetch to return an empty array
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve([]),
+      })
+    );
+
+    // Call the searchMovies function
+    await searchMovies();
+
+    // Get the results container content
+    const results = decodeHtmlEntities(document.getElementById("results").innerHTML);
+
+    // Assert that the "no results" message is displayed
+    expect(results).toContain("No results found.");
+  });
 });
