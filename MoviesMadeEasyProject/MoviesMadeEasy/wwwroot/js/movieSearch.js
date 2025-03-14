@@ -95,6 +95,8 @@ async function searchMovies() {
 
 
 
+
+
 function enableFilters() {
     searchExecuted = true;
     document.getElementById("sortBy").disabled = false;
@@ -144,6 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
             searchMovies();
         }
     });
+    document.getElementById("sortBy").addEventListener("change", updateClearFiltersVisibility);
+    document.getElementById("minYear").addEventListener("input", updateClearFiltersVisibility);
+    document.getElementById("maxYear").addEventListener("input", updateClearFiltersVisibility);
 
     document.getElementById("sortBy").addEventListener("click", handleFilterInteraction);
     document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
