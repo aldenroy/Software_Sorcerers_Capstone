@@ -1,3 +1,5 @@
+
+let searchExecuted = false;
 async function searchMovies() {
     let searchInput = document.getElementById("searchInput");
     let query = searchInput.value.trim();
@@ -38,6 +40,7 @@ async function searchMovies() {
 
         if (!index || index.length === 0) {
             resultsContainer.innerHTML = "<div class='no-results' role='alert'>No results found.</div>";
+            updateClearFiltersVisibility();
             return;
         }
 
@@ -72,7 +75,11 @@ async function searchMovies() {
             `;
         }).join('');
 
+        // Enable filters once a successful search is executed.
         enableFilters();
+
+        // Show Clear Filters if any filters are applied.
+        updateClearFiltersVisibility();
     } catch (error) {
         loadingSpinner.style.display = "none";
         resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
@@ -103,6 +110,32 @@ function handleFilterInteraction(event) {
         alert("Please perform a search to use filters");
     }
 }
+
+function updateClearFiltersVisibility() {
+    let sortOption = document.getElementById("sortBy").value;
+    let minYear = document.getElementById("minYear").value.trim();
+    let maxYear = document.getElementById("maxYear").value.trim();
+    let clearButton = document.getElementById("clearFilters");
+
+    // Show button if any filter is not its default/empty
+    if (sortOption !== "default" || minYear !== "" || maxYear !== "") {
+        clearButton.style.display = "inline-block";
+    } else {
+        clearButton.style.display = "none";
+    }
+}
+
+function clearFilters() {
+    // Reset the filter values
+    document.getElementById("sortBy").value = "default";
+    document.getElementById("minYear").value = "";
+    document.getElementById("maxYear").value = "";
+    document.getElementById("clearFilters").style.display = "none";
+
+    // Optionally, re-trigger the search to display the full list
+    searchMovies();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     let searchInput = document.getElementById("searchInput");
 
@@ -113,10 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
             searchMovies();
         }
     });
+    document.getElementById("sortBy").addEventListener("change", updateClearFiltersVisibility);
+    document.getElementById("minYear").addEventListener("input", updateClearFiltersVisibility);
+    document.getElementById("maxYear").addEventListener("input", updateClearFiltersVisibility);
 
     document.getElementById("sortBy").addEventListener("click", handleFilterInteraction);
     document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
     document.getElementById("maxYear").addEventListener("focus", handleFilterInteraction);
+
+     // Attach event listener for the Clear Filters button
+     document.getElementById("clearFilters").addEventListener("click", clearFilters);
 });
 
 module.exports = { searchMovies };
