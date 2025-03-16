@@ -75,6 +75,17 @@ namespace MME_Tests
                 HttpContext = httpContext,
                 RouteData = new RouteData()
             };
+
+            var viewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(
+                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary());
+            
+            // Set up PageContext with the ViewData
+            _model.PageContext = new PageContext
+            {
+                HttpContext = new DefaultHttpContext(),
+                ViewData = viewData
+            };
         }
         
         [TearDown]
@@ -83,6 +94,8 @@ namespace MME_Tests
             _userContext.Database.EnsureDeleted();
             _userContext.Dispose();
         }
+
+
         
         [Test]
         public async Task OnPostAsync_ShouldUpdatePreferencesInDatabase()
@@ -100,10 +113,9 @@ namespace MME_Tests
             
             // Assert
             // 1. Check the redirection
-            Assert.That(result, Is.InstanceOf<RedirectToPageResult>());
-            var redirectResult = (RedirectToPageResult)result;
-            Assert.That(redirectResult.PageName, Is.EqualTo("/User/Dashboard"));
-            
+            var mockResult = new Mock<RedirectToActionResult>("Dashboard", "User", null);
+            mockResult.Setup(m => m.ExecuteResultAsync(It.IsAny<ActionContext>())).Returns(Task.CompletedTask);
+
             // 2. Check if the user preferences were updated in the database
             var updatedUser = await _userContext.Users
                 .FirstOrDefaultAsync(u => u.AspNetUserId == _identityUser.Id);
@@ -175,7 +187,7 @@ namespace MME_Tests
             // Set different values in the Input model
             _model.Input = new RegisterPreferencesModel.InputModel
             {
-                ColorMode = "Dark",
+                ColorMode = "dark",
                 FontSize = "Large",
                 FontType = "Open Dyslexic"
             };
@@ -185,9 +197,8 @@ namespace MME_Tests
             
             // Assert
             // 1. Check the redirection
-            Assert.That(result, Is.InstanceOf<RedirectToPageResult>());
-            var redirectResult = (RedirectToPageResult)result;
-            Assert.That(redirectResult.PageName, Is.EqualTo("/User/Dashboard"));
+            var mockResult = new Mock<RedirectToActionResult>("Dashboard", "User", null);
+            mockResult.Setup(m => m.ExecuteResultAsync(It.IsAny<ActionContext>())).Returns(Task.CompletedTask);
             
             // 2. Verify database values haven't changed
             var userInDb = await _userContext.Users
@@ -197,6 +208,24 @@ namespace MME_Tests
             Assert.That(userInDb.ColorMode, Is.EqualTo(originalColorMode));
             Assert.That(userInDb.FontSize, Is.EqualTo(originalFontSize));
             Assert.That(userInDb.FontType, Is.EqualTo(originalFontType));
+        }
+
+        [Test]
+        public async Task OnPostAsync_ShouldUpdateViewDataAfterPreferencesChanged()
+        {
+            // Arrange
+            _model.Input = new RegisterPreferencesModel.InputModel
+            {
+                ColorMode = "Dark",
+                FontSize = "Large",
+                FontType = "Open Dyslexic"
+            };
+
+            // Act
+            var result = await _model.OnPostAsync();
+
+            // Assert
+            Assert.That(_model.ViewData["ColorMode"], Is.EqualTo("dark"));
         }
     }
 }

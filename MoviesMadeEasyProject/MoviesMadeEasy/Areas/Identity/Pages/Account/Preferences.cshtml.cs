@@ -62,10 +62,10 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 customUser.FontSize = Input.FontSize;
                 customUser.FontType = Input.FontType;
                 await _userContext.SaveChangesAsync();
+                ViewData["ColorMode"] = Input.ColorMode.ToLower();
             }
 
-            var returnUrl = "/User/Dashboard";
-            return Redirect(returnUrl);
+            return RedirectToAction("Dashboard", "User");
         }
 
         public async Task<IActionResult> OnGet()
@@ -85,6 +85,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 Input.ColorMode = customUser.ColorMode;
                 Input.FontSize = customUser.FontSize;
                 Input.FontType = customUser.FontType;
+
+                ViewData["ColorMode"] = Input.ColorMode;
             }
 
             return Page();
@@ -92,8 +94,7 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
 
         public IActionResult OnPostSkip()
         {
-            var returnUrl = "/User/Dashboard";
-            return Redirect(returnUrl);
+            return RedirectToAction("Dashboard", "User");
         }
 
     }
