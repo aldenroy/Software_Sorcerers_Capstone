@@ -64,8 +64,7 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 await _userContext.SaveChangesAsync();
             }
 
-            var returnUrl = "/User/Dashboard";
-            return Redirect(returnUrl);
+            return RedirectToAction("Dashboard", "User");
         }
 
         public async Task<IActionResult> OnGet()
@@ -92,8 +91,7 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
 
         public IActionResult OnPostSkip()
         {
-            var returnUrl = "/User/Dashboard";
-            return Redirect(returnUrl);
+            return RedirectToAction("Dashboard", "User");
         }
 
     }

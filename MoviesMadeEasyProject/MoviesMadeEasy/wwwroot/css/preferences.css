@@ -479,3 +479,8 @@ html[data-theme="dark"] select {
     background-color: var(--background-color);
     color: var(--text-color);
 }
+
+.high-contrast-theme {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}

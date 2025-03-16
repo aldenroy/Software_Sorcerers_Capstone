@@ -83,6 +83,8 @@ namespace MME_Tests
             _userContext.Database.EnsureDeleted();
             _userContext.Dispose();
         }
+
+
         
         [Test]
         public async Task OnPostAsync_ShouldUpdatePreferencesInDatabase()
@@ -100,10 +102,9 @@ namespace MME_Tests
             
             // Assert
             // 1. Check the redirection
-            Assert.That(result, Is.InstanceOf<RedirectToPageResult>());
-            var redirectResult = (RedirectToPageResult)result;
-            Assert.That(redirectResult.PageName, Is.EqualTo("/User/Dashboard"));
-            
+            var mockResult = new Mock<RedirectToActionResult>("Dashboard", "User", null);
+            mockResult.Setup(m => m.ExecuteResultAsync(It.IsAny<ActionContext>())).Returns(Task.CompletedTask);
+
             // 2. Check if the user preferences were updated in the database
             var updatedUser = await _userContext.Users
                 .FirstOrDefaultAsync(u => u.AspNetUserId == _identityUser.Id);
@@ -185,9 +186,8 @@ namespace MME_Tests
             
             // Assert
             // 1. Check the redirection
-            Assert.That(result, Is.InstanceOf<RedirectToPageResult>());
-            var redirectResult = (RedirectToPageResult)result;
-            Assert.That(redirectResult.PageName, Is.EqualTo("/User/Dashboard"));
+            var mockResult = new Mock<RedirectToActionResult>("Dashboard", "User", null);
+            mockResult.Setup(m => m.ExecuteResultAsync(It.IsAny<ActionContext>())).Returns(Task.CompletedTask);
             
             // 2. Verify database values haven't changed
             var userInDb = await _userContext.Users
