@@ -75,6 +75,17 @@ namespace MME_Tests
                 HttpContext = httpContext,
                 RouteData = new RouteData()
             };
+
+            var viewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(
+                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary());
+            
+            // Set up PageContext with the ViewData
+            _model.PageContext = new PageContext
+            {
+                HttpContext = new DefaultHttpContext(),
+                ViewData = viewData
+            };
         }
         
         [TearDown]
@@ -176,7 +187,7 @@ namespace MME_Tests
             // Set different values in the Input model
             _model.Input = new RegisterPreferencesModel.InputModel
             {
-                ColorMode = "Dark",
+                ColorMode = "dark",
                 FontSize = "Large",
                 FontType = "Open Dyslexic"
             };
@@ -197,6 +208,24 @@ namespace MME_Tests
             Assert.That(userInDb.ColorMode, Is.EqualTo(originalColorMode));
             Assert.That(userInDb.FontSize, Is.EqualTo(originalFontSize));
             Assert.That(userInDb.FontType, Is.EqualTo(originalFontType));
+        }
+
+        [Test]
+        public async Task OnPostAsync_ShouldUpdateViewDataAfterPreferencesChanged()
+        {
+            // Arrange
+            _model.Input = new RegisterPreferencesModel.InputModel
+            {
+                ColorMode = "Dark",
+                FontSize = "Large",
+                FontType = "Open Dyslexic"
+            };
+
+            // Act
+            var result = await _model.OnPostAsync();
+
+            // Assert
+            Assert.That(_model.ViewData["ColorMode"], Is.EqualTo("dark"));
         }
     }
 }
