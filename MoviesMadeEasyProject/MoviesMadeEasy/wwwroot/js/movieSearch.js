@@ -1,4 +1,3 @@
-
 let searchExecuted = false;
 async function searchMovies() {
     let searchInput = document.getElementById("searchInput");
@@ -10,6 +9,7 @@ async function searchMovies() {
     let sortOption = document.getElementById("sortBy")?.value || "default";
     let minYear = document.getElementById("minYear")?.value?.trim();
     let maxYear = document.getElementById("maxYear")?.value?.trim();
+    const genreFiltersContainer = document.getElementById("genre-filters");
 
     // Clear previous results
     resultsContainer.innerHTML = "";
@@ -22,17 +22,29 @@ async function searchMovies() {
         return;
     }
 
+    // Convert year values to numbers
+    let numMinYear = minYear ? parseInt(minYear, 10) : NaN;
+    let numMaxYear = maxYear ? parseInt(maxYear, 10) : NaN;
+
+    // Validate date range if both values are provided
+    if (minYear && maxYear) {
+        if (isNaN(numMinYear) || isNaN(numMaxYear) || numMinYear > numMaxYear) {
+            resultsContainer.innerHTML = "<div class='error-message' role='alert'>Please enter a valid date range: Min Year must be less than or equal to Max Year.</div>";
+            loadingSpinner.style.display = "none";
+            return;
+        }
+    }
+
     // Construct query parameters
     let queryParams = new URLSearchParams({
         query: query,
         sortBy: sortOption
     });
-
-    // Add minYear and maxYear if they are provided
     if (minYear) queryParams.append("minYear", minYear);
     if (maxYear) queryParams.append("maxYear", maxYear);
 
     try {
+        console.log("Fetching: /Home/SearchMovies?" + queryParams.toString());
         let response = await fetch(`/Home/SearchMovies?${queryParams.toString()}`);
         let index = await response.json();
 
@@ -44,28 +56,21 @@ async function searchMovies() {
             return;
         }
 
+        const availableGenresSet = new Set();
         resultsContainer.innerHTML = index.map(item => {
-            let genres = item.genres && item.genres.length > 0 
-                ? item.genres.join(", ") 
-                : 'Unknown';
-        
-            // Ensure overview and services are correctly mapped
-            let overview = item.overview || 'N/A';
-            let services = item.services && item.services.length > 0 
-                ? item.services.join(', ') 
-                : 'N/A';
-            console.log(overview)
-            console.log(services)
-        
+            // Add any genres that exist in the movie
+            if(item.genres && item.genres.length) {
+                item.genres.forEach(genre => availableGenresSet.add(genre));
+            }
+            // Prepare genre CSV (for the data-genres attribute)
+            const genresCSV = item.genres && item.genres.length ? item.genres.join(",") : "";
             return `
-                <article class="movie-card" 
-                        data-overview="${overview}" 
-                        data-streaming="${services}">
+                <article class="movie-card" data-genres="${genresCSV}" data-overview="${item.overview}" data-streaming="${item.streaming}">
                     <div class="movie-row" aria-label="Search results card for ${item.title}">
                         <img src="${item.posterUrl || 'https://via.placeholder.com/150'}" class="movie-poster" alt="${item.title} movie poster">
                         <div class="movie-details">
                             <h5>${item.title} <span class="movie-year">(${item.releaseYear || 'N/A'})</span></h5>
-                            <p class="movie-genres">Genres: ${genres}</p>
+                            <p class="movie-genres">Genres: ${item.genres && item.genres.length ? item.genres.join(", ") : 'Unknown'}</p>
                             <p class="movie-rating">Rating: ${item.rating || 'N/A'}</p>
                             <button class="btn btn-primary">View Details</button>
                             <button class="btn btn-outline-secondary">More Like This</button>
@@ -75,27 +80,95 @@ async function searchMovies() {
             `;
         }).join('');
 
-        // Enable filters once a successful search is executed.
+        // Inside your searchMovies function (after processing search results)
+        if (availableGenresSet.size > 0) {
+            const genreFiltersContainer = document.getElementById("genre-filters");
+            genreFiltersContainer.style.display = "block";
+            const availableGenres = Array.from(availableGenresSet);
+            setupGenreFilter(availableGenres);
+        } else {
+            document.getElementById("genre-filters").style.display = "none";
+        }
+        
+        // Ensure filters are enabled now that a search was executed
         enableFilters();
-
-        // Show Clear Filters if any filters are applied.
         updateClearFiltersVisibility();
     } catch (error) {
         loadingSpinner.style.display = "none";
         resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
         console.error("Error fetching index:", error);
-        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
-        console.error("Error fetching index:", error);
-        resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
-        console.error("Error fetching index:", error);
     }
 }
 
+function setupGenreFilter(availableGenres) {
+    const filterContainer = document.getElementById("genre-filters");
+    const contentList = document.getElementById("results");
 
+    // Load saved filter state (if any)
+    const savedFilters = localStorage.getItem("selectedGenres");
+    let selectedGenres = savedFilters ? JSON.parse(savedFilters) : [];
 
+    // Render genre checkboxes
+    filterContainer.innerHTML = "";
+    availableGenres.forEach(genre => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = genre;
+        checkbox.id = `genre-${genre}`;
+        if (selectedGenres.indexOf(genre) > -1) {
+            checkbox.checked = true;
+        }
 
+        const label = document.createElement("label");
+        label.setAttribute("for", checkbox.id);
+        label.textContent = genre;
 
+        const wrapper = document.createElement("div");
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+        filterContainer.appendChild(wrapper);
+    });
 
+    function filterContent() {
+        // Get currently selected genres
+        selectedGenres = Array.from(filterContainer.querySelectorAll("input[type='checkbox']:checked"))
+            .map(cb => cb.value);
+        localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
+
+        // Filter movie cards: only show movies that include ALL selected genres.
+        Array.from(contentList.children).forEach(item => {
+            const genresAttr = item.getAttribute("data-genres") || "";
+            const itemGenres = genresAttr.split(",").map(s => s.trim()).filter(s => s);
+            if (
+                selectedGenres.length === 0 ||
+                selectedGenres.every(genre => itemGenres.includes(genre))
+            ) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        updateClearFiltersVisibility();
+    }
+
+    // Listen for checkbox changes
+    filterContainer.addEventListener("change", filterContent);
+
+    // Execute filter to restore previous state on load
+    filterContent();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Use the full list of genres from your API
+    const allGenres = [
+        "Action", "Adult", "Adventure", "Animation", "Biography", "Comedy", "Crime",
+        "Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game Show", "History",
+        "Horror", "Musical", "Music", "Mystery", "News", "Reality-TV", "Romance",
+        "Sci-Fi", "Short", "Sport", "Talk-Show", "Thriller", "War", "Western"
+    ];
+    setupGenreFilter(allGenres);
+});
 
 function enableFilters() {
     searchExecuted = true;
@@ -111,14 +184,19 @@ function handleFilterInteraction(event) {
     }
 }
 
+// Modify updateClearFiltersVisibility to use an optional element and a fallback value
 function updateClearFiltersVisibility() {
-    let sortOption = document.getElementById("sortBy").value;
-    let minYear = document.getElementById("minYear").value.trim();
-    let maxYear = document.getElementById("maxYear").value.trim();
+    // Use the value from "sortBy" if it exists; otherwise, default to "default"
+    let sortOption = document.getElementById("sortBy")?.value || "default";
+    let minYear = document.getElementById("minYear")?.value?.trim() || "";
+    let maxYear = document.getElementById("maxYear")?.value?.trim() || "";
     let clearButton = document.getElementById("clearFilters");
 
-    // Show button if any filter is not its default/empty
-    if (sortOption !== "default" || minYear !== "" || maxYear !== "") {
+    const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
+    const isGenreFilterApplied = Array.from(genreCheckboxes).some(cb => cb.checked);
+
+    // Show the Clear Filters button if any filter is applied
+    if (sortOption !== "default" || minYear !== "" || maxYear !== "" || isGenreFilterApplied) {
         clearButton.style.display = "inline-block";
     } else {
         clearButton.style.display = "none";
@@ -132,6 +210,12 @@ function clearFilters() {
     document.getElementById("maxYear").value = "";
     document.getElementById("clearFilters").style.display = "none";
 
+    const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
+    genreCheckboxes.forEach(cb => {
+        cb.checked = false;
+    });
+
+    localStorage.removeItem("selectedGenres");
     // Optionally, re-trigger the search to display the full list
     searchMovies();
 }
@@ -146,16 +230,42 @@ document.addEventListener("DOMContentLoaded", () => {
             searchMovies();
         }
     });
-    document.getElementById("sortBy").addEventListener("change", updateClearFiltersVisibility);
+    localStorage.removeItem("selectedGenres");
+
+    const allGenres = [
+        "Action", "Adult", "Adventure", "Animation", "Biography", "Comedy", "Crime",
+        "Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game Show", "History",
+        "Horror", "Musical", "Music", "Mystery", "News", "Reality-TV", "Romance",
+        "Sci-Fi", "Short", "Sport", "Talk-Show", "Thriller", "War", "Western"
+    ];
+    setupGenreFilter(allGenres);
+
+    // When attaching event listeners for "sortBy", check if the element exists
+    let sortByElem = document.getElementById("sortBy");
+    if (sortByElem) {
+        sortByElem.addEventListener("change", updateClearFiltersVisibility);
+        sortByElem.addEventListener("click", handleFilterInteraction);
+    }
+
     document.getElementById("minYear").addEventListener("input", updateClearFiltersVisibility);
     document.getElementById("maxYear").addEventListener("input", updateClearFiltersVisibility);
 
-    document.getElementById("sortBy").addEventListener("click", handleFilterInteraction);
     document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
     document.getElementById("maxYear").addEventListener("focus", handleFilterInteraction);
-
+    
      // Attach event listener for the Clear Filters button
      document.getElementById("clearFilters").addEventListener("click", clearFilters);
+});
+
+document.querySelectorAll(".sort-option").forEach(item => {
+    item.addEventListener("click", (e) => {
+        e.preventDefault();
+        let sortBy = e.target.getAttribute("data-sort");
+        document.getElementById("sortGenreDropdown").textContent = e.target.textContent;
+        // Update the hidden sortBy input
+        document.getElementById("sortBy").value = sortBy;
+        searchMovies();
+    });
 });
 
 module.exports = { searchMovies };

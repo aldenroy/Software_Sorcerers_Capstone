@@ -20,22 +20,51 @@
 <div class="search-container">
     <label for="searchInput" class="visually-hidden">Search for a movie</label>
     <input type="text" id="searchInput" class="search-box" placeholder="Enter movie title..." onkeypress="handleKeyPress(event)" aria-label="Search for a movie" />
+    <input type="hidden" id="sortBy" value="default" />
 
     <!-- Sorting Options -->
-    <select id="sortBy" class="form-select" disabled onchange="searchMovies()"  aria-label="Sort movies">
-        <option value="default">Sort by</option>
-        <option value="yearAsc">Year Ascending</option>
-        <option value="yearDesc">Year Descending</option>
-        <option value="titleAsc">Title (A-Z)</option>
-        <option value="titleDesc">Title (Z-A)</option>
-        <option value="ratingHighLow">Rating: High to Low</option>
-        <option value="ratingLowHigh">Rating: Low to High</option>
-    </select>
+    <div class="dropdown d-inline-block">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="sortGenreDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Sort by / Filter
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="sortGenreDropdown">
+        <!-- Sorting Options -->
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="default">Sort by: Default</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="yearAsc">Year Ascending</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="yearDesc">Year Descending</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="titleAsc">Title (A-Z)</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="titleDesc">Title (Z-A)</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="ratingHighLow">Rating: High to Low</a>
+        </li>
+        <li>
+            <a class="dropdown-item sort-option" href="#" data-sort="ratingLowHigh">Rating: Low to High</a>
+        </li>
+        <li><hr class="dropdown-divider" /></li>
+        <!-- Genre Filters Section -->
+        <li>
+            <div id="genre-filters" class="px-3 py-2" style="display:none;">
+                <!-- Genre checkboxes will be rendered here by setupGenreFilter() -->
+            </div>
+        </li>
+    </ul>
+</div>
     @* Will create new query params in javascript to help bring logic here. *@
 
     <!-- Year Filters -->
     <input type="number" id="minYear" class="form-control" disabled placeholder="Min Year" aria-label="Minimum year" min="1600" max="2100" style="max-width: 100px;" />
     <input type="number" id="maxYear" class="form-control"  disabled placeholder="Max Year" aria-label="Maximum year" min="1600" max="2100" style="max-width: 100px;"/>
+
     <!-- Clear Filters Button - hidden by default -->
     <button id="clearFilters" class="search-btn" aria-label="Clear Filters" style=" display:  none;">
         Clear Filters
