@@ -1,5 +1,5 @@
-﻿USE [MoviesMadeEasyDb];
-GO
+﻿--USE [MoviesMadeEasyDb];
+--GO
 
 IF OBJECT_ID('dbo.UserStreamingServices', 'U') IS NOT NULL
 BEGIN
