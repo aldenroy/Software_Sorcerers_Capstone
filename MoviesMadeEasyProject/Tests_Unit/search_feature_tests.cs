@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace MME_Tests
 {
@@ -22,7 +24,21 @@ namespace MME_Tests
         public void Setup()
         {
             _mockMovieService = new Mock<IMovieService>();
-            //_homeController = new HomeController(_mockMovieService.Object);
+
+            // Mock other dependencies required by HomeController
+            var mockUserManager = new Mock<UserManager<IdentityUser>>(
+                Mock.Of<IUserStore<IdentityUser>>(), null, null, null, null, null, null, null, null);
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            var mockLogger = new Mock<ILogger<BaseController>>();
+
+            // Initialize the HomeController with mocked dependencies
+            _homeController = new HomeController(
+                _mockMovieService.Object,
+                mockUserManager.Object,
+                mockUserRepository.Object,
+                mockLogger.Object
+            );
         }
 
         [TearDown]

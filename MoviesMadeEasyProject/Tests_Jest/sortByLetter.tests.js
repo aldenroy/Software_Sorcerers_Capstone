@@ -6,7 +6,6 @@ const { searchMovies } = require("../MoviesMadeEasy/wwwroot/js/movieSearch");
 require("@testing-library/jest-dom");
 
 describe("Movie querying", () => {
-  // Set up the DOM before each test
   beforeEach(() => {
     document.body.innerHTML = `
       <input id="searchInput" value="Avengers" />
@@ -17,6 +16,8 @@ describe("Movie querying", () => {
       </select>
       <div id="results"></div>
       <div id="loadingSpinner"></div>
+      <div id="genre-filters"></div>
+      <button id="clearFilters" style="display: none;"></button>
       <input id="minYear" />
       <input id="maxYear" />
     `;

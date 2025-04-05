@@ -33,5 +33,10 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
+  },
+  "dependencies": {
+    "@testing-library/react": "^16.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

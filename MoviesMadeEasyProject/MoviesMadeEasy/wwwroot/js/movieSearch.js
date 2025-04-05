@@ -62,10 +62,17 @@ async function searchMovies() {
             if(item.genres && item.genres.length) {
                 item.genres.forEach(genre => availableGenresSet.add(genre));
             }
+            let overview = item.overview || 'N/A';
+            let services = item.services && item.services.length > 0 
+                ? item.services.join(', ') 
+                : 'N/A';
+            console.log(overview)
+            console.log(services)
+
             // Prepare genre CSV (for the data-genres attribute)
             const genresCSV = item.genres && item.genres.length ? item.genres.join(",") : "";
             return `
-                <article class="movie-card" data-genres="${genresCSV}" data-overview="${item.overview}" data-streaming="${item.streaming}">
+                <article class="movie-card" data-genres="${genresCSV}" data-overview="${overview}" data-streaming="${services}">
                     <div class="movie-row" aria-label="Search results card for ${item.title}">
                         <img src="${item.posterUrl || 'https://via.placeholder.com/150'}" class="movie-poster" alt="${item.title} movie poster">
                         <div class="movie-details">
