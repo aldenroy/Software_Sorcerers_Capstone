@@ -8,22 +8,27 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MoviesMadeEasy.DTOs;
-
+using System.Net; 
+using System.Text.Json;
 namespace MoviesMadeEasy.Controllers
+
 {
     public class HomeController : BaseController
     {
+        private readonly IOpenAIService _openAIService;
         private readonly IMovieService _movieService;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<BaseController> _logger;
 
         public HomeController(
+            IOpenAIService openAIService,
             IMovieService movieService, 
             UserManager<IdentityUser> userManager, 
             IUserRepository userRepository, 
             ILogger<BaseController> logger) : base(userManager, userRepository, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
         {
+            _openAIService = openAIService;
             _movieService = movieService;
             _userManager = userManager;
             _userRepository = userRepository;
@@ -33,6 +38,43 @@ namespace MoviesMadeEasy.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+        public IActionResult Recommendations()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSimilarMovies(string title)
+        {
+            try
+            {
+                var recommendations = await _openAIService.GetSimilarMoviesAsync(title);
+                
+                // Store the full recommendations in session for the recommendations page
+                HttpContext.Session.SetString("LastRecommendations", 
+                    JsonSerializer.Serialize(recommendations));
+                HttpContext.Session.SetString("LastRecommendationTitle", title);
+                
+                // Return the recommendations as JSON
+                return Ok(recommendations);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                _logger.LogWarning("OpenAI rate limit exceeded for {Title}", title);
+                return StatusCode(429, new { 
+                    error = "rate_limit_exceeded",
+                    message = "We're getting too many requests. Please try again later." 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting similar movies for {Title}", title);
+                return StatusCode(500, new {
+                    error = "server_error",
+                    message = "Something went wrong. Please try again later."
+                });
+            }
         }
 
         [HttpGet]
