@@ -22,7 +22,7 @@ namespace MoviesMadeEasy.Controllers
             IMovieService movieService, 
             UserManager<IdentityUser> userManager, 
             IUserRepository userRepository, 
-            ILogger<BaseController> logger) : base(userManager, userRepository, logger) // To be changed if future features require HomeController to use UserManager or IUserRepository
+            ILogger<BaseController> logger) : base(userManager, userRepository, logger)
         {
             _movieService = movieService;
             _userManager = userManager;
@@ -36,7 +36,7 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
+            public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
         {
             try
             {

@@ -1,10 +1,11 @@
 ﻿@{
     string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
+    string fontSize = ViewData["FontSize"]?.ToString()?.ToLower()?? "medium";
 }
 
 
 <!DOCTYPE html>
-<html lang="en" data-theme="@colorMode" class="@colorMode-theme">
+<html lang="en" data-theme="@colorMode" data-font-size="@fontSize" class="@colorMode-theme">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,7 +13,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MoviesMadeEasy.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/preferences.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/fontPreferences.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/colorPreferences.css" asp-append-version="true" />
 </head>
 <body class="@colorMode-theme">
     <header>
