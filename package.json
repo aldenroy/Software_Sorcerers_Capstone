@@ -18,6 +18,7 @@
     "bootstrap": "^5.3.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "text-encoding": "^0.7.0",
     "whatwg-fetch": "^3.6.20"
   },
@@ -29,6 +30,9 @@
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/MoviesMadeEasyProject/Tests_Jest/setupTests.js"
+    ],
+    "setupFiles": [
+      "<rootDir>/MoviesMadeEasyProject/Tests_Jest/jest.setup.js"
     ],
     "transform": {
       "^.+\\.js$": "babel-jest"
