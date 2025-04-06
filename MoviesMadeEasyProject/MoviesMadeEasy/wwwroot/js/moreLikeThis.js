@@ -112,3 +112,11 @@ function loadRecommendations() {
         container.innerHTML = '<div class="alert alert-danger">Error displaying recommendations. Please try again.</div>';
     }
 }
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = {
+      loadRecommendations,
+      getMoreLikeThis,
+      setupMoreLikeThisButtons
+    };
+  }
