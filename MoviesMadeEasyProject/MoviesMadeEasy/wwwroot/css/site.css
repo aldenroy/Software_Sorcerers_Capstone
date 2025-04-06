@@ -1,5 +1,61 @@
-html {
-  font-size: 14px;
+#logo-main {
+    display: block;
+    margin: 20px auto;
+    max-width: 100px;
+}
+
+#app-name {
+    text-align: center;
+    font-size: 1.8em; 
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.dark-theme #app-name,
+html[data-theme="dark"] #app-name {
+    color: var(--text-color);
+}
+
+#navbar-primary {
+    text-align: center;
+    margin-top: 10px;
+    padding: 15px;
+}
+
+#navbar-primary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#navbar-primary ul li {
+    display: inline-block;
+    margin: 0 15px;
+}
+
+#navbar-primary ul li a {
+    text-decoration: none;
+    padding: 10px 20px;
+    color: black;
+    transition: background-color 0.3s ease;
+}
+
+#navbar-primary .nav-link {
+    font-size: 1.15rem;
+}
+
+/* Light mode hover */
+#navbar-primary ul li a:hover {
+    background-color: #e5e5e5;
+    border-radius: 4px;
+}
+
+/* Dark mode hover */
+.dark-theme #navbar-primary ul li a:hover,
+html[data-theme="dark"] #navbar-primary ul li a:hover {
+    background-color: #333;
+    border-radius: 4px;
 }
 
 @media (min-width: 768px) {
@@ -15,6 +71,7 @@ html {
 html {
   position: relative;
   min-height: 100%;
+  font-size: 14px;
 }
 
 body {

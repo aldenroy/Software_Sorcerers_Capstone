@@ -1,8 +1,6 @@
 ﻿@{
-    string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
+    string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower() ?? "light";
 }
-
-
 <!DOCTYPE html>
 <html lang="en" data-theme="@colorMode" class="@colorMode-theme">
 <head>
@@ -15,24 +13,44 @@
     <link rel="stylesheet" href="~/css/preferences.css" asp-append-version="true" />
 </head>
 <body class="@colorMode-theme">
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MoviesMadeEasy</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
+    <header role="banner">
+        @if (colorMode == "dark")
+        {
+            <img id="logo-main" src="~/images/team_logo_dark.png" alt="Dark Mode Logo" />
+        }
+        else
+        {
+            <img id="logo-main" src="~/images/team_logo.svg" alt="Light Mode Logo" />
+        }
+        <h2 id="app-name">MoviesMadeEasy</h2>
+                <div id="navbar-primary">
+                    <ul>
+                        <li class="nav-item active">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="User" asp-action="Dashboard">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();">Logout</a>
+                                <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" method="post" style="display: none;"></form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            </li>
+                        }
                     </ul>
-                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
