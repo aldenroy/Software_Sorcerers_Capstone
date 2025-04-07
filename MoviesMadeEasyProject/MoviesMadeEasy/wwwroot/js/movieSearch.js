@@ -99,6 +99,7 @@ async function searchMovies() {
         
         // Ensure filters are enabled now that a search was executed
         enableFilters();
+        updateStreamingFilters();
         updateClearFiltersVisibility();
     } catch (error) {
         loadingSpinner.style.display = "none";
@@ -174,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Horror", "Musical", "Music", "Mystery", "News", "Reality-TV", "Romance",
         "Sci-Fi", "Short", "Sport", "Talk-Show", "Thriller", "War", "Western"
     ];
+    const availableStreamingServices = ["Netflix", "Hulu", "Disney+", "Amazon Prime Video", "Max \"HBO Max\"", "Apple TV+", "Peacock", "Starz", "Tubi", "Pluto TV", "BritBox", "AMC+"];
+    setupStreamingFilter(availableStreamingServices);
     setupGenreFilter(allGenres);
 });
 
@@ -191,7 +194,7 @@ function handleFilterInteraction(event) {
     }
 }
 
-// Modify updateClearFiltersVisibility to use an optional element and a fallback value
+
 function updateClearFiltersVisibility() {
     // Use the value from "sortBy" if it exists; otherwise, default to "default"
     let sortOption = document.getElementById("sortBy")?.value || "default";
@@ -202,28 +205,123 @@ function updateClearFiltersVisibility() {
     const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
     const isGenreFilterApplied = Array.from(genreCheckboxes).some(cb => cb.checked);
 
+    const streamingCheckboxes = document.querySelectorAll("#streaming-filters input[type='checkbox']");
+    const isStreamingFilterApplied = Array.from(streamingCheckboxes).some(cb => cb.checked);
+
     // Show the Clear Filters button if any filter is applied
-    if (sortOption !== "default" || minYear !== "" || maxYear !== "" || isGenreFilterApplied) {
+    if (sortOption !== "default" || minYear !== "" || maxYear !== "" || isGenreFilterApplied || isStreamingFilterApplied) {
         clearButton.style.display = "inline-block";
     } else {
         clearButton.style.display = "none";
     }
 }
 
+function filterContentByStreaming() {
+    const selectedServices = Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
+        .map(cb => cb.value);
+    const movieCards = document.querySelectorAll(".movie-card");
+    movieCards.forEach(card => {
+        const serviceAttr = card.getAttribute("data-streaming") || "";
+        const cardServices = serviceAttr.split(",").map(s => s.trim()).filter(s => s);
+        if (selectedServices.length === 0 || selectedServices.some(service => cardServices.includes(service))) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+    updateClearFiltersVisibility();
+}
+
+function setupStreamingFilter(availableServices) {
+    const streamingFilterContainer = document.getElementById("streaming-filters");
+    if (!streamingFilterContainer) return;
+    streamingFilterContainer.innerHTML = "";
+    availableServices.forEach(service => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = service;
+        checkbox.id = `streaming-${service}`;
+    
+        const label = document.createElement("label");
+        label.setAttribute("for", checkbox.id);
+        label.textContent = service;
+    
+        const wrapper = document.createElement("div");
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+    
+        streamingFilterContainer.appendChild(wrapper);
+    });
+    // Listen for changes on streaming checkboxes
+    streamingFilterContainer.addEventListener("change", filterContentByStreaming);
+}
+
+function updateStreamingFilters() {
+    // Get all movie cards that are part of the search results.
+    const movieCards = document.querySelectorAll(".movie-card");
+    let streamingServicesSet = new Set();
+
+    movieCards.forEach(card => {
+        const servicesText = card.getAttribute("data-streaming") || "";
+        servicesText.split(",")
+            .map(s => s.trim())
+            .filter(s => s)
+            .forEach(service => streamingServicesSet.add(service));
+    });
+    
+    const streamingServices = Array.from(streamingServicesSet).sort();
+
+    // Preserve already selected streaming services
+    const selectedServices = new Set(Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
+        .map(cb => cb.value));
+
+    const container = document.getElementById("streaming-filters");
+    container.innerHTML = "";
+    
+    streamingServices.forEach(service => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = service;
+        checkbox.id = `streaming-${service}`;
+
+        // Restore selection if the service is already selected.
+        if (selectedServices.has(service)) {
+            checkbox.checked = true;
+        }
+
+        const label = document.createElement("label");
+        label.setAttribute("for", checkbox.id);
+        label.textContent = service;
+    
+        const wrapper = document.createElement("div");
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+    
+        container.appendChild(wrapper);
+    });
+    
+    container.addEventListener("change", filterContentByStreaming);
+}
+
 function clearFilters() {
-    // Reset the filter values
     document.getElementById("sortBy").value = "default";
     document.getElementById("minYear").value = "";
     document.getElementById("maxYear").value = "";
-    document.getElementById("clearFilters").style.display = "none";
 
     const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
     genreCheckboxes.forEach(cb => {
         cb.checked = false;
     });
 
+    const streamingCheckboxes = document.querySelectorAll("#streaming-filters input[type='checkbox']");
+    streamingCheckboxes.forEach(cb => {
+        cb.checked = false;
+    });
+
+    document.getElementById("clearFilters").style.display = "none";
     localStorage.removeItem("selectedGenres");
-    // Optionally, re-trigger the search to display the full list
+    
+    // Re-trigger the search to rebuild the unfiltered content list.
     searchMovies();
 }
 
