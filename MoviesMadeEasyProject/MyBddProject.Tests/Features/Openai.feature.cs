@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------------------
 #region Designer generated code
 #pragma warning disable
-namespace MyBddProject.Tests
+namespace MyBddProject.Tests.Features
 {
     using Reqnroll;
     using System;
@@ -20,18 +20,18 @@ namespace MyBddProject.Tests
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Login")]
+    [NUnit.Framework.DescriptionAttribute("Openai")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class LoginFeature
+    public partial class OpenaiFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "", "Login", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Openai", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "Login.feature"
+#line 1 "Openai.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -83,12 +83,12 @@ namespace MyBddProject.Tests
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Successful login")]
-        public async System.Threading.Tasks.Task SuccessfulLogin()
+        [NUnit.Framework.DescriptionAttribute("Search result")]
+        public async System.Threading.Tasks.Task SearchResult()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successful login", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Search result", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 2
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -100,13 +100,43 @@ namespace MyBddProject.Tests
             {
                 await this.ScenarioStartAsync();
 #line 3
-    await testRunner.GivenAsync("the user is on the login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the user is on the search page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 4
-    await testRunner.WhenAsync("the user enters valid credentials", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the user enters \"Hunger Games\" in the search bar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 5
-    await testRunner.ThenAsync("the user should be redirected to the dashboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the user search should show results for \"Hunger Games\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Triggering More Like This button")]
+        public async System.Threading.Tasks.Task TriggeringMoreLikeThisButton()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Triggering More Like This button", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 7
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 8
+    await testRunner.GivenAsync("the user has searched for \"Hunger Games\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 9
+    await testRunner.WhenAsync("the user clicks the \"More Like This\" button on the first result", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 10
+    await testRunner.ThenAsync("the user should be redirected to a new page with the Openai results", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
