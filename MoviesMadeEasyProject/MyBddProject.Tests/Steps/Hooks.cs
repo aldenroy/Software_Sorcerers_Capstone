@@ -34,10 +34,32 @@ public class Hooks
             // options.AddArgument("--headless");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
+            if (!OperatingSystem.IsWindows())
+            {
+                options.AddArgument("--user-data-dir=/tmp/chrome-profile");
+            }
 
-            options.AddArgument("--user-data-dir=/tmp/chrome-profile");
-            
-            _driver = new ChromeDriver("/opt/homebrew/bin", options);
+            string? driverPath = null;
+
+            if (OperatingSystem.IsMacOS())
+            {
+                driverPath = _configuration["DriverPaths:Mac"];
+                if (string.IsNullOrWhiteSpace(driverPath))
+                {
+                    throw new Exception("ChromeDriver path for Mac is not configured in appsettings.json.");
+                }
+
+                _driver = new ChromeDriver(driverPath, options);
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                _driver = new ChromeDriver(options);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("Unsupported OS.");
+            }
+
             _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
             
             _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);

@@ -25,9 +25,9 @@ namespace MyBddProject.Tests.Steps
         public void GivenTheUserIsOnTheSearchPage()
         {
             // Navigate to the root URL if not already there
-            if (!_driver.Url.Contains("localhost:5260"))
+            if (!_driver.Url.Contains("localhost:5000"))
             {
-                _driver.Navigate().GoToUrl("http://localhost:5260/");
+                _driver.Navigate().GoToUrl("http://localhost:5000/");
             }
             
             // Optionally, you could verify the search page elements are present

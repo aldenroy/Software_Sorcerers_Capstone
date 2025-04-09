@@ -1,7 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
-namespace MyBddProject.Tests
+namespace MyBddProject.Tests.PageObjects
 {
     public class LoginPageTestSetup
     {
@@ -14,7 +14,7 @@ namespace MyBddProject.Tests
 
         public void GoTo()
         {
-            _driver.Navigate().GoToUrl("http://localhost:5260/Identity/Account/Login");
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
         }
 
         public void Login(string email, string password)

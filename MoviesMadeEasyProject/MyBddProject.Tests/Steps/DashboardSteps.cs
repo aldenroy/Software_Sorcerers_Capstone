@@ -3,8 +3,10 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using Reqnroll;
 using OpenQA.Selenium.Support.UI;
+using NUnit.Framework;
+using MyBddProject.Tests.PageObjects;
 
-namespace MyBddProject.Tests
+namespace MyBddProject.Tests.Steps
 {
     [Binding]
     public class DashboardSteps
@@ -14,7 +16,7 @@ namespace MyBddProject.Tests
         [BeforeScenario]
         public void SetUp()
         {
-            _driver = new ChromeDriver(); 
+            _driver = new ChromeDriver();
         }
 
         [AfterScenario]
@@ -55,8 +57,7 @@ namespace MyBddProject.Tests
         {
             string url = pageName.ToLower() switch
             {
-                "home" => "http://localhost:5260/",
-                "privacy" => "http://localhost:5260/Home/Privacy",
+                "home" => "http://localhost:5000/",
                 _ => throw new ArgumentException($"Unknown page: {pageName}")
             };
 
@@ -86,7 +87,7 @@ namespace MyBddProject.Tests
         [When(@"I tab through the navbar until I reach the ""(.*)"" link")]
         public void WhenITabThroughTheNavbarUntilIReachTheLink(string linkText)
         {
-            var maxTabs = 20; 
+            var maxTabs = 20;
             bool found = false;
 
             for (int i = 0; i < maxTabs; i++)
