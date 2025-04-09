@@ -30,7 +30,7 @@ namespace MyBddProject.Tests.Steps
         {
             var loginPage = new LoginPageTestSetup(_driver);
             loginPage.GoTo();
-            loginPage.Login("test@mail.com", "Ab+1234");
+            loginPage.Login("testuser@example.com", "Ab+1234");
         }
 
         [When("the page loads")]
