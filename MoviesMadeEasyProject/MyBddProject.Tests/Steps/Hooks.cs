@@ -31,7 +31,7 @@ public class Hooks
 
             // Configure ChromeDriver
             var options = new ChromeOptions();
-            // options.AddArgument("--headless");
+            options.AddArgument("--headless");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
             if (!OperatingSystem.IsWindows())
