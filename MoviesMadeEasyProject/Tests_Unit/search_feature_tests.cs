@@ -17,29 +17,31 @@ namespace MME_Tests
     [TestFixture]
     public class HomeControllerTests
     {
+        private Mock<IOpenAIService> _mockOpenAIService;
         private Mock<IMovieService> _mockMovieService;
         private HomeController _homeController;
 
         [SetUp]
         public void Setup()
         {
+            _mockOpenAIService = new Mock<IOpenAIService>();
             _mockMovieService = new Mock<IMovieService>();
 
-            // Mock other dependencies required by HomeController
             var mockUserManager = new Mock<UserManager<IdentityUser>>(
                 Mock.Of<IUserStore<IdentityUser>>(), null, null, null, null, null, null, null, null);
 
             var mockUserRepository = new Mock<IUserRepository>();
             var mockLogger = new Mock<ILogger<BaseController>>();
 
-            // Initialize the HomeController with mocked dependencies
             _homeController = new HomeController(
+                _mockOpenAIService.Object,
                 _mockMovieService.Object,
                 mockUserManager.Object,
                 mockUserRepository.Object,
                 mockLogger.Object
             );
         }
+
 
         [TearDown]
         public void TearDown()
