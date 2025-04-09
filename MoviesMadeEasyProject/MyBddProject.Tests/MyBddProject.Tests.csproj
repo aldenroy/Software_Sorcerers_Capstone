@@ -17,6 +17,9 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Reqnroll" Version="2.4.0" />
     <PackageReference Include="Reqnroll.NUnit" Version="2.4.0" />
+    <PackageReference Include="Reqnroll.SpecFlowCompatibility.Actions.Selenium" Version="0.2.6" />
+    <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" Version="2.4.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="135.0.7049.4200" />
   </ItemGroup>
 
   <ItemGroup>

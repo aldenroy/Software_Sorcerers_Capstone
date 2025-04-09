@@ -33,7 +33,7 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="User" asp-action="Dashboard">Dashboard</a>
+                                    <a class="nav-link" asp-controller="User" asp-action="Dashboard" aria-label="Go to your dashboard page">Dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">Settings</a>

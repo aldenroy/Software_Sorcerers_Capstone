@@ -373,4 +373,6 @@ document.querySelectorAll(".sort-option").forEach(item => {
     });
 });
 
-module.exports = { searchMovies };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { searchMovies };
+}

@@ -20,7 +20,7 @@ public class OpenAIService : IOpenAIService
         // Configure HttpClient
         _httpClient.BaseAddress = new Uri("https://api.openai.com/v1/");
         _httpClient.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Bearer", _config["OpenAI:ApiKey"]);
+            new AuthenticationHeaderValue("Bearer", _config["OpenAI"]);
         _httpClient.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
     }
 
