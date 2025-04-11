@@ -20,7 +20,7 @@ public class OpenAIService : IOpenAIService
         // Configure HttpClient
         _httpClient.BaseAddress = new Uri("https://api.openai.com/v1/");
         _httpClient.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Bearer", _config["OpenAI:ApiKey"]);
+            new AuthenticationHeaderValue("Bearer", _config["OpenAI_ApiKey"]);
         _httpClient.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
     }
 
@@ -70,7 +70,7 @@ public class OpenAIService : IOpenAIService
             {
                 var request = new
                 {
-                    model = _config["OpenAI:Model"],
+                    model = _config["OpenAI_Model"],
                     messages = new[] { new { role = "user", content = prompt } },
                     temperature = 0.7,
                     max_tokens = 1000
