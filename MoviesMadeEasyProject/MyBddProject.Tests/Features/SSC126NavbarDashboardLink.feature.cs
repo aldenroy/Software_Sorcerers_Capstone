@@ -31,7 +31,7 @@ namespace MyBddProject.Tests.Features
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dashboard UI for authenticated users", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "Dashboard.feature"
+#line 1 "SSC126NavbarDashboardLink.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -142,7 +142,7 @@ this.ScenarioInitialize(scenarioInfo);
 await this.FeatureBackgroundAsync();
 #line hidden
 #line 11
-    await testRunner.GivenAsync("I navigate the \"Home\" page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I navigate to the \"Home\" page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 12
     await testRunner.WhenAsync("I click the \"Dashboard\" link on the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
@@ -213,37 +213,6 @@ await this.FeatureBackgroundAsync();
 #line 22
     await testRunner.ThenAsync("the \"Dashboard\" link should include a clear, descriptive label that lets my scree" +
                         "n reader announce its purpose.", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Icon Navigation to Subscription Login")]
-        public async System.Threading.Tasks.Task IconNavigationToSubscriptionLogin()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Icon Navigation to Subscription Login", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 24
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 25
-    await testRunner.WhenAsync("I click on a subscription bubble for \"Hulu\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 26
-    await testRunner.ThenAsync("I should be redirected to that services website login page \"https://auth.hulu.com" +
-                        "/web/login\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
