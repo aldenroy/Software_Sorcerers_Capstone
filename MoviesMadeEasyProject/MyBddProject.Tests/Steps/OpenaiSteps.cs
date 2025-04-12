@@ -76,5 +76,62 @@ namespace MyBddProject.Tests.Steps
             Assert.IsTrue(_driver.Url.Contains("Recommendations"));
             Assert.Greater(_recommendationsPage.RecommendationCount(), 0);
         }
+
+        // Add these methods to your existing OpenaiSteps class
+
+        [Given(@"the user has clicked the More Like This button")]
+        public void GivenTheUserHasClickedTheMoreLikeThisButton()
+        {
+            // This step is already covered by previous steps
+            GivenTheUserHasSearchedFor("Hunger Games");
+            WhenTheUserClicksTheMoreLikeThisButton();
+            ThenUserShouldSeeRecommendations();
+        }
+
+        [When(@"the user is on the recommendations page")]
+        public void WhenTheUserIsOnTheRecommendationsPage()
+        {
+            // Wait for recommendations page to load
+            _recommendationsPage.WaitForPageToLoad();
+            
+            // Verify we're on the recommendations page
+            Assert.IsTrue(_driver.Url.Contains("Recommendations"));
+        }
+
+        [Then(@"the user should see five suggested results")]
+        public void ThenTheUserShouldSeeFiveSuggestedResults()
+        {
+            var recommendationCount = _recommendationsPage.RecommendationCount();
+            Assert.AreEqual(5, recommendationCount, 
+                $"Expected 5 recommendations but found {recommendationCount}");
+        }
+
+        [Given(@"the user is on the recommendations page")]
+        public void GivenTheUserIsOnTheRecommendationsPage()
+        {
+            // This combines previous steps to get to recommendations page
+            GivenTheUserHasClickedTheMoreLikeThisButton();
+            WhenTheUserIsOnTheRecommendationsPage();
+        }
+
+        [When(@"the user clicks the Back to search button")]
+        public void WhenTheUserClicksTheBackToSearchButton()
+        {
+            _recommendationsPage.ClickBackToSearch();
+        }
+
+        [Then(@"the user should be redirected back to the search page")]
+        public void ThenTheUserShouldBeRedirectedBackToTheSearchPage()
+        {
+            // Wait for URL to change back to search page
+            new WebDriverWait(_driver, TimeSpan.FromSeconds(10))
+                .Until(d => !d.Url.Contains("Recommendations"));
+            
+            // Verify we're back on search page
+            Assert.IsTrue(_driver.Url.EndsWith("/") || _driver.Url.Contains("Home/Index"));
+            
+            // Verify search page elements are present
+            Assert.IsTrue(_searchPage.IsSearchInputDisplayed());
+        }
     }
 }
