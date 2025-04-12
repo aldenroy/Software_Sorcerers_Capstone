@@ -8,7 +8,7 @@ Scenario: Display Dashboard link for Authenticated User
     Then I should see a "Dashboard" link in the navbar
 
 Scenario: Navigate to the Dashboard Page
-    Given I navigate the "Home" page
+    Given I navigate to the "Home" page
     When I click the "Dashboard" link on the navbar
     Then I should be redirected to my dashboard page
 
@@ -21,7 +21,5 @@ Scenario: Screen Reader Accessibility for Dashboard link
     When I navigate to the navbar
     Then the "Dashboard" link should include a clear, descriptive label that lets my screen reader announce its purpose.
 
-Scenario: Icon Navigation to Subscription Login
-    When I click on a subscription bubble for "Hulu"
-    Then I should be redirected to that services website login page "https://auth.hulu.com/web/login"
+
 
