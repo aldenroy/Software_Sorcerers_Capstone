@@ -33,17 +33,33 @@ namespace MyBddProject.PageObjects
         {
             try 
             {
-                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-                wait.Until(d => d.FindElement(By.Id("results")).Displayed);
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15)); // Increased timeout
                 
-                // First check if any movie cards exist
-                var cards = _driver.FindElements(By.CssSelector(".movie-card"));
-                if (cards.Count == 0) return false;
+                // First wait for either results or a "no results" message
+                wait.Until(d => 
+                    d.FindElements(By.CssSelector(".movie-card")).Count > 0 ||
+                    d.FindElements(By.CssSelector(".no-results")).Count > 0);
                 
+                // Check if we got a "no results" message
+                if (_driver.FindElements(By.CssSelector(".no-results")).Count > 0)
+                    return false;
+                    
                 // Then check if any card contains the expected text
+                var cards = _driver.FindElements(By.CssSelector(".movie-card"));
                 return cards.Any(card => card.Text.Contains(expectedText));
             }
-            catch (NoSuchElementException)
+            catch (WebDriverException)
+            {
+                return false;
+            }
+        }
+        public bool IsSearchInputDisplayed()
+        {
+            try
+            {
+                return _driver.FindElement(By.Id("searchInput")).Displayed;
+            }
+            catch
             {
                 return false;
             }
