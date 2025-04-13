@@ -23,38 +23,6 @@ namespace MyProject.Tests.StepDefinitions
             _registrationPage = new RegistrationPageTestSetup(_driver);
             _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-
-            _email = "test@test.com";
-            _password = "Test!123";
-
-            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
-            _registrationPage.FillFirstName("Test");
-            _registrationPage.FillLastName("User");
-            _registrationPage.FillEmail(_email);
-            _registrationPage.FillPassword(_password);
-            _registrationPage.FillConfirmPassword(_password);
-            _registrationPage.Submit();
-
-            try
-            {
-                if (IsElementPresent(By.LinkText("Logout")))
-                {
-                    var logoutLink = wait.Until(d => d.FindElement(By.LinkText("Logout")));
-                    logoutLink.Click();
-                }
-            }
-            catch (WebDriverTimeoutException ex)
-            {
-                Console.WriteLine($"[Setup] Timeout waiting for Logout link: {ex.Message}");
-            }
-            catch (NoSuchElementException ex)
-            {
-                Console.WriteLine($"[Setup] Logout link not found: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Setup] Unexpected error during logout: {ex.Message}");
-            }
         }
 
         private bool IsElementPresent(By by)
@@ -101,6 +69,32 @@ namespace MyProject.Tests.StepDefinitions
                     _driver.Quit();
                     _driver.Dispose();
                 }
+            }
+        }
+
+        [Given(@"a user with the email ""(.*)"" exists in the system")]
+        public void GivenAUserWithTheEmailExistsInTheSystem(string email)
+        {
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
+            _registrationPage.FillFirstName("Test");
+            _registrationPage.FillLastName("User");
+            _registrationPage.FillEmail(email);
+            _registrationPage.FillPassword("Test!123");
+            _registrationPage.FillConfirmPassword("Test!123");
+            _registrationPage.Submit();
+
+            try
+            {
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+                if (IsElementPresent(By.LinkText("Logout")))
+                {
+                    var logoutLink = wait.Until(d => d.FindElement(By.LinkText("Logout")));
+                    logoutLink.Click();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Given Step] Error during logout: {ex.Message}");
             }
         }
 
