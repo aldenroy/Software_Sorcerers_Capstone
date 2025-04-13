@@ -12,11 +12,6 @@ namespace MyBddProject.Tests.PageObjects
             _driver = driver;
         }
 
-        public void GoTo()
-        {
-            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
-        }
-
         public void Login(string email, string password)
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));

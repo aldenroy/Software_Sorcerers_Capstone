@@ -27,7 +27,7 @@ namespace MyProject.Tests.StepDefinitions
             _email = "test@test.com";
             _password = "Test!123";
 
-            _registrationPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
             _registrationPage.FillFirstName("Test");
             _registrationPage.FillLastName("User");
             _registrationPage.FillEmail(_email);
@@ -76,28 +76,21 @@ namespace MyProject.Tests.StepDefinitions
             {
                 try
                 {
-                    // Navigate to the delete personal data page
                     _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
 
-                    // Wait for the password input to be visible
                     var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
                     wait.Until(d => d.FindElement(By.Id("Input_Password")));
 
-                    // Enter the password (you should use the password you used to register/login)
                     var passwordInput = _driver.FindElement(By.Id("Input_Password"));
                     passwordInput.SendKeys("Test!123");
 
-                    // Click the delete button
                     var deleteButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
                     deleteButton.Click();
 
-                    // Wait for the user to be redirected to the home page (after account deletion)
-                    wait.Until(d => d.Url.Contains("http://localhost:5000/")); // Or any other URL indicating successful redirection
+                    wait.Until(d => d.Url.Contains("http://localhost:5000/"));
 
-                    // Optional: You can add a check to ensure the home page is loaded
                     var homePageText = _driver.FindElement(By.CssSelector("h2")).Text;
-                    Assert.That(homePageText, Is.EqualTo("MoviesMadeEasy")); // Adjust based on your actual page content
-
+                    Assert.That(homePageText, Is.EqualTo("MoviesMadeEasy"));
                 }
                 catch (Exception ex)
                 {
@@ -114,7 +107,7 @@ namespace MyProject.Tests.StepDefinitions
         [Given(@"the user is on the login page")]
         public void GivenTheUserIsOnTheLoginPage()
         {
-            _loginPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
         }
 
         private string _email;
@@ -157,7 +150,7 @@ namespace MyProject.Tests.StepDefinitions
         [Given(@"the user is on the registration page")]
         public void GivenTheUserIsOnTheRegistrationPage()
         {
-            _registrationPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
         }
 
         [When(@"the user enters ""(.*)"" in the first name field")]
