@@ -164,7 +164,6 @@ body {
 }
 
 .movie-genres {
-  font-size: 14px;
   color: #555;
 }
 
@@ -220,6 +219,11 @@ body {
 .filter-disabled {
   background-color: #e9ecef;
   cursor: default;
+}
+
+.modal-dialog {
+  max-width: 70vw;
+  width: auto;
 }
 
 #movieModal .modal-content {

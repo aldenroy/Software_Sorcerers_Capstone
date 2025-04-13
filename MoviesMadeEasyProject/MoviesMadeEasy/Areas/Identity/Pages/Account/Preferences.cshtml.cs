@@ -63,6 +63,7 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 customUser.FontType = Input.FontType;
                 await _userContext.SaveChangesAsync();
                 ViewData["ColorMode"] = Input.ColorMode.ToLower();
+                ViewData["FontSize"] = Input.FontSize.ToLower();
             }
 
             return RedirectToAction("Dashboard", "User");
@@ -86,7 +87,8 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 Input.FontSize = customUser.FontSize;
                 Input.FontType = customUser.FontType;
 
-                ViewData["ColorMode"] = Input.ColorMode;
+                ViewData["ColorMode"] = Input.ColorMode.ToLower();
+                ViewData["FontSize"] = Input.FontSize.ToLower();
             }
 
             return Page();
