@@ -1,5 +1,9 @@
 @kira
 Feature: User Management
+
+  Background:
+    Given a user with the email "test@test.com" exists in the system
+
   Scenario: Successful Login
     Given the user is on the login page
     When the user enters "test@test.com" in the email field

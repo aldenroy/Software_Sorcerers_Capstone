@@ -12,11 +12,6 @@ namespace MyBddProject.Tests.PageObjects
             _driver = driver;
         }
 
-        public void GoTo()
-        {
-            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
-        }
-
         public void FillFirstName(string firstName)
         {
             _driver.FindElement(By.Id("Input_FirstName")).SendKeys(firstName);

@@ -30,7 +30,7 @@ namespace MyBddProject.Tests.Steps
         public void GivenIAmLoggedInOnTheDashboardPage()
         {
             var loginPage = new LoginPageTestSetup(_driver);
-            loginPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
             loginPage.Login("testuser@example.com", "Ab+1234");
         }
 

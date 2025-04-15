@@ -23,38 +23,6 @@ namespace MyProject.Tests.StepDefinitions
             _registrationPage = new RegistrationPageTestSetup(_driver);
             _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-
-            _email = "test@test.com";
-            _password = "Test!123";
-
-            _registrationPage.GoTo();
-            _registrationPage.FillFirstName("Test");
-            _registrationPage.FillLastName("User");
-            _registrationPage.FillEmail(_email);
-            _registrationPage.FillPassword(_password);
-            _registrationPage.FillConfirmPassword(_password);
-            _registrationPage.Submit();
-
-            try
-            {
-                if (IsElementPresent(By.LinkText("Logout")))
-                {
-                    var logoutLink = wait.Until(d => d.FindElement(By.LinkText("Logout")));
-                    logoutLink.Click();
-                }
-            }
-            catch (WebDriverTimeoutException ex)
-            {
-                Console.WriteLine($"[Setup] Timeout waiting for Logout link: {ex.Message}");
-            }
-            catch (NoSuchElementException ex)
-            {
-                Console.WriteLine($"[Setup] Logout link not found: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Setup] Unexpected error during logout: {ex.Message}");
-            }
         }
 
         private bool IsElementPresent(By by)
@@ -76,28 +44,21 @@ namespace MyProject.Tests.StepDefinitions
             {
                 try
                 {
-                    // Navigate to the delete personal data page
                     _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
 
-                    // Wait for the password input to be visible
                     var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
                     wait.Until(d => d.FindElement(By.Id("Input_Password")));
 
-                    // Enter the password (you should use the password you used to register/login)
                     var passwordInput = _driver.FindElement(By.Id("Input_Password"));
                     passwordInput.SendKeys("Test!123");
 
-                    // Click the delete button
                     var deleteButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
                     deleteButton.Click();
 
-                    // Wait for the user to be redirected to the home page (after account deletion)
-                    wait.Until(d => d.Url.Contains("http://localhost:5000/")); // Or any other URL indicating successful redirection
+                    wait.Until(d => d.Url.Contains("http://localhost:5000/"));
 
-                    // Optional: You can add a check to ensure the home page is loaded
                     var homePageText = _driver.FindElement(By.CssSelector("h2")).Text;
-                    Assert.That(homePageText, Is.EqualTo("MoviesMadeEasy")); // Adjust based on your actual page content
-
+                    Assert.That(homePageText, Is.EqualTo("MoviesMadeEasy"));
                 }
                 catch (Exception ex)
                 {
@@ -111,10 +72,36 @@ namespace MyProject.Tests.StepDefinitions
             }
         }
 
+        [Given(@"a user with the email ""(.*)"" exists in the system")]
+        public void GivenAUserWithTheEmailExistsInTheSystem(string email)
+        {
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
+            _registrationPage.FillFirstName("Test");
+            _registrationPage.FillLastName("User");
+            _registrationPage.FillEmail(email);
+            _registrationPage.FillPassword("Test!123");
+            _registrationPage.FillConfirmPassword("Test!123");
+            _registrationPage.Submit();
+
+            try
+            {
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+                if (IsElementPresent(By.LinkText("Logout")))
+                {
+                    var logoutLink = wait.Until(d => d.FindElement(By.LinkText("Logout")));
+                    logoutLink.Click();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Given Step] Error during logout: {ex.Message}");
+            }
+        }
+
         [Given(@"the user is on the login page")]
         public void GivenTheUserIsOnTheLoginPage()
         {
-            _loginPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
         }
 
         private string _email;
@@ -157,7 +144,7 @@ namespace MyProject.Tests.StepDefinitions
         [Given(@"the user is on the registration page")]
         public void GivenTheUserIsOnTheRegistrationPage()
         {
-            _registrationPage.GoTo();
+            _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
         }
 
         [When(@"the user enters ""(.*)"" in the first name field")]

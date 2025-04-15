@@ -1,3 +1,4 @@
+@openai
 Feature: Openai
   Scenario: Search result
     Given the user is on the search page
