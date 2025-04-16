@@ -3,6 +3,7 @@ using Moq;
 using MoviesMadeEasy.DAL.Concrete;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
+using MoviesMadeEasy.DTOs;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using MoviesMadeEasy.Controllers;
-using MoviesMadeEasy.Models.ModelView;
 
 namespace MME_Tests
 {
@@ -153,7 +153,7 @@ namespace MME_Tests
         private Mock<IUserRepository> _userRepositoryMock;
         private Mock<ISubscriptionRepository> _subscriptionServiceMock;
         private MoviesMadeEasy.Controllers.UserController _controller;
-        private DashboardModelView _dashboard;
+        private DashboardDTO _dashboard;
 
         [SetUp]
         public void Setup()
@@ -162,7 +162,7 @@ namespace MME_Tests
             _userRepositoryMock = new Mock<IUserRepository>();
             _subscriptionServiceMock = new Mock<ISubscriptionRepository>();
             _controller = new MoviesMadeEasy.Controllers.UserController(dummyLogger, null, _userRepositoryMock.Object, _subscriptionServiceMock.Object);
-            _dashboard = new DashboardModelView { UserName = "Test" };
+            _dashboard = new DashboardDTO { UserName = "Test" };
             var httpContext = new DefaultHttpContext();
             _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
         }
@@ -192,7 +192,7 @@ namespace MME_Tests
             var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
             Assert.IsNotNull(result);
             Assert.AreEqual("Dashboard", result.ViewName);
-            var model = result.Model as DashboardModelView;
+            var model = result.Model as DashboardDTO;
             Assert.IsNotNull(model);
             Assert.AreEqual(userId, model.UserId);
             Assert.AreEqual(user.FirstName, model.UserName);
@@ -217,7 +217,7 @@ namespace MME_Tests
             var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
             Assert.IsNotNull(result);
             Assert.AreEqual("Dashboard", result.ViewName);
-            var model = result.Model as DashboardModelView;
+            var model = result.Model as DashboardDTO;
             Assert.IsNotNull(model);
             Assert.AreEqual(userId, model.UserId);
             Assert.AreEqual("", model.UserName);

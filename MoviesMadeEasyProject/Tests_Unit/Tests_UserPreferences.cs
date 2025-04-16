@@ -226,7 +226,6 @@ namespace MME_Tests
 
             // Assert
             Assert.That(_model.ViewData["ColorMode"], Is.EqualTo("dark"));
-            Assert.That(_model.ViewData["FontSize"], Is.EqualTo("large"));
         }
     }
 }

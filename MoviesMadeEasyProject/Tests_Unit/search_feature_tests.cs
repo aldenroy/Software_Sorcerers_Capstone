@@ -11,56 +11,35 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Net; // Added for HttpStatusCode
-using Microsoft.AspNetCore.Http;
 
 namespace MME_Tests
 {
     [TestFixture]
     public class HomeControllerTests
     {
-        private Mock<IOpenAIService> _mockOpenAIService;
         private Mock<IMovieService> _mockMovieService;
         private HomeController _homeController;
 
         [SetUp]
         public void Setup()
         {
-            _mockOpenAIService = new Mock<IOpenAIService>();
             _mockMovieService = new Mock<IMovieService>();
 
+            // Mock other dependencies required by HomeController
             var mockUserManager = new Mock<UserManager<IdentityUser>>(
                 Mock.Of<IUserStore<IdentityUser>>(), null, null, null, null, null, null, null, null);
 
             var mockUserRepository = new Mock<IUserRepository>();
             var mockLogger = new Mock<ILogger<BaseController>>();
 
+            // Initialize the HomeController with mocked dependencies
             _homeController = new HomeController(
-                _mockOpenAIService.Object,
                 _mockMovieService.Object,
                 mockUserManager.Object,
                 mockUserRepository.Object,
                 mockLogger.Object
             );
-
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockSession = new Mock<ISession>();
-            var memoryStream = new MemoryStream();
-            var writer = new BinaryWriter(memoryStream);
-
-            mockSession.Setup(_ => _.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
-                .Callback<string, byte[]>((key, value) => {
-                    writer.Write(value);
-                    writer.Flush();
-                });
-
-            mockHttpContext.Setup(c => c.Session).Returns(mockSession.Object);
-            _homeController.ControllerContext = new ControllerContext()
-            {
-                HttpContext = mockHttpContext.Object
-            };
         }
-
 
         [TearDown]
         public void TearDown()
@@ -214,112 +193,6 @@ namespace MME_Tests
 
             var sortedYears = movieList.Select(m => (int)m["releaseYear"]).ToList();
             Assert.That(sortedYears, Is.Ordered.Descending);
-        }
-
-
-        //START of openi tests. In same file due to mocking conflict
-        [Test]
-        public async Task GetSimilarMovies_ValidTitle_ReturnsRecommendations()
-        {
-            // Arrange
-            var testTitle = "Inception";
-            var expectedRecommendations = new List<MovieRecommendation>
-            {
-                new MovieRecommendation { Title = "The Matrix", Year = 1999 },
-                new MovieRecommendation { Title = "Interstellar", Year = 2014 }
-            };
-
-            _mockOpenAIService.Setup(s => s.GetSimilarMoviesAsync(testTitle))
-                .ReturnsAsync(expectedRecommendations);
-
-            // Mock session
-            var session = new Mock<ISession>();
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { Session = session.Object }
-            };
-            _homeController.ControllerContext = controllerContext;
-
-            // Act
-            var result = await _homeController.GetSimilarMovies(testTitle) as OkObjectResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(StatusCodes.Status200OK, result.StatusCode);
-            Assert.AreEqual(expectedRecommendations, result.Value);
-            
-            // Verify session was set
-            session.Verify(s => s.Set(
-                "LastRecommendations", 
-                It.IsAny<byte[]>()), Times.Once);
-            session.Verify(s => s.Set(
-                "LastRecommendationTitle", 
-                It.IsAny<byte[]>()), Times.Once);
-        }
-
-        [Test]
-        public async Task GetSimilarMovies_RateLimitExceeded_Returns429()
-        {
-            // Arrange
-            var testTitle = "Inception";
-            _mockOpenAIService.Setup(s => s.GetSimilarMoviesAsync(testTitle))
-                .ThrowsAsync(new HttpRequestException("Rate limit exceeded", null, HttpStatusCode.TooManyRequests));
-
-            // Act
-            var result = await _homeController.GetSimilarMovies(testTitle);
-
-            // Assert
-            Assert.IsInstanceOf<ObjectResult>(result);
-            var statusResult = result as ObjectResult;
-            Assert.AreEqual(429, statusResult.StatusCode);
-            Assert.IsNotNull(statusResult.Value);
-        }
-
-        [Test]
-        public async Task GetSimilarMovies_ServiceError_Returns500()
-        {
-            // Arrange
-            var testTitle = "Inception";
-            _mockOpenAIService.Setup(s => s.GetSimilarMoviesAsync(testTitle))
-                .ThrowsAsync(new Exception("Service error"));
-
-            // Act
-            var result = await _homeController.GetSimilarMovies(testTitle);
-
-            // Assert
-            Assert.IsInstanceOf<ObjectResult>(result);
-            var statusResult = result as ObjectResult;
-            Assert.AreEqual(500, statusResult.StatusCode);
-            Assert.IsNotNull(statusResult.Value);
-        }
-        [Test]
-        public async Task GetSimilarMovies_StoresResultsInSession()
-        {
-            // Arrange
-            var testTitle = "Inception";
-            var expectedRecommendations = new List<MovieRecommendation> // Changed to MovieRecommendation
-            {
-                new MovieRecommendation { Title = "The Matrix", Year = 1999 }
-            };
-
-            _mockOpenAIService.Setup(s => s.GetSimilarMoviesAsync(testTitle))
-                .ReturnsAsync(expectedRecommendations);
-
-            // Setup mock HttpContext
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockSession = new Mock<ISession>();
-            byte[] sessionData = null;
-            mockSession.Setup(s => s.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
-                .Callback<string, byte[]>((key, value) => sessionData = value);
-            mockHttpContext.Setup(c => c.Session).Returns(mockSession.Object);
-            _homeController.ControllerContext = new ControllerContext { HttpContext = mockHttpContext.Object };
-
-            // Act
-            await _homeController.GetSimilarMovies(testTitle);
-
-            // Assert
-            mockSession.Verify(s => s.Set("LastRecommendations", It.IsAny<byte[]>()), Times.Once);
-            mockSession.Verify(s => s.Set("LastRecommendationTitle", It.IsAny<byte[]>()), Times.Once);
         }
     }
 }

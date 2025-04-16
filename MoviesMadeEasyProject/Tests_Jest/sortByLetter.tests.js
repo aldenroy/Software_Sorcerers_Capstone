@@ -17,7 +17,6 @@ describe("Movie querying", () => {
       <div id="results"></div>
       <div id="loadingSpinner"></div>
       <div id="genre-filters"></div>
-      <div id="streaming-filters"></div>
       <button id="clearFilters" style="display: none;"></button>
       <input id="minYear" />
       <input id="maxYear" />

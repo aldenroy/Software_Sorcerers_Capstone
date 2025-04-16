@@ -2,12 +2,21 @@
     ViewData["Title"] = "Movie Search";
 }
 
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
 <h2 class="text-center">Movie Search</h2>
 
 <!-- Search Bar -->
 <div class="search-container">
     <label for="searchInput" class="visually-hidden">Search for a movie</label>
-    <input type="text" id="searchInput" class="search-box" placeholder="Enter movie title..." aria-label="Search for a movie" />
+    <input type="text" id="searchInput" class="search-box" placeholder="Enter movie title..." onkeypress="handleKeyPress(event)" aria-label="Search for a movie" />
     <input type="hidden" id="sortBy" value="default" />
 
     <!-- Sorting Options -->
@@ -45,13 +54,6 @@
                 <!-- Genre checkboxes will be rendered here by setupGenreFilter() -->
             </div>
         </li>
-        <li><hr class="dropdown-divider" /></li>
-        <!-- Streaming services-->
-        <li>
-            <div id="streaming-filters" class="px-3 py-2">
-                <!-- Streaming service checkboxes will be rendered here by setupStreamingFilter() -->
-            </div>
-        </li>
     </ul>
 </div>
     @* Will create new query params in javascript to help bring logic here. *@
@@ -78,10 +80,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Movie Title</h3>
+                <h5 class="modal-title" id="modalTitle">Movie Title</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body d-flex flex-column flex-md-row align-items-start gap-3">
+            <div class="modal-body">
                 <img id="modalPoster" src="" alt="Movie Poster" class="img-fluid">
                 <div class="modal-text-content">
                     <p id="modalGenres"></p>
@@ -97,5 +99,5 @@
 <!-- Load JavaScript via Partial View -->
 @await Html.PartialAsync("_MovieSearchScript")
 @await Html.PartialAsync("_ModalOpenScript")
-@await Html.PartialAsync("_MoreLikeThisScript") 
 
+</body>

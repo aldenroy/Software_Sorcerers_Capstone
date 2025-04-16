@@ -1,5 +1,4 @@
-@using MoviesMadeEasy.Models.ModelView
-@model DashboardModelView
+@model MoviesMadeEasy.DTOs.DashboardDTO
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -37,13 +36,10 @@
                 <ul class="d-flex flex-wrap justify-content-center gap-3 list-unstyled" aria-label="Subscription services list">
                     @foreach (var service in Model.SubList)
                     {
-                        <li class="subscription-item d-flex align-items-center justify-content-center">
+                        <li class="subscription-item d-flex align-items-center justify-content-center" tabindex="0">
                             @if (!string.IsNullOrEmpty(service.LogoUrl))
                             {
-                                <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer"
-                                   aria-label="Visit @service.Name website" role="link" tabindex="0">
-                                    <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
-                                </a>
+                                <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
                             }
                         </li>
                     }

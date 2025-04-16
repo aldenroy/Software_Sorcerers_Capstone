@@ -25,9 +25,8 @@ namespace MoviesMadeEasy.Controllers
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Set defaults
+            // Set default theme
             ViewData["ColorMode"] = "light";
-            ViewData["FontSize"] = "medium";
             
             try
             {
@@ -46,35 +45,26 @@ namespace MoviesMadeEasy.Controllers
                             if (user != null)
                             {
                                 // Normalize the color mode value
-                                string colorMode = user.ColorMode?.ToLower().Trim() ?? "light";
+                                string colorMode = !string.IsNullOrWhiteSpace(user.ColorMode) 
+                                    ? user.ColorMode.ToLower().Trim() 
+                                    : "light";
+
+                                string normalizedColorMode = colorMode.ToLower();
 
                                 // Map "High Contrast" to "high-contrast" for CSS class purposes
                                 if (colorMode == "high contrast")
                                 {
-                                    colorMode = "high-contrast";
+                                    normalizedColorMode = "high-contrast";
                                 }
                                 // Ensure the value is "light", "dark", or "high contrast"
-                                if (colorMode != "light" && colorMode != "dark" && colorMode != "high-contrast")
+                                if (normalizedColorMode != "light" && normalizedColorMode != "dark" && normalizedColorMode != "high-contrast")
                                 {
                                     colorMode = "light"; // Default to light if invalid value
+                                    normalizedColorMode = "light";
                                 }
                                 
-                                ViewData["ColorMode"] = colorMode;
+                                ViewData["ColorMode"] = normalizedColorMode;
                                 _logger.LogInformation($"Set color mode to: {colorMode}");
-
-                                // Normalize FontSize
-                                string fontSize = user.FontSize?.ToLower().Trim() ?? "medium";
-                                if (fontSize == "extra large")
-                                {
-                                    fontSize = "extra-large";
-                                }
-
-                                if (fontSize != "small" && fontSize != "medium" && fontSize != "large" && fontSize != "extra-large")
-                                {
-                                    fontSize = "medium";
-                                }
-                                ViewData["FontSize"] = fontSize;
-                                _logger.LogInformation($"Set font size to: {fontSize}");
                             }
                             else
                             {

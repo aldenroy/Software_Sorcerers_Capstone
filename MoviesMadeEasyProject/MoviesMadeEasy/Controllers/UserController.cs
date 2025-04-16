@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using MoviesMadeEasy.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using MoviesMadeEasy.DTOs;
 using MoviesMadeEasy.DAL.Abstract;
 using MoviesMadeEasy.Data;
 using Microsoft.AspNetCore.Mvc.Filters;
-using MoviesMadeEasy.Models.ModelView;
 
 namespace MoviesMadeEasy.Controllers
 {
@@ -29,13 +29,13 @@ namespace MoviesMadeEasy.Controllers
             _subscriptionService = subscriptionService;
         }
 
-        private DashboardModelView BuildDashboardModelView(int userId)
+        private DashboardDTO BuildDashboardDTO(int userId)
         {
             var user = _userRepository.GetUser(userId);
             var userSubscriptions = _subscriptionService.GetUserSubscriptions(userId);
             var allServices = _subscriptionService.GetAllServices()?.ToList() ?? new List<StreamingService>();
 
-            return new DashboardModelView
+            return new DashboardDTO
             {
                 UserId = userId,
                 UserName = user != null ? user.FirstName : "",
@@ -60,7 +60,7 @@ namespace MoviesMadeEasy.Controllers
                 }
 
                 var user = _userRepository.GetUser(identityUser.Id);
-                var dto = BuildDashboardModelView(user.Id);
+                var dto = BuildDashboardDTO(user.Id);
                 return View(dto);
             }
             catch (Exception ex)
@@ -70,9 +70,9 @@ namespace MoviesMadeEasy.Controllers
             }
         }
 
-        public IActionResult SubscriptionForm(DashboardModelView dto)
+        public IActionResult SubscriptionForm(DashboardDTO dto)
         {
-            var updatedDto = BuildDashboardModelView(dto.UserId);
+            var updatedDto = BuildDashboardDTO(dto.UserId);
             return View(updatedDto);
         }
 
@@ -92,7 +92,7 @@ namespace MoviesMadeEasy.Controllers
 
                 TempData["Message"] = "Subscriptions managed successfully!";
 
-                var dto = BuildDashboardModelView(userId);
+                var dto = BuildDashboardDTO(userId);
                 return View("Dashboard", dto);
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace MoviesMadeEasy.Controllers
 
                 TempData["Message"] = "There was an issue managing your subscription. Please try again later.";
 
-                var dto = BuildDashboardModelView(userId);
+                var dto = BuildDashboardDTO(userId);
                 return View("SubscriptionForm", dto);
             }
         }

@@ -2,7 +2,6 @@
 @{
     Layout = "/Views/Shared/_Layout.cshtml";
     ViewData["ColorMode"] = "light"; // Default
-    ViewData["FontSize"] = "medium";
 
     if (User.Identity.IsAuthenticated)
     {
@@ -17,33 +16,25 @@
                 var user = userRepository.GetUser(identityUser.Id);
                 if (user != null)
                 {
-                    string colorMode = user.ColorMode?.ToLower().Trim() ?? "light";
+                    string colorMode = !string.IsNullOrWhiteSpace(user.ColorMode) 
+                        ? user.ColorMode.ToLower().Trim() 
+                        : "light";
+
+                    string normalizedColorMode = colorMode.ToLower();
 
                     // Map "High Contrast" to "high-contrast" for CSS class purposes
                     if (colorMode == "high contrast")
                     {
-                        colorMode = "high-contrast";
+                        normalizedColorMode = "high-contrast";
                     }
                     // Ensure the value is "light", "dark", or "high contrast"
-                    if (colorMode != "light" && colorMode != "dark" && colorMode != "high-contrast")
+                    if (normalizedColorMode != "light" && normalizedColorMode != "dark" && normalizedColorMode != "high-contrast")
                     {
                         colorMode = "light"; // Default to light if invalid value
+                        normalizedColorMode = "light";
                     }
                     
-                    ViewData["ColorMode"] = colorMode;
-
-                    // Normalize FontSize
-                    string fontSize = user.FontSize?.ToLower().Trim() ?? "medium";
-                    if (fontSize == "extra large")
-                    {
-                        fontSize = "extra-large";
-                    }
-
-                    if (fontSize != "small" && fontSize != "medium" && fontSize != "large" && fontSize != "extra-large")
-                    {
-                        fontSize = "medium";
-                    }
-                    ViewData["FontSize"] = fontSize;
+                    ViewData["ColorMode"] = normalizedColorMode;
                 }
             }
         }
