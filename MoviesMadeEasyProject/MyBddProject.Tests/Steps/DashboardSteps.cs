@@ -219,12 +219,15 @@ namespace MyBddProject.Tests.Steps
         [Then(@"the ""(.*)"" subscription icon should include a clear, descriptive accessible label")]
         public void ThenTheSubscriptionIconShouldIncludeAClearDescriptiveAccessibleLabel(string serviceName)
         {
-            var icon = _driver.FindElements(By.CssSelector(".subscription-link"))
-                .FirstOrDefault(el =>
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            var icon = wait.Until(driver =>
+            {
+                var icons = driver.FindElements(By.CssSelector(".subscription-link"));
+                return icons.FirstOrDefault(el =>
                     el.GetAttribute("aria-label")?.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0);
+            });
 
             Assert.IsNotNull(icon, $"Could not find a subscription icon for '{serviceName}'.");
-
             string ariaLabel = icon.GetAttribute("aria-label");
             Assert.IsFalse(string.IsNullOrWhiteSpace(ariaLabel), "aria-label is missing or empty on the subscription icon.");
             Assert.IsTrue(ariaLabel.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0,
