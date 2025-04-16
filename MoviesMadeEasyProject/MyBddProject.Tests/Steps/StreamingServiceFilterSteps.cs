@@ -12,16 +12,9 @@ public class StreamingServiceFilterSteps
 {
     private readonly IWebDriver _driver;
 
-    public StreamingServiceFilterSteps(IObjectContainer objectContainer)
+    public StreamingServiceFilterSteps(IWebDriver driver)
     {
-        var options = new ChromeOptions();
-        options.AddArgument("--headless");
-        options.AddArgument("--no-sandbox");
-        options.AddArgument("--disable-dev-shm-usage");
-
-        _driver = new ChromeDriver(options);
-        _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
-        objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
+        _driver = driver;
     }
 
     [Given("the user is on the content browsing page")]
@@ -219,9 +212,4 @@ public class StreamingServiceFilterSteps
         WhenTheUserSelectsASpecificStreamingService("Pluto TV");
     }
 
-    [AfterScenario]
-    public void TearDown()
-    {
-        _driver.Quit();
-    }
 }
