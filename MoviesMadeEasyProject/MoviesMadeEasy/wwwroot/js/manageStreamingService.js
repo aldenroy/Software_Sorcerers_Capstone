@@ -99,4 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-module.exports = { manageStreamingService };
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = { manageStreamingService };
+}
+

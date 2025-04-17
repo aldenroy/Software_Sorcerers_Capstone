@@ -14,6 +14,7 @@ namespace MoviesMadeEasy.Data
         public virtual DbSet<Title> Titles { get; set; }
         public virtual DbSet<UserStreamingService> UserStreamingServices { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<RecentlyViewedTitle> RecentlyViewedTitles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -31,8 +32,7 @@ namespace MoviesMadeEasy.Data
             builder.Entity<UserStreamingService>()
                 .HasOne(us => us.StreamingService)
                 .WithMany(s => s.UserStreamingServices)
-                .HasForeignKey(us => us.StreamingServiceId); 
-
+                .HasForeignKey(us => us.StreamingServiceId);
 
             builder.Entity<StreamingService>(entity =>
             {
@@ -40,7 +40,7 @@ namespace MoviesMadeEasy.Data
                 entity.ToTable("StreamingService");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd() 
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("id");
 
                 entity.Property(e => e.Name)
@@ -63,6 +63,7 @@ namespace MoviesMadeEasy.Data
             builder.Entity<Title>(entity =>
             {
                 entity.HasKey(e => e.Id);
+
                 entity.ToTable("Title");
 
                 entity.Property(e => e.Id)
@@ -73,21 +74,79 @@ namespace MoviesMadeEasy.Data
                     .HasMaxLength(255)
                     .HasColumnName("external_id");
 
-                entity.Property(e => e.LastUpdated)
-                    .HasDefaultValueSql("(getdate())")
-                    .HasColumnType("datetime")
-                    .HasColumnName("last_updated");
-
                 entity.Property(e => e.TitleName)
                     .HasMaxLength(255)
                     .HasColumnName("title_name");
+
+                entity.Property(e => e.Year)
+                    .HasColumnName("year");
 
                 entity.Property(e => e.Type)
                     .HasMaxLength(50)
                     .HasColumnName("type");
 
-                entity.Property(e => e.Year)
-                    .HasColumnName("year");
+                entity.Property(e => e.PosterUrl)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("poster_url");
+
+                entity.Property(e => e.Genres)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("genres");
+
+                entity.Property(e => e.Rating)
+                    .HasMaxLength(50)
+                    .HasColumnName("rating");
+
+                entity.Property(e => e.Overview)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("overview");
+
+                entity.Property(e => e.StreamingServices)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("streaming_services");
+
+                entity.Property(e => e.LastUpdated)
+                    .HasDefaultValueSql("(getdate())")
+                    .HasColumnType("datetime")
+                    .HasColumnName("last_updated");
+
+                entity.HasMany(t => t.RecentlyViewedTitles)
+                      .WithOne(rv => rv.Title)
+                      .HasForeignKey(rv => rv.TitleId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<RecentlyViewedTitle>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.ToTable("RecentlyViewedTitles");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("Id");
+
+                entity.Property(e => e.UserId)
+                    .HasColumnName("UserId");
+
+                entity.Property(e => e.TitleId)
+                    .HasColumnName("TitleId");
+
+                entity.Property(e => e.ViewedAt)
+                    .HasDefaultValueSql("(getdate())")
+                    .HasColumnName("ViewedAt");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.RecentlyViewedTitles)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Title)
+                    .WithMany(t => t.RecentlyViewedTitles)
+                    .HasForeignKey(e => e.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => new { e.UserId, e.TitleId })
+                    .IsUnique();
             });
 
             builder.Entity<User>(entity =>
@@ -95,6 +154,7 @@ namespace MoviesMadeEasy.Data
                 entity.ToTable("User");
 
                 entity.HasKey(u => u.Id);
+
                 entity.Property(u => u.Id)
                       .ValueGeneratedOnAdd()
                       .HasColumnName("Id");
@@ -111,9 +171,6 @@ namespace MoviesMadeEasy.Data
                       .IsRequired()
                       .HasColumnName("LastName");
 
-                entity.Property(u => u.RecentlyViewedShowId)
-                      .HasColumnName("RecentlyViewedShowId");
-
                 entity.Property(u => u.ColorMode)
                       .IsRequired()
                       .HasDefaultValue("")
@@ -129,10 +186,10 @@ namespace MoviesMadeEasy.Data
                       .HasDefaultValue("")
                       .HasColumnName("FontType");
 
-                entity.HasOne(u => u.RecentlyViewedShow)
-                    .WithMany(t => t.Users)
-                    .HasForeignKey(u => u.RecentlyViewedShowId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasMany(u => u.RecentlyViewedTitles)
+                      .WithOne(rv => rv.User)
+                      .HasForeignKey(rv => rv.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

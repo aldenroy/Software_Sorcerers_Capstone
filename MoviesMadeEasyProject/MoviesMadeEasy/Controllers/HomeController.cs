@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using MoviesMadeEasy.DTOs;
 using System.Net; 
 using System.Text.Json;
+using MoviesMadeEasy.Models;
 namespace MoviesMadeEasy.Controllers
 
 {
@@ -134,6 +135,18 @@ namespace MoviesMadeEasy.Controllers
             {
                 return Json(new { });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CaptureMovie([FromBody] Title dto)
+        {
+
+            var userId = _userManager.GetUserId(User);
+            dto.Id = Guid.NewGuid();
+            dto.LastUpdated = DateTime.UtcNow;
+            //await _movieService.SaveTitleForUserAsync(userId, dto); NOT Implamented
+
+            return Ok();
         }
     }
 }
