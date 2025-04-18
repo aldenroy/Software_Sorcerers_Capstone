@@ -21,18 +21,21 @@ namespace MoviesMadeEasy.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<BaseController> _logger;
+        private readonly ITitleRepository _titleRepository;
 
         public HomeController(
             IOpenAIService openAIService,
             IMovieService movieService, 
             UserManager<IdentityUser> userManager, 
-            IUserRepository userRepository, 
+            IUserRepository userRepository,
+            ITitleRepository titleRepository,
             ILogger<BaseController> logger) : base(userManager, userRepository, logger)
         {
             _openAIService = openAIService;
             _movieService = movieService;
             _userManager = userManager;
             _userRepository = userRepository;
+            _titleRepository = titleRepository;
             _logger = logger;
         }
 
@@ -138,14 +141,10 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CaptureMovie([FromBody] Title dto)
+        public IActionResult CaptureMovie([FromBody] Title title)
         {
-
-            var userId = _userManager.GetUserId(User);
-            dto.Id = Guid.NewGuid();
-            dto.LastUpdated = DateTime.UtcNow;
-            //await _movieService.SaveTitleForUserAsync(userId, dto); NOT Implamented
-
+            if (title == null) return BadRequest();
+            _titleRepository.CaptureOrUpdate(title);
             return Ok();
         }
     }

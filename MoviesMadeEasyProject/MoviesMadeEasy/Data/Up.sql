@@ -11,11 +11,9 @@ GO
 ----------------------------------------------------------
 
 CREATE TABLE [dbo].[Title] (
-    [id]                 UNIQUEIDENTIFIER NOT NULL,
-    [external_id]        NVARCHAR(255)    NULL,
+    [id]                 INT IDENTITY(1,1) NOT NULL,
     [title_name]         NVARCHAR(255)    NOT NULL,
     [year]               INT              NOT NULL,
-    [type]               NVARCHAR(50)     NOT NULL,
     [poster_url]         NVARCHAR(MAX)     NULL,
     [genres]             NVARCHAR(MAX)     NULL,
     [rating]             NVARCHAR(50)      NULL,
@@ -85,9 +83,9 @@ GO
 ----------------------------------------------------------
 
 CREATE TABLE [dbo].[RecentlyViewedTitles] (
-    [Id] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
+    [Id] INT IDENTITY(1,1) NOT NULL,
     [UserId] INT NOT NULL,
-    [TitleId] UNIQUEIDENTIFIER NOT NULL,
+    [TitleId] INT NOT NULL,
     [ViewedAt] DATETIME NOT NULL DEFAULT GETDATE(),
     
     CONSTRAINT [PK_RecentlyViewedTitles] PRIMARY KEY CLUSTERED ([Id] ASC),

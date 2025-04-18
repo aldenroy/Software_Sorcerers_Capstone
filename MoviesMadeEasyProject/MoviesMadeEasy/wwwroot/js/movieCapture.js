@@ -9,11 +9,9 @@
         if (!card) return;
 
         const payload = {
-            ExternalId: card.dataset.externalId,
             TitleName: card.querySelector('h5').childNodes[0].textContent.trim(),
             Year: parseInt(card.querySelector('.movie-year').textContent.replace(/[()]/g, ''), 10),
-            Type: card.dataset.type,
-            PosterUrl: card.dataset.posterUrl || null,
+            PosterUrl: card.dataset.posterUrl || card.querySelector('img')?.src || null,
             Genres: card.dataset.genres,        
             Rating: card.querySelector('.movie-rating').textContent.replace('Rating: ', '') || null,
             Overview: card.dataset.overview,

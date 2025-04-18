@@ -68,11 +68,9 @@ namespace MoviesMadeEasy.Data
 
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
-                    .HasColumnName("id");
-
-                entity.Property(e => e.ExternalId)
-                    .HasMaxLength(255)
-                    .HasColumnName("external_id");
+                    .HasColumnName("id")
+                    .UseIdentityColumn()   
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.TitleName)
                     .HasMaxLength(255)
@@ -80,10 +78,6 @@ namespace MoviesMadeEasy.Data
 
                 entity.Property(e => e.Year)
                     .HasColumnName("year");
-
-                entity.Property(e => e.Type)
-                    .HasMaxLength(50)
-                    .HasColumnName("type");
 
                 entity.Property(e => e.PosterUrl)
                     .HasColumnType("nvarchar(max)")
