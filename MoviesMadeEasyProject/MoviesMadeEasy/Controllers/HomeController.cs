@@ -144,7 +144,11 @@ namespace MoviesMadeEasy.Controllers
         public IActionResult CaptureMovie([FromBody] Title title)
         {
             if (title == null) return BadRequest();
-            _titleRepository.CaptureOrUpdate(title);
+            if (!User.Identity.IsAuthenticated) return Unauthorized();
+            var identityId = _userManager.GetUserId(User);
+            var user = _userRepository.GetUser(identityId);
+            if (user.Id == null) return Unauthorized();
+            _titleRepository.RecordTitleView(title, user.Id);
             return Ok();
         }
     }

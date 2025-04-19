@@ -116,8 +116,9 @@ namespace MoviesMadeEasy.Data
                 entity.ToTable("RecentlyViewedTitles");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("Id");
+                      .HasColumnName("Id")
+                      .UseIdentityColumn()   
+                      .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.UserId)
                     .HasColumnName("UserId");
@@ -142,6 +143,7 @@ namespace MoviesMadeEasy.Data
                 entity.HasIndex(e => new { e.UserId, e.TitleId })
                     .IsUnique();
             });
+
 
             builder.Entity<User>(entity =>
             {

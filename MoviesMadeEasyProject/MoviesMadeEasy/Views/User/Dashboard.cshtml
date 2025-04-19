@@ -13,7 +13,27 @@
     <h1 id="dashboard-greeting" aria-live="polite">Hello, @Model.UserName!</h1>
 
     <h2 class="dashtitles">Recently Viewed</h2>
-    <div id="recently-viewed" class="movie-placeholder" role="region" aria-labelledby="recently-viewed-title"></div>
+
+    @if (Model.RecentlyViewedTitles != null && Model.RecentlyViewedTitles.Any())
+    {
+        <div id="recently-viewed" class="row gx-3 gy-4 text-center" role="list">
+            @foreach (var t in Model.RecentlyViewedTitles)
+            {
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2" role="listitem">
+                    <img src="@t.PosterUrl"
+                         alt="@t.TitleName poster"
+                         class="img-fluid mb-2" />
+                    <p class="movie-title mb-0">@t.TitleName</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div id="no-recent-titles" role="status">
+            You haven't viewed any titles yet.
+        </div>
+    }
 
     <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
     
