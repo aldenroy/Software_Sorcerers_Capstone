@@ -96,22 +96,36 @@ function loadRecommendations() {
 
     try {
         const recommendations = JSON.parse(recommendationsData);
-        
-        let html = `<h3>Movies similar to "${originalTitle}":</h3><ul class="list-group">`;
+
+        let html = `<h3>Movies similar to "${originalTitle}":</h3>`;
 
         recommendations.forEach(movie => {
-            // Only display the movie title and year, without the raw object representation
-            html += `<li class="list-group-item">${movie.title} (${movie.year})</li>`;
+            const genres = movie.genres && movie.genres.length ? movie.genres.join(", ") : "Unknown";
+            const rating = movie.rating || "N/A";
+            const posterUrl = movie.posterUrl || 'https://via.placeholder.com/150';
+            const overview = movie.overview || "N/A";
+            const services = movie.services && movie.services.length ? movie.services.join(", ") : "N/A";
+
+            html += `
+                <article class="movie-card" data-genres="${genres}" data-overview="${overview}" data-streaming="${services}">
+                    <div class="movie-row" aria-label="Recommendation card for ${movie.title}">
+                        <div class="movie-details">
+                            <h5>${movie.title} <span class="movie-year">(${movie.year || 'N/A'})</span></h5>
+                            <button class="btn btn-primary">View Details</button>
+                            <button class="btn btn-outline-secondary">More Like This</button>
+                        </div>
+                    </div>
+                </article>
+            `;
         });
-        
-        html += '</ul>';
-        
+
         container.innerHTML = html;
     } catch (error) {
         console.error("Error loading recommendations:", error);
         container.innerHTML = '<div class="alert alert-danger">Error displaying recommendations. Please try again.</div>';
     }
 }
+
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = {

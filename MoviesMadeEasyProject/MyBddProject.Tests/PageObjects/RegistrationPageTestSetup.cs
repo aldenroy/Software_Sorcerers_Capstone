@@ -11,9 +11,26 @@ namespace MyBddProject.Tests.PageObjects
         {
             _driver = driver;
         }
+        private IWebElement WaitForElement(By by)
+        {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            return wait.Until(driver =>
+            {
+                try
+                {
+                    var element = driver.FindElement(by);
+                    return (element.Displayed && element.Enabled) ? element : null;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            });
+        }
 
         public void FillFirstName(string firstName)
         {
+            var firstNameField = WaitForElement(By.Id("Input_FirstName"));
             _driver.FindElement(By.Id("Input_FirstName")).SendKeys(firstName);
         }
 

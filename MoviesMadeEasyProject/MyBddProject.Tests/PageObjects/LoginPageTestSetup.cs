@@ -16,7 +16,14 @@ namespace MyBddProject.Tests.PageObjects
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
 
-            _driver.FindElement(By.Id("Input_Email")).SendKeys(email);
+            var emailField = wait.Until(driver =>
+            {
+                var element = driver.FindElement(By.Id("Input_Email"));
+                return element.Displayed && element.Enabled ? element : null;
+            });
+
+            emailField.SendKeys(email);
+
             _driver.FindElement(By.Id("Input_Password")).SendKeys(password);
             _driver.FindElement(By.Id("login-submit")).Click();
         }

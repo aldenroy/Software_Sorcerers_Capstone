@@ -138,6 +138,8 @@ namespace MyProject.Tests.StepDefinitions
         [Then(@"the user will be logged in and redirected to the dashboard page")]
         public void ThenTheUserWillBeLoggedInAndRedirectedToTheDashboardPage()
         {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(driver => driver.Url.Contains("/Dashboard"));
             Assert.That(_driver.Url, Does.Contain("/Dashboard"));
         }
 
@@ -187,6 +189,8 @@ namespace MyProject.Tests.StepDefinitions
         [Then(@"the user should be redirected to the preferences page")]
         public void ThenTheUserShouldBeRedirectedToThePreferencesPage()
         {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(driver => driver.Url.Contains("/Preferences"));
             Assert.That(_driver.Url, Does.Contain("/Preferences"));
         }
 
