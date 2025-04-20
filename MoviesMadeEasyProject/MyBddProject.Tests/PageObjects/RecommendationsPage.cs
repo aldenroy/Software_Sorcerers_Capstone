@@ -18,36 +18,56 @@ namespace MyBddProject.PageObjects
         public void WaitForPageToLoad()
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
-            
+
             // Wait for exact URL
             wait.Until(d => d.Url.Equals(
-                "http://localhost:5000/Home/Recommendations", 
+                "http://localhost:5000/Home/Recommendations",
                 StringComparison.OrdinalIgnoreCase));
 
-            // Wait for loading to complete
-            wait.Until(d => 
+            // Wait for loading spinner to disappear
+            wait.Until(d =>
                 d.FindElement(By.Id("loadingSpinner")).GetCssValue("display") == "none");
 
-            // Wait for content to appear
-            wait.Until(d => 
-                d.FindElements(By.CssSelector("#recommendationsContainer .list-group-item")).Count > 0 ||
-                d.FindElements(By.CssSelector(".recommendations-error")).Count > 0);
+            // Wait until at least one .movie-card is visible in the container
+            wait.Until(d =>
+                d.FindElements(By.CssSelector("#recommendationsContainer .movie-card")).Count > 0);
         }
+
 
         public int RecommendationCount()
         {
-            return _driver.FindElements(By.CssSelector("#recommendationsContainer .list-group-item")).Count;
+            return _driver.FindElements(By.CssSelector("#recommendationsContainer .movie-card")).Count;
         }
 
         public void ClickBackToSearch()
         {
-            var backButton = _wait.Until(d => 
+            // Wait for the spinner to disappear first
+            _wait.Until(d =>
+                d.FindElement(By.Id("loadingSpinner")).GetCssValue("display") == "none");
+
+            var backButton = _wait.Until(d =>
                 d.FindElement(By.CssSelector(".back-to-search .btn-primary")));
-            backButton.Click();
-            
-            // Wait to leave recommendations page
+
+            // Scroll into view and wait until clickable
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", backButton);
+            _wait.Until(d => backButton.Displayed && backButton.Enabled);
+
+            try
+            {
+                backButton.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                // Try again after a brief wait if intercepted
+                Thread.Sleep(500);
+                ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", backButton);
+            }
+
+            // Wait for navigation to happen
             _wait.Until(d => !d.Url.Contains("Recommendations"));
         }
+
+
 
         public bool IsRecommendationFor(string originalTitle)
         {
