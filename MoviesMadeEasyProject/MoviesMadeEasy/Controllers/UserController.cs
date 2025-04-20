@@ -16,17 +16,21 @@ namespace MoviesMadeEasy.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly ISubscriptionRepository _subscriptionService;
+        private readonly ITitleRepository _titleRepository;
 
         public UserController(
             ILogger<UserController> logger,
             UserManager<IdentityUser> userManager,
             IUserRepository userRepository,
-            ISubscriptionRepository subscriptionService) : base(userManager, userRepository, logger)
+            ISubscriptionRepository subscriptionService,
+            ITitleRepository titleRepository)
+            : base(userManager, userRepository, logger)
         {
             _logger = logger;
             _userManager = userManager;
             _userRepository = userRepository;
             _subscriptionService = subscriptionService;
+            _titleRepository = titleRepository;
         }
 
         private DashboardModelView BuildDashboardModelView(int userId)
@@ -34,6 +38,11 @@ namespace MoviesMadeEasy.Controllers
             var user = _userRepository.GetUser(userId);
             var userSubscriptions = _subscriptionService.GetUserSubscriptions(userId);
             var allServices = _subscriptionService.GetAllServices()?.ToList() ?? new List<StreamingService>();
+            var recentTitles = _titleRepository
+                      .GetRecentlyViewedByUser(userId)
+                      .OrderByDescending(tv => tv.LastUpdated)
+                      .Take(10)
+                      .ToList();
 
             return new DashboardModelView
             {
@@ -44,7 +53,8 @@ namespace MoviesMadeEasy.Controllers
                 AllServicesList = allServices,
                 PreSelectedServiceIds = userSubscriptions != null
                                         ? string.Join(",", userSubscriptions.Select(s => s.Id))
-                                        : ""
+                                        : "",
+               RecentlyViewedTitles = recentTitles
             };
         }
 

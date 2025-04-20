@@ -22,12 +22,14 @@ namespace MME_Tests
         private Mock<IOpenAIService> _mockOpenAIService;
         private Mock<IMovieService> _mockMovieService;
         private HomeController _homeController;
+        private Mock<ITitleRepository> _mockTitleRepo;
 
         [SetUp]
         public void Setup()
         {
             _mockOpenAIService = new Mock<IOpenAIService>();
             _mockMovieService = new Mock<IMovieService>();
+            _mockTitleRepo = new Mock<ITitleRepository>();
 
             var mockUserManager = new Mock<UserManager<IdentityUser>>(
                 Mock.Of<IUserStore<IdentityUser>>(), null, null, null, null, null, null, null, null);
@@ -40,6 +42,7 @@ namespace MME_Tests
                 _mockMovieService.Object,
                 mockUserManager.Object,
                 mockUserRepository.Object,
+                _mockTitleRepo.Object,
                 mockLogger.Object
             );
 

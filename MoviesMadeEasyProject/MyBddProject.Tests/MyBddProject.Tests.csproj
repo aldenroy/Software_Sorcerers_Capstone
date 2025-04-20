@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <GenerateReqnrollCodeBehindFiles>true</GenerateReqnrollCodeBehindFiles>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,4 +30,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+
+  <ItemGroup>
+  <None Update="Features\**\*.feature">
+    <Generator>ReqnrollSingleFileGenerator</Generator>
+    <LastGenOutput>%(Filename).feature.cs</LastGenOutput>
+  </None>
+</ItemGroup>
 </Project>

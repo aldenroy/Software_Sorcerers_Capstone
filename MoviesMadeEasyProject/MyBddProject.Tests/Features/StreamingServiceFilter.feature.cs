@@ -20,18 +20,19 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Dashboard UI for authenticated users")]
+    [NUnit.Framework.DescriptionAttribute("Content Filtering by Streaming Service")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class DashboardUIForAuthenticatedUsersFeature
+    public partial class ContentFilteringByStreamingServiceFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dashboard UI for authenticated users", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Content Filtering by Streaming Service", "  In order to view only desired content\r\n  As a user on the content browsing page" +
+                "\r\n  I want to filter content by streaming services", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "SSC126NavbarDashboardLink.feature"
+#line 1 "StreamingServiceFilter.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -82,24 +83,15 @@ namespace MyBddProject.Tests.Features
             await testRunner.CollectScenarioErrorsAsync();
         }
         
-        public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
-        {
-#line 3
-#line hidden
-#line 4
- await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-        }
-        
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Display Dashboard link for Authenticated User")]
-        public async System.Threading.Tasks.Task DisplayDashboardLinkForAuthenticatedUser()
+        [NUnit.Framework.DescriptionAttribute("Filtering content by a single streaming service")]
+        public async System.Threading.Tasks.Task FilteringContentByASingleStreamingService()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Display Dashboard link for Authenticated User", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filtering content by a single streaming service", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 6
-this.ScenarioInitialize(scenarioInfo);
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -108,61 +100,31 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
 #line 7
-    await testRunner.WhenAsync("the page loads", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 8
-    await testRunner.ThenAsync("I should see a \"Dashboard\" link in the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the list of available streaming services is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Navigate to the Dashboard Page")]
-        public async System.Threading.Tasks.Task NavigateToTheDashboardPage()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Navigate to the Dashboard Page", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 9
+    await testRunner.WhenAsync("the user selects a specific streaming service \"Netflix\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 10
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 11
-    await testRunner.GivenAsync("I navigate to the \"Home\" page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 12
-    await testRunner.WhenAsync("I click the \"Dashboard\" link on the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 13
-    await testRunner.ThenAsync("I should be redirected to my dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the content list is updated to show only items available on \"Netflix\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Keyboard Navigation for Dashboard Button")]
-        public async System.Threading.Tasks.Task KeyboardNavigationForDashboardButton()
+        [NUnit.Framework.DescriptionAttribute("Filtering content by multiple streaming services")]
+        public async System.Threading.Tasks.Task FilteringContentByMultipleStreamingServices()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Keyboard Navigation for Dashboard Button", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 15
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filtering content by multiple streaming services", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 12
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -171,31 +133,32 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
+#line 13
+    await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 14
+    await testRunner.AndAsync("the list of available streaming services is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 15
+    await testRunner.WhenAsync("the user selects streaming services \"Netflix\" and \"Hulu\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 16
-    await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 17
-    await testRunner.WhenAsync("I tab through the navbar until I reach the \"Dashboard\" link", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 18
-    await testRunner.ThenAsync("I should be able to focus on and activate the button using the keyboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the content list is updated to show items available on either \"Netflix\" or \"Hulu\"" +
+                        "", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Screen Reader Accessibility for Dashboard link")]
-        public async System.Threading.Tasks.Task ScreenReaderAccessibilityForDashboardLink()
+        [NUnit.Framework.DescriptionAttribute("Clearing applied streaming service filters")]
+        public async System.Threading.Tasks.Task ClearingAppliedStreamingServiceFilters()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Screen Reader Accessibility for Dashboard link", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 20
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Clearing applied streaming service filters", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 18
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -204,15 +167,50 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
+#line 19
+    await testRunner.GivenAsync("the user has one or more streaming service filters applied", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 20
+    await testRunner.WhenAsync("the user clicks the \"Clear Filters\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 21
-    await testRunner.WhenAsync("I navigate to the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.ThenAsync("all streaming service filters are removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 22
-    await testRunner.ThenAsync("the \"Dashboard\" link should include a clear, descriptive label that lets my scree" +
-                        "n reader announce its purpose.", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the content list returns to the default unfiltered view", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Filter response time performance")]
+        public async System.Threading.Tasks.Task FilterResponseTimePerformance()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filter response time performance", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 24
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 25
+    await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 26
+    await testRunner.AndAsync("the user has one or more streaming service filters applied", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 27
+    await testRunner.WhenAsync("the user selects a streaming service filter", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 28
+    await testRunner.ThenAsync("the content list should update within 2 seconds", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -3,17 +3,71 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+    var itemsPerSlide = 5;
+    var titles = Model.RecentlyViewedTitles ?? new List<Title>();
+    var total = titles.Count;
 }
 
 <link rel="stylesheet" href="~/css/dashboard.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
+<h2 id="recently-viewed-title" class="dashtitles">Recently Viewed</h2>
 
-<div class="content container">
-    <h1 id="dashboard-greeting" aria-live="polite">Hello, @Model.UserName!</h1>
+@if (total > 0)
+{
+    <div id="recentlyViewedCarousel"
+         class="carousel slide"
+         data-bs-ride="carousel"
+         aria-labelledby="recently-viewed-title">
 
-    <h2 class="dashtitles">Recently Viewed</h2>
-    <div id="recently-viewed" class="movie-placeholder" role="region" aria-labelledby="recently-viewed-title"></div>
+        <div class="carousel-inner">
+            @for (int i = 0; i < total; i += itemsPerSlide)
+            {
+                var slide = titles.Skip(i).Take(itemsPerSlide).ToList();
+                <div class="carousel-item @(i == 0 ? "active" : "")">
+                    <div class="row gx-3 gy-4 text-center">
+                        @foreach (var t in slide)
+                        {
+                            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                <a href="javascript:void(0)"
+                                   aria-label="@t.TitleName, view details">
+                                    <img src="@t.PosterUrl"
+                                         alt=""
+                                         aria-hidden="true"
+                                         class="img-fluid mb-2" />
+                                    <span class="movie-title mb-0"
+                                          aria-hidden="true">
+                                        @t.TitleName
+                                    </span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button class="carousel-control-prev"
+                type="button"
+                data-bs-target="#recentlyViewedCarousel"
+                data-bs-slide="prev"
+                aria-label="Previous slide">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next"
+                type="button"
+                data-bs-target="#recentlyViewedCarousel"
+                data-bs-slide="next"
+                aria-label="Next slide">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+}
+else
+{
+    <p id="no-recent-titles" role="status">
+        You haven't viewed any titles yet.
+    </p>
+}
 
     <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
     
@@ -61,4 +115,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!--Credit: Bootstrap Carousel-->
 

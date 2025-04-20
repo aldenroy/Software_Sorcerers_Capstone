@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MoviesMadeEasy.Models
+﻿namespace MoviesMadeEasy.Models
 {
-    public class User
+    public partial class User
     {
         public int Id { get; set; }
-
-        public string AspNetUserId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public Guid? RecentlyViewedShowId { get; set; }
-
+        public string AspNetUserId { get; set; } = null!;
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
         public string ColorMode { get; set; } = "Light";
         public string FontSize { get; set; } = "Medium";
         public string FontType { get; set; } = "Standard";
 
-        public virtual Title RecentlyViewedShow { get; set; }
         public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; }
+            = new List<UserStreamingService>();
+
+        public virtual ICollection<RecentlyViewedTitle> RecentlyViewedTitles { get; set; }
+            = new List<RecentlyViewedTitle>();
     }
 }

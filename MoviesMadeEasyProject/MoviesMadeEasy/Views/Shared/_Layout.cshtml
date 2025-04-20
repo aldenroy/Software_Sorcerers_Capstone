@@ -16,7 +16,7 @@
 </head>
 <body data-theme="@colorMode" data-font-size="@fontSize" class="@colorMode-theme">
     <header role="banner">
-        @if (colorMode == "dark")
+        @if (colorMode == "dark" || colorMode == "high-contrast")
         {
             <img id="logo-main" src="~/images/team_logo_dark.png" alt="Dark Mode Logo" />
         }

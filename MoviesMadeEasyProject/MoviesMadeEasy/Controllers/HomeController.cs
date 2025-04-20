@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using MoviesMadeEasy.DTOs;
 using System.Net; 
 using System.Text.Json;
+using MoviesMadeEasy.Models;
 namespace MoviesMadeEasy.Controllers
 
 {
@@ -20,18 +21,21 @@ namespace MoviesMadeEasy.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<BaseController> _logger;
+        private readonly ITitleRepository _titleRepository;
 
         public HomeController(
             IOpenAIService openAIService,
             IMovieService movieService, 
             UserManager<IdentityUser> userManager, 
-            IUserRepository userRepository, 
+            IUserRepository userRepository,
+            ITitleRepository titleRepository,
             ILogger<BaseController> logger) : base(userManager, userRepository, logger)
         {
             _openAIService = openAIService;
             _movieService = movieService;
             _userManager = userManager;
             _userRepository = userRepository;
+            _titleRepository = titleRepository;
             _logger = logger;
         }
 
@@ -134,6 +138,18 @@ namespace MoviesMadeEasy.Controllers
             {
                 return Json(new { });
             }
+        }
+
+        [HttpPost]
+        public IActionResult CaptureMovie([FromBody] Title title)
+        {
+            if (title == null) return BadRequest();
+            if (!User.Identity.IsAuthenticated) return Unauthorized();
+            var identityId = _userManager.GetUserId(User);
+            var user = _userRepository.GetUser(identityId);
+            if (user.Id == null) return Unauthorized();
+            _titleRepository.RecordTitleView(title, user.Id);
+            return Ok();
         }
     }
 }

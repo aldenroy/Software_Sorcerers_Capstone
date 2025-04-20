@@ -1,5 +1,11 @@
-﻿--USE [MoviesMadeEasyDb];
---GO
+﻿USE [MoviesMadeEasyDB];
+GO
+
+IF OBJECT_ID('dbo.RecentlyViewedTitles', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE [dbo].[RecentlyViewedTitles];
+END
+GO
 
 IF OBJECT_ID('dbo.UserStreamingServices', 'U') IS NOT NULL
 BEGIN
@@ -19,10 +25,8 @@ BEGIN
 END
 GO
 
-
 IF OBJECT_ID('dbo.Title', 'U') IS NOT NULL
 BEGIN
     DROP TABLE [dbo].[Title];
 END
 GO
-

@@ -334,10 +334,6 @@ html[data-theme="high-contrast"] select {
 
 
 /* Navbar styling */
-#app-name {
-    color: var(--navbar-text) !important;
-}
-
 .navbar {
     background-color: var(--navbar-bg) !important;
     border-color: var(--border-color) !important;
