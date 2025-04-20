@@ -102,7 +102,7 @@ if (!app.Environment.IsDevelopment())
 //-------------------------------------------------------------------------------
 // Seed test User: Uncomment out when running bdd tests
 //--------------------------------------------------------------------------------
-// using (var scope = app.Services.CreateScope())
+//using (var scope = app.Services.CreateScope())
 //{
 //    var services = scope.ServiceProvider;
 //    try

@@ -11,8 +11,6 @@ describe('movieCapture.js', () => {
 
     document.body.innerHTML = `
       <article class="movie-card"
-        data-external-id="imdb123"
-        data-type="MovieType"
         data-poster-url="http://poster.jpg"
         data-genres="Action,Comedy"
         data-overview="Overview text"
@@ -48,10 +46,8 @@ describe('movieCapture.js', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ExternalId:        'imdb123',
           TitleName:         'Title Name',
           Year:              2025,
-          Type:              'MovieType',
           PosterUrl:         'http://poster.jpg',
           Genres:            'Action,Comedy',
           Rating:            '9.5',

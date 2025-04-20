@@ -12,51 +12,128 @@
 }
 
 .dashtitles {
-    margin: auto;
-    padding: 30px 10px;
+    margin: 30px auto 10px auto;
+    padding: 0;
+    text-align: center;
+    width: 100%;
 }
 
-.subscription-placeholder {
-    position: relative;
-    width: 130px; 
-    height: 130px; 
-    border-radius: 50%;
-    background-color: #ddd;
+#recently-viewed-title {
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+#recentlyViewedCarousel {
+    margin-bottom: 40px;
+}
+
+.carousel-inner {
+    display: block;
+    padding-left: 0;
+    padding-bottom: 0;
+    width: 100%;
+}
+
+.carousel-item {
+    width: 100%;
+    min-height: 320px;
+    padding-bottom: 0;
+}
+
+.row.gx-3.gy-4.text-center {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
-    flex-shrink: 0; 
-    margin: 0 auto; 
+    align-items: flex-start;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    gap: 20px;
+}
+
+.carousel-item .col-6,
+.carousel-item .col-sm-4,
+.carousel-item .col-md-3,
+.carousel-item .col-lg-2 {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.carousel-item a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+}
+
+.carousel-item img {
+    width: 120px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.movie-title {
+    margin: 0;
+    font-size: 14px;
+    color: yellow;
+    text-align: center;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+#subscription-title {
+    margin-top: 20px;
+    margin-bottom: 60px;
 }
 
 #circle-center {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
     margin-top: 40px;
     margin-bottom: 60px;
-}
-
-.service-name {
-    color: #333; 
+    width: 100%;
+    text-align: center;
 }
 
 #add-subscription-btn {
-    background-color: #333; 
-    color: #fff; 
-    padding: 10px 15px;
+    display: block;
+    margin: 40px auto 70px auto;
+    background-color: #333;
+    color: #fff;
+    padding: 12px 18px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     outline: none;
-    margin: 10px 10px 25px 10px;
 }
 
-#add-subscription-btn:focus, #add-subscription-btn:hover {
-    background-color: #fff; 
-    color: #000000;
-    border: dashed 2px #000000;
+    #add-subscription-btn:focus,
+    #add-subscription-btn:hover {
+        background-color: #fff;
+        color: #000000;
+        border: dashed 2px #000000;
+    }
+
+.subscription-placeholder {
+    margin: 20px auto;
+}
+
+ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
+    justify-content: center;
+    padding: 0;
+}
+
+.subscription-item {
+    list-style: none;
 }
 
 .subscription-list {
@@ -69,6 +146,10 @@
     list-style-type: none;
 }
 
+.service-name {
+    color: #333;
+}
+
 .service-logo {
     width: 100%;
     height: 100%;
@@ -78,6 +159,7 @@
     background-color: white;
     border: none;
 }
+
 .subscription-link {
     display: flex;
     width: 160px;
@@ -93,23 +175,26 @@
     position: relative;
 }
 
-.subscription-link:hover,
-.subscription-link:focus {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
-    outline: none; 
+    .subscription-link:hover,
+    .subscription-link:focus {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .subscription-link:focus {
+        outline: 3px solid #007bff;
+        outline-offset: 4px;
+    }
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
 }
 
-.subscription-link:focus {
-    outline: 3px solid #007bff;
-    outline-offset: 4px;
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: white;
+    border: 2px solid white;
+    border-radius: 50%;
 }
-
-
-
-
-
-
-
-
-
