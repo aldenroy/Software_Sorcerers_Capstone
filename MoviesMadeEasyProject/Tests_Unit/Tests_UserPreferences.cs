@@ -187,7 +187,7 @@ namespace MME_Tests
             // Set different values in the Input model
             _model.Input = new RegisterPreferencesModel.InputModel
             {
-                ColorMode = "dark",
+                ColorMode = "Dark",
                 FontSize = "Large",
                 FontType = "Open Dyslexic"
             };
@@ -227,6 +227,7 @@ namespace MME_Tests
             // Assert
             Assert.That(_model.ViewData["ColorMode"], Is.EqualTo("dark"));
             Assert.That(_model.ViewData["FontSize"], Is.EqualTo("large"));
+            Assert.That(_model.ViewData["FontType"], Is.EqualTo("open dyslexic"));
         }
     }
 }

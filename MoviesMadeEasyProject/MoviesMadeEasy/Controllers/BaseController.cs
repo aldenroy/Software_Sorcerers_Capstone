@@ -28,6 +28,7 @@ namespace MoviesMadeEasy.Controllers
             // Set defaults
             ViewData["ColorMode"] = "light";
             ViewData["FontSize"] = "medium";
+            ViewData["FontType"] = "standard";
             
             try
             {
@@ -75,6 +76,19 @@ namespace MoviesMadeEasy.Controllers
                                 }
                                 ViewData["FontSize"] = fontSize;
                                 _logger.LogInformation($"Set font size to: {fontSize}");
+
+                                string fontType = user.FontType?.ToLower().Trim() ?? "standard";
+                                if (fontType == "open dyslexic")
+                                {
+                                    fontType = "open-dyslexic";
+                                }
+                                
+                                if (fontType != "standard" && fontType != "open-dyslexic")
+                                {
+                                    fontType = "standard";
+                                }
+                                ViewData["FontType"] = fontType;
+                                _logger.LogInformation($"Set font type to: {fontType}");
                             }
                             else
                             {
