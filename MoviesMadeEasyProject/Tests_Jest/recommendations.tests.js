@@ -119,3 +119,62 @@ describe('setupMoreLikeThisButtons', () => {
     expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('⚠️'));
   });
 });
+
+describe('loadRecommendations - UI rendering and interaction', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div id="recommendationsContainer"></div>
+      <div id="modalTitle"></div>
+      <img id="modalPoster" />
+    `;
+
+    sessionStorage.setItem('recommendations', JSON.stringify([
+      {
+        title: 'Interstellar',
+        year: 2014,
+        genres: ['Sci-Fi', 'Adventure'],
+        overview: 'A team of explorers travel through a wormhole in space.',
+        rating: 'PG-13',
+        posterUrl: 'https://example.com/interstellar.jpg',
+        services: ['Netflix', 'HBO Max']
+      }
+    ]));
+    sessionStorage.setItem('originalTitle', 'Inception');
+  });
+
+  test('renders a movie card with title, year, and buttons', () => {
+    loadRecommendations();
+
+    const container = document.getElementById('recommendationsContainer');
+    expect(container).toHaveTextContent('Interstellar (2014)');
+    expect(container.querySelector('.btn-primary')).toBeInTheDocument();
+    expect(container.querySelector('.btn-outline-secondary')).toBeInTheDocument();
+  }); 
+
+  test('clicking "More Like This" on recommendation triggers new fetch', async () => {
+    // Add dummy spinner
+    document.body.innerHTML += `<div id="loadingSpinner" style="display: none;"></div>`;
+  
+    fetch.mockResponseOnce(JSON.stringify([
+      { title: 'The Martian', year: 2015 }
+    ]));
+  
+    loadRecommendations();
+    setupMoreLikeThisButtons();
+  
+    const moreLikeThisBtn = document.querySelector('.btn-outline-secondary');
+  
+    // Simulate card data needed by the button
+    moreLikeThisBtn.closest('.movie-card').setAttribute('data-title', 'Interstellar');
+  
+    fireEvent.click(moreLikeThisBtn);
+  
+    // Allow promise to resolve
+    await new Promise(resolve => setTimeout(resolve, 0));
+  
+    expect(fetch).toHaveBeenCalled();
+    expect(sessionStorage.getItem('originalTitle')).not.toBeNull();
+    expect(sessionStorage.getItem('recommendations')).toBeTruthy();
+  });
+  
+});
