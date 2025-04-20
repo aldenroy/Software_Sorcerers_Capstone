@@ -102,8 +102,8 @@ if (!app.Environment.IsDevelopment())
 //-------------------------------------------------------------------------------
 // Seed test User: Uncomment out when running bdd tests
 //--------------------------------------------------------------------------------
-//using (var scope = app.Services.CreateScope())
-//{
+// using (var scope = app.Services.CreateScope())
+// {
 //    var services = scope.ServiceProvider;
 //    try
 //    {
@@ -114,7 +114,7 @@ if (!app.Environment.IsDevelopment())
 //        var logger = services.GetRequiredService<ILogger<Program>>();
 //        logger.LogError(ex, "An error occurred seeding the DB.");
 //    }
-//}
+// }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
