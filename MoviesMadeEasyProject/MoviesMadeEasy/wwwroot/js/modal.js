@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("results").addEventListener("click", function (event) {
+    document.getElementById("results")?.addEventListener("click", function (event) {
         if (event.target.classList.contains("btn-primary")) {
             let movieCard = event.target.closest(".movie-card");
 

@@ -25,67 +25,68 @@
 
 #recentlyViewedCarousel {
     margin-bottom: 40px;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
 }
 
 .carousel-inner {
-    display: block;
-    padding-left: 0;
-    padding-bottom: 0;
     width: 100%;
 }
 
 .carousel-item {
+    display: none;
+    transition: transform 0.6s ease-in-out;
     width: 100%;
-    min-height: 320px;
-    padding-bottom: 0;
+}
+
+.carousel-item.active {
+    display: block;
 }
 
 .row.gx-3.gy-4.text-center {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: flex-start;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
+    align-items: stretch;
+    margin: 0;
+    padding: 0 2rem;
     gap: 20px;
+    width: 100%;
 }
 
-.carousel-item .col-6,
-.carousel-item .col-sm-4,
-.carousel-item .col-md-3,
-.carousel-item .col-lg-2 {
+.movie-card {
     flex: 0 0 auto;
+    width: 120px;
+    height: 310px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100%;
+    align-self: stretch;
 }
 
-.carousel-item a {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-}
-
-.carousel-item img {
+.movie-card img {
     width: 120px;
-    height: 200px;
+    height: 180px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
 }
 
 .movie-title {
-    margin: 0;
-    font-size: 14px;
-    color: black;
+    font-size: 15px;
+    font-weight: 600;
+    color: yellow;
     text-align: center;
     width: 100%;
     overflow-wrap: break-word;
+    line-height: 1.2;
+}
+
+.movie-card img.img-fluid,
+.movie-card .movie-title {
+    cursor: pointer;
 }
 
 #subscription-title {
@@ -195,6 +196,18 @@ ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
 .carousel-control-prev,
 .carousel-control-next {
     width: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    z-index: 2;
+}
+
+.carousel-control-prev {
+    left: -2%;
+}
+
+.carousel-control-next {
+    right: -2%;
 }
 
 .carousel-control-prev-icon {
@@ -216,7 +229,6 @@ ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
     background-position: center;
     background-size: 50% 50%;
 }
-
 
 .carousel-control-prev-icon:hover,
 .carousel-control-next-icon:hover {

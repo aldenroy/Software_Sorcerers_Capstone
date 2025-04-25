@@ -11,14 +11,15 @@ namespace MyBddProject.Tests.Steps
     public class DashboardSteps
     {
         private IWebDriver _driver;
-    public DashboardSteps(IWebDriver driver)
-    {
-        _driver = driver;
-    }
 
-    // Scenario: Display Dashboard Link for Authenticated User
+        public DashboardSteps(IWebDriver driver)
+        {
+            _driver = driver;
+        }
 
-    [Given(@"I am logged in on the dashboard page")]
+        // Scenario: Display Dashboard Link for Authenticated User
+
+        [Given(@"I am logged in on the dashboard page")]
         public void GivenIAmLoggedInOnTheDashboardPage()
         {
             var loginPage = new LoginPageTestSetup(_driver);
