@@ -82,7 +82,7 @@
 .movie-title {
     margin: 0;
     font-size: 14px;
-    color: yellow;
+    color: black;
     text-align: center;
     width: 100%;
     overflow-wrap: break-word;
@@ -116,12 +116,12 @@
     outline: none;
 }
 
-    #add-subscription-btn:focus,
-    #add-subscription-btn:hover {
-        background-color: #fff;
-        color: #000000;
-        border: dashed 2px #000000;
-    }
+#add-subscription-btn:focus,
+#add-subscription-btn:hover {
+    background-color: #fff;
+    color: #000;
+    border: dashed 2px #000;
+}
 
 .subscription-placeholder {
     margin: 20px auto;
@@ -175,26 +175,51 @@ ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
     position: relative;
 }
 
-    .subscription-link:hover,
-    .subscription-link:focus {
-        transform: scale(1.1);
-        box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
-        outline: none;
-    }
+.subscription-link:hover,
+.subscription-link:focus {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
 
-    .subscription-link:focus {
-        outline: 3px solid #007bff;
-        outline-offset: 4px;
-    }
+.subscription-link:focus {
+    outline: 3px solid #007bff;
+    outline-offset: 4px;
+}
+
+#no-recent-titles {
+    text-align: center;
+    margin-top: 30px;
+}
 
 .carousel-control-prev,
 .carousel-control-next {
     width: 5%;
 }
 
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    background-color: white;
-    border: 2px solid white;
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+    background-color: #333;
+    border: 2px solid blue;
     border-radius: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50% 50%;
+}
+
+.carousel-control-next-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-color: #333;
+    border: 2px solid blue;
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50% 50%;
+}
+
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: #555;
+    border-color: lightblue;
 }

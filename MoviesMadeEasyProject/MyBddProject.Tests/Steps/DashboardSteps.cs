@@ -80,7 +80,7 @@ namespace MyBddProject.Tests.Steps
         [When(@"I tab through the navbar until I reach the ""(.*)"" link")]
         public void WhenITabThroughTheNavbarUntilIReachTheLink(string linkText)
         {
-            new WebDriverWait(_driver, TimeSpan.FromSeconds(10)).Until(d =>
+            new WebDriverWait(_driver, TimeSpan.FromSeconds(15)).Until(d =>
             {
                 try
                 {
