@@ -81,5 +81,11 @@ namespace MyBddProject.PageObjects
                 return false;
             }
         }
+
+        public void ClickViewDetails(int resultIndex = 0)
+        {
+            var buttons = _driver.FindElements(By.CssSelector(".movie-card .btn-primary"));
+            buttons[resultIndex].Click();
+        }
     }
 }

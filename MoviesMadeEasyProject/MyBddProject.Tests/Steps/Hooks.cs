@@ -31,9 +31,13 @@ public class Hooks
 
             // Configure ChromeDriver
             var options = new ChromeOptions();
-            options.AddArgument("--headless");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
+            options.AddArguments(
+                "--headless", // Run in headless mode (no visible window)
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--window-size=1920,1080"
+            );
             if (!OperatingSystem.IsWindows())
             {
                 options.AddArgument("--user-data-dir=/tmp/chrome-profile");
