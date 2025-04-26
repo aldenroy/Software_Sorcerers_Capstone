@@ -152,7 +152,8 @@ namespace MME_Tests
     {
         private Mock<IUserRepository> _userRepositoryMock;
         private Mock<ISubscriptionRepository> _subscriptionServiceMock;
-        private MoviesMadeEasy.Controllers.UserController _controller;
+        private Mock<ITitleRepository> _titleRepositoryMock;
+        private UserController _controller;
         private DashboardModelView _dashboard;
 
         [SetUp]
@@ -161,7 +162,18 @@ namespace MME_Tests
             var dummyLogger = Mock.Of<ILogger<UserController>>();
             _userRepositoryMock = new Mock<IUserRepository>();
             _subscriptionServiceMock = new Mock<ISubscriptionRepository>();
-            _controller = new MoviesMadeEasy.Controllers.UserController(dummyLogger, null, _userRepositoryMock.Object, _subscriptionServiceMock.Object);
+            _titleRepositoryMock = new Mock<ITitleRepository>();
+
+            _titleRepositoryMock.Setup(x => x.GetRecentlyViewedByUser(It.IsAny<int>(), It.IsAny<int>()))
+             .Returns(new List<Title>());
+
+            _controller = new UserController(
+                dummyLogger, 
+                null, 
+                _userRepositoryMock.Object, 
+                _subscriptionServiceMock.Object, 
+                _titleRepositoryMock.Object);
+
             _dashboard = new DashboardModelView { UserName = "Test" };
             var httpContext = new DefaultHttpContext();
             _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());

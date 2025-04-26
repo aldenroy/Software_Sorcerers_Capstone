@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using MoviesMadeEasy.DAL.Abstract;
+using Castle.Components.DictionaryAdapter.Xml;
 
 ///Given to us from HW3 CS460
 
@@ -77,11 +78,17 @@ namespace MoviesMadeEasy.DAL.Concrete
 
         public virtual TEntity AddOrUpdate(TEntity entity)
         {
-            if (entity == null)
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            var entry = _context.Entry(entity);
+            if (!entry.IsKeySet || entry.State == EntityState.Detached)
             {
-                throw new ArgumentNullException("Entity must not be null to add or update");
+                _dbSet.Add(entity);        
             }
-            _context.Update(entity);
+            else
+            {
+                _dbSet.Update(entity);     
+            }
             _context.SaveChanges();
             return entity;
         }

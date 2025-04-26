@@ -1,0 +1,86 @@
+name: Build, test, and deploy ASP.Net Core app to an Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: MoviesMadeEasy
+  AZURE_WEBAPP_PACKAGE_PATH: './publish_output'
+  DOTNET_VERSION: '8.0.x'
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - name: Restore .NET dependencies
+        run: dotnet restore MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj
+
+      - name: Install npm packages
+        run: npm install
+
+      - name: Build with dotnet
+        run: dotnet build MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release
+
+      - name: Run backend unit tests (NUnit)
+        run: dotnet test MoviesMadeEasyProject/Tests_Unit/Tests_Unit.csproj --verbosity normal
+
+      - name: Run BDD tests (NUnit + Selenium)
+        run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
+
+      - name: Run frontend tests (Jest)
+        run: npm run test
+
+      - name: Publish app
+        run: dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish_output
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish_output
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

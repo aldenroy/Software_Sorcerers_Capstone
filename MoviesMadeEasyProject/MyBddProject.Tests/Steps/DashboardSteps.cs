@@ -80,35 +80,47 @@ namespace MyBddProject.Tests.Steps
         [When(@"I tab through the navbar until I reach the ""(.*)"" link")]
         public void WhenITabThroughTheNavbarUntilIReachTheLink(string linkText)
         {
-            var maxTabs = 20;
-            bool found = false;
-
-            for (int i = 0; i < maxTabs; i++)
+            new WebDriverWait(_driver, TimeSpan.FromSeconds(15)).Until(d =>
             {
-                System.Threading.Thread.Sleep(100);
-                var currentElement = _driver.SwitchTo().ActiveElement();
-
-                if (currentElement.Text.Trim().Equals(linkText, StringComparison.OrdinalIgnoreCase))
+                try
                 {
-                    found = true;
-                    break;
+                    return d.FindElements(By.CssSelector("#navbar-primary .nav-link"))
+                            .Any(l =>
+                            {
+                                try { return l.Text.Trim().Equals(linkText, StringComparison.OrdinalIgnoreCase); }
+                                catch { return false; }
+                            });
                 }
-                currentElement.SendKeys(Keys.Tab);
+                catch { return false; }
+            });
+
+            for (int i = 0; i < 20; i++)
+            {
+                Thread.Sleep(100);
+                try
+                {
+                    var active = _driver.SwitchTo().ActiveElement();
+                    if (!string.IsNullOrWhiteSpace(active?.Text) &&
+                        active.Text.Trim().Equals(linkText, StringComparison.OrdinalIgnoreCase))
+                    {
+                        active.SendKeys(Keys.Enter); 
+                        return;
+                    }
+                    active?.SendKeys(Keys.Tab);
+                }
+                catch { }
             }
 
-            Assert.IsTrue(found, $"Did not find a focusable element with text '{linkText}' using keyboard tabbing.");
+            Assert.Fail($"Did not find and activate link '{linkText}' using keyboard tabbing.");
         }
 
         [Then(@"I should be able to focus on and activate the button using the keyboard")]
         public void ThenIShouldBeAbleToFocusOnAndActivateTheButton()
         {
-            var activeElement = _driver.SwitchTo().ActiveElement();
-            activeElement.SendKeys(Keys.Enter);
+            new WebDriverWait(_driver, TimeSpan.FromSeconds(5))
+                .Until(d => d.Url.Contains("/User/Dashboard"));
 
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
-            wait.Until(driver => driver.Url.Contains("/User/Dashboard"));
-
-            Assert.IsTrue(_driver.Url.Contains("/User/Dashboard"), $"Expected to be on dashboard page but was on {_driver.Url}");
+            Assert.IsTrue(_driver.Url.Contains("/User/Dashboard"), $"Expected dashboard page but was on {_driver.Url}");
         }
 
         // Scenario: Screen Reader Accessibility for Dashboard Link
@@ -116,11 +128,20 @@ namespace MyBddProject.Tests.Steps
         [When(@"I navigate to the navbar")]
         public void WhenINavigateToTheNavbar()
         {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            wait.Until(driver =>
+            {
+                var navbar = driver.FindElement(By.Id("navbar-primary"));
+                return navbar != null && navbar.Displayed;
+            });
         }
 
-        [Then(@"the ""(.*)"" link should include a clear, descriptive label that lets my screen reader announce its purpose\.")]
+        [Then(@"the ""(.*)"" link should include a clear, descriptive label that lets my screen reader announce its purpose.")]
         public void ThenTheLinkShouldIncludeADescriptiveLabel(string linkText)
         {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            wait.Until(driver => driver.FindElement(By.Id("navbar-primary")).Displayed);
+
             var link = _driver.FindElements(By.CssSelector("#navbar-primary .nav-link"))
                               .FirstOrDefault(e => e.Text.Trim().Equals(linkText, StringComparison.OrdinalIgnoreCase));
 
@@ -132,7 +153,6 @@ namespace MyBddProject.Tests.Steps
             Assert.IsTrue(ariaLabel.Contains("dashboard", StringComparison.OrdinalIgnoreCase),
                 $"aria-label should describe purpose. Found: '{ariaLabel}'");
         }
-
 
         // Scenario : Icon Navigation to Subscription Login
 
@@ -187,10 +207,9 @@ namespace MyBddProject.Tests.Steps
         [When(@"I tab through the subscription icons until I reach the ""(.*)"" icon")]
         public void WhenITabThroughTheSubscriptionIconsUntilIReachTheIcon(string serviceName)
         {
-            int maxTabs = 20;
             bool found = false;
 
-            for (int i = 0; i < maxTabs; i++)
+            for (int i = 0; i < 20; i++)
             {
                 System.Threading.Thread.Sleep(100);
                 var activeElement = _driver.SwitchTo().ActiveElement();
