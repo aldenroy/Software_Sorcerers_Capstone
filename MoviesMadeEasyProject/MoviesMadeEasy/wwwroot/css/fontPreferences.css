@@ -5,6 +5,7 @@
     --font-size-h2: 28px;
     --font-size-h3: 24px;
     --font-size-p: 16px;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Font size themes */
@@ -40,21 +41,36 @@ html[data-font-size="extra-large"] {
     --font-size-p: 24px;
 }
 
+html[data-font-type="standard"] {
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+
+
+html[data-font-type="open-dyslexic"] {
+    --font-family: 'Open-Dyslexic', sans-serif;
+}
+
 /* Apply font size globally */
 body {
     font-size: var(--font-size-base, 20px) !important;
+    font-family: var(--font-family) !important;
 }
 
 h1 {
     font-size: var(--font-size-h1, 32px) !important;
+    font-family: var(--font-family) !important;
 }
 
 h2 {
     font-size: var(--font-size-h2, 28px) !important;
+    font-family: var(--font-family) !important;
 }
 
-h3 {
+h3,
+h5 {
     font-size: var(--font-size-h3, 24px) !important;
+    font-family: var(--font-family) !important;
 }
 
 p,
@@ -66,4 +82,5 @@ button,
 input,
 input::placeholder {
     font-size: var(--font-size-p, 16px) !important;
+    font-family: var(--font-family) !important;
 }

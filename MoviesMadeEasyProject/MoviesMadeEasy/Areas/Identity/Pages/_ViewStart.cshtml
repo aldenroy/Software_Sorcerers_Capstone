@@ -44,6 +44,19 @@
                         fontSize = "medium";
                     }
                     ViewData["FontSize"] = fontSize;
+
+                    // Normalize FontType
+                    string fontType = user.FontType?.ToLower().Trim() ?? "standard";
+                    if (fontType == "open dyslexic")
+                    {
+                        fontType = "open-dyslexic";
+                    }
+                    
+                    if (fontType != "standard" && fontType != "open-dyslexic")
+                    {
+                        fontType = "standard";
+                    }
+                    ViewData["FontType"] = fontType;
                 }
             }
         }

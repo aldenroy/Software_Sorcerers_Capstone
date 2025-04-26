@@ -1,76 +1,171 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MoviesMadeEasy.Data;
+using Microsoft.Extensions.DependencyInjection;
 using MoviesMadeEasy.Models;
 
-public static class SeedData
+namespace MoviesMadeEasy.Data
 {
-    public static async Task InitializeAsync(IServiceProvider serviceProvider)
+    public static class SeedData
     {
-        using var scope = serviceProvider.CreateScope();
-
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>(); 
-
-        string testEmail = "testuser@example.com";
-        string password = "Ab+1234";
-
-        var user = await userManager.FindByEmailAsync(testEmail);
-        if (user == null)
+        public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
-            user = new IdentityUser
-            {
-                UserName = testEmail,
-                Email = testEmail,
-                EmailConfirmed = true
-            };
+            using var scope = serviceProvider.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
 
-            var result = await userManager.CreateAsync(user, password);
-            if (!result.Succeeded)
+            await EnsureUserAsync(
+                "testuser@example.com",
+                "Ab+1234",
+                true,
+                userManager,
+                dbContext
+            );
+
+            await EnsureUserAsync(
+                "testuser2@example.com",
+                "Ab+1234",
+                false,
+                userManager,
+                dbContext
+            );
+        }
+
+        private static async Task EnsureUserAsync(
+            string email,
+            string password,
+            bool seedMovies,
+            UserManager<IdentityUser> userManager,
+            UserDbContext dbContext)
+        {
+            var aspUser = await userManager.FindByEmailAsync(email);
+            if (aspUser == null)
             {
-                throw new Exception("Failed to create test user: " + string.Join(", ", result.Errors));
+                aspUser = new IdentityUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true
+                };
+                var result = await userManager.CreateAsync(aspUser, password);
+                if (!result.Succeeded)
+                {
+                    throw new Exception($"Failed to create user {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
             }
 
-            MoviesMadeEasy.Models.User customUser = await dbContext.Users
-                .FirstOrDefaultAsync(u => u.AspNetUserId == user.Id);
-
+            var customUser = await dbContext.Users.FirstOrDefaultAsync(u => u.AspNetUserId == aspUser.Id);
             if (customUser == null)
             {
-                customUser = new MoviesMadeEasy.Models.User
+                customUser = new User
                 {
-                    AspNetUserId = user.Id,
-                    FirstName = "Test",
-                    LastName = "User",
+                    AspNetUserId = aspUser.Id,
+                    FirstName = email.Split('@')[0],
+                    LastName = "Test",
                     ColorMode = "Light",
                     FontSize = "Medium",
                     FontType = "Sans-serif"
                 };
-
                 dbContext.Users.Add(customUser);
-                await dbContext.SaveChangesAsync(); 
+                await dbContext.SaveChangesAsync();
             }
 
-            var existingServiceIds = dbContext.UserStreamingServices
-                .Where(uss => uss.UserId == customUser.Id)
-                .Select(uss => uss.StreamingServiceId)
-                .ToHashSet();
-
-            var serviceNames = new[] { "Hulu", "Disney+", "Netflix" };
-            var matchingServices = await dbContext.StreamingServices
-                .Where(s => serviceNames.Contains(s.Name))
-                .ToListAsync();
-
-            foreach (var service in matchingServices)
+            if (seedMovies)
             {
-                dbContext.UserStreamingServices.Add(new UserStreamingService
-                {
-                    UserId = customUser.Id,
-                    StreamingServiceId = service.Id
-                });
-            }
+                var defaultServices = new[] { "Hulu", "Disney+", "Netflix" };
+                var services = await dbContext.StreamingServices
+                    .Where(s => defaultServices.Contains(s.Name))
+                    .ToListAsync();
 
-            await dbContext.SaveChangesAsync();
+                var existingServiceIds = await dbContext.UserStreamingServices
+                    .Where(us => us.UserId == customUser.Id)
+                    .Select(us => us.StreamingServiceId)
+                    .ToListAsync();
+
+                foreach (var svc in services)
+                {
+                    if (!existingServiceIds.Contains(svc.Id))
+                    {
+                        dbContext.UserStreamingServices.Add(new UserStreamingService
+                        {
+                            UserId = customUser.Id,
+                            StreamingServiceId = svc.Id
+                        });
+                    }
+                }
+                await dbContext.SaveChangesAsync();
+
+                var moviesToSeed = new List<Title>
+                {
+                    new Title
+                    {
+                        TitleName = "Her",
+                        Year = 2013,
+                        PosterUrl = "https://example.com/her.jpg",
+                        Genres = "Romance,Drama",
+                        Rating = "8.0",
+                        Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
+                        StreamingServices = "Netflix",
+                        LastUpdated = DateTime.UtcNow
+                    },
+                    new Title
+                    {
+                        TitleName = "Pokemon 4Ever",
+                        Year = 2001,
+                        PosterUrl = "https://example.com/pokemon4ever.jpg",
+                        Genres = "Animation,Adventure",
+                        Rating = "5.8",
+                        Overview = "Ash and friends must save a Celebi from a hunter and a corrupted future.",
+                        StreamingServices = "Hulu,Disney+",
+                        LastUpdated = DateTime.UtcNow
+                    }
+                };
+
+                foreach (var movie in moviesToSeed)
+                {
+                    bool exists = await dbContext.Titles
+                        .AnyAsync(t => t.TitleName == movie.TitleName && t.Year == movie.Year);
+
+                    if (!exists)
+                    {
+                        dbContext.Titles.Add(movie);
+                    }
+                }
+                await dbContext.SaveChangesAsync();
+
+                var herTitle = await dbContext.Titles.FirstOrDefaultAsync(t => t.TitleName == "Her" && t.Year == 2013);
+                var pokemonTitle = await dbContext.Titles.FirstOrDefaultAsync(t => t.TitleName == "Pokemon 4Ever" && t.Year == 2001);
+
+                var existingRecentlyViewed = await dbContext.RecentlyViewedTitles
+                    .Where(rv => rv.UserId == customUser.Id)
+                    .Select(rv => rv.TitleId)
+                    .ToListAsync();
+
+                if (herTitle != null && !existingRecentlyViewed.Contains(herTitle.Id))
+                {
+                    dbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
+                    {
+                        UserId = customUser.Id,
+                        TitleId = herTitle.Id,
+                        ViewedAt = DateTime.UtcNow.AddMinutes(-10)
+                    });
+                }
+
+                if (pokemonTitle != null && !existingRecentlyViewed.Contains(pokemonTitle.Id))
+                {
+                    dbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
+                    {
+                        UserId = customUser.Id,
+                        TitleId = pokemonTitle.Id,
+                        ViewedAt = DateTime.UtcNow.AddMinutes(-5)
+                    });
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
 }
-
