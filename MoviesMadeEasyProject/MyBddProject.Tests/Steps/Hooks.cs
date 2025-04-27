@@ -12,9 +12,9 @@ namespace MyBddProject.Tests.Steps
     public class Hooks
     {
         private readonly IObjectContainer _objectContainer;
-        private IWebDriver _driver;
+        private IWebDriver? _driver;
         private readonly IConfiguration _configuration;
-        private Process _serverProcess;
+        private Process? _serverProcess;
 
         public Hooks(IObjectContainer objectContainer)
         {
@@ -24,18 +24,12 @@ namespace MyBddProject.Tests.Steps
                 .Build();
         }
 
-        [BeforeTestRun]
-        public static void BeforeTestRun()
-        {
-            Console.WriteLine("Starting test run");
-        }
-
         [BeforeScenario]
         public void BeforeScenario()
         {
             try
             {
-                // Only start the server locally when not in GitHub Actions
+                // Only start the server locally
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
                 {
                     StartApplicationServer();
@@ -46,8 +40,11 @@ namespace MyBddProject.Tests.Steps
                 }
 
                 var options = new ChromeOptions();
+
+                // Basic options for headless testing
                 options.AddArguments("--headless", "--disable-gpu");
 
+                // Add GitHub Actions specific options
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
                     options.AddArguments(
@@ -57,13 +54,22 @@ namespace MyBddProject.Tests.Steps
                     );
                 }
 
-                // Create and register the driver
+                // Create ChromeDriver with appropriate settings
                 _driver = new ChromeDriver(options);
-                _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
+
+                // Set longer timeouts for GitHub Actions
+                if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+                {
+                    _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+                    _driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
+                }
+
+                _objectContainer.RegisterInstanceAs(_driver);
 
                 // Wait for app to be available
                 var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:5000";
-                bool isAvailable = WaitForAppAvailability(baseUrl, 30);
+                bool isAvailable = WaitForAppAvailability(baseUrl,
+                    Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? 60 : 30);
 
                 if (!isAvailable)
                 {

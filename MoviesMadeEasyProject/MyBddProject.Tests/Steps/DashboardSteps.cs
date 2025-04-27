@@ -240,19 +240,82 @@ namespace MyBddProject.Tests.Steps
         [Then(@"the ""(.*)"" subscription icon should include a clear, descriptive accessible label")]
         public void ThenTheSubscriptionIconShouldIncludeAClearDescriptiveAccessibleLabel(string serviceName)
         {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-            var icon = wait.Until(driver =>
-            {
-                var icons = driver.FindElements(By.CssSelector(".subscription-link"));
-                return icons.FirstOrDefault(el =>
-                    el.GetAttribute("aria-label")?.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0);
-            });
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30)); // Increased timeout
 
-            Assert.IsNotNull(icon, $"Could not find a subscription icon for '{serviceName}'.");
-            string ariaLabel = icon.GetAttribute("aria-label");
-            Assert.IsFalse(string.IsNullOrWhiteSpace(ariaLabel), "aria-label is missing or empty on the subscription icon.");
-            Assert.IsTrue(ariaLabel.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0,
-                $"aria-label '{ariaLabel}' does not clearly identify the service '{serviceName}'.");
+            Console.WriteLine($"Looking for subscription icon for '{serviceName}'");
+
+            try
+            {
+                // First wait for any subscription links
+                wait.Until(d => {
+                    try
+                    {
+                        return d.FindElements(By.CssSelector(".subscription-link")).Count > 0;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
+
+                // Log all subscription links found
+                var allLinks = _driver.FindElements(By.CssSelector(".subscription-link"));
+                Console.WriteLine($"Found {allLinks.Count} subscription links");
+                foreach (var link in allLinks)
+                {
+                    try
+                    {
+                        Console.WriteLine($"Link with label: '{link.GetAttribute("aria-label")}'");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Could not get aria-label from link");
+                    }
+                }
+
+                // Try to find the specific service
+                var icon = wait.Until(driver =>
+                {
+                    try
+                    {
+                        // Look for any subscription link with an aria-label containing the service name
+                        var links = driver.FindElements(By.CssSelector(".subscription-link"));
+                        return links.FirstOrDefault(el =>
+                            el.GetAttribute("aria-label")?.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                });
+
+                Assert.IsNotNull(icon, $"Could not find subscription icon for '{serviceName}'");
+
+                string ariaLabel = icon.GetAttribute("aria-label");
+                Assert.IsFalse(string.IsNullOrWhiteSpace(ariaLabel),
+                    "aria-label is missing or empty on the subscription icon");
+
+                Assert.IsTrue(ariaLabel.IndexOf(serviceName, StringComparison.OrdinalIgnoreCase) >= 0,
+                    $"aria-label '{ariaLabel}' does not clearly identify the service '{serviceName}'.");
+
+                Console.WriteLine($"Successfully found icon with label: {ariaLabel}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error finding subscription icon: {ex.Message}");
+
+                try
+                {
+                    // Take screenshot for debugging
+                    var screenshot = ((ITakesScreenshot)_driver).GetScreenshot();
+                    var filename = "subscription_error.png";
+                    screenshot.SaveAsFile(filename);
+                    Console.WriteLine($"Screenshot saved as {filename}");
+                }
+                catch { }
+
+                throw;
+            }
         }
     }
 }
