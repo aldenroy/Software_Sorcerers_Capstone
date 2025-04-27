@@ -168,7 +168,7 @@ using (var scope = app.Services.CreateScope())
                 StreamingServices = "Netflix",
                 LastUpdated = DateTime.UtcNow.AddDays(-1)
             };
-            
+
             var pokemonMovie = new Title
             {
                 TitleName = "Pokemon 4Ever",
@@ -181,8 +181,8 @@ using (var scope = app.Services.CreateScope())
                 LastUpdated = DateTime.UtcNow.AddDays(-1)
             };
             
-            userDbContext.Titles.Add(pokemonMovie);
             userDbContext.Titles.Add(herMovie);
+            userDbContext.Titles.Add(pokemonMovie);
             userDbContext.SaveChanges();
             
             Console.WriteLine("Test movie titles added successfully");
