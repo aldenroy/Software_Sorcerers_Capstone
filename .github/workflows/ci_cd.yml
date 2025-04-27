@@ -338,6 +338,210 @@ jobs:
           app.Run();
           EOL
           
+          # Create a mock MovieService for CI that doesn't call the real API
+          cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/DAL/Concrete/MovieService.cs << 'EOL'
+          using MoviesMadeEasy.DAL.Abstract;
+          using MoviesMadeEasy.DTOs;
+          using MoviesMadeEasy.Models;
+          using System.Collections.Generic;
+          using System.Net.Http;
+          using System.Text.Json;
+          using System.Threading.Tasks;
+          using System.Linq;
+          using Microsoft.Extensions.Configuration;
+
+          namespace MoviesMadeEasy.DAL.Concrete
+          {
+              public class MovieService : IMovieService
+              {
+                  private readonly HttpClient _httpClient;
+                  private readonly IConfiguration _configuration;
+
+                  public MovieService(HttpClient httpClient, IConfiguration configuration)
+                  {
+                      _httpClient = httpClient;
+                      _configuration = configuration;
+                  }
+
+                  public async Task<List<MoviesMadeEasy.Models.Movie>> SearchMoviesAsync(string query)
+                  {
+                      Console.WriteLine($"Mock MovieService handling search for: {query}");
+                      
+                      // Return mock data for testing
+                      var movies = new List<MoviesMadeEasy.Models.Movie>();
+                      
+                      if (query.Contains("Hunger Games", StringComparison.OrdinalIgnoreCase))
+                      {
+                          // Create mock movies for Hunger Games
+                          var mockMovie1 = new MoviesMadeEasy.Models.Movie
+                          {
+                              Title = "The Hunger Games",
+                              ReleaseYear = 2012,
+                              Overview = "Katniss Everdeen voluntarily takes her younger sister's place in the Hunger Games.",
+                              Rating = 72,
+                              Genres = new List<MoviesMadeEasy.Models.Genre>
+                              {
+                                  new MoviesMadeEasy.Models.Genre { Id = "1", Name = "Action" },
+                                  new MoviesMadeEasy.Models.Genre { Id = "2", Name = "Adventure" },
+                                  new MoviesMadeEasy.Models.Genre { Id = "3", Name = "Sci-Fi" }
+                              },
+                              ImageSet = new MoviesMadeEasy.Models.ImageSet
+                              {
+                                  VerticalPoster = new MoviesMadeEasy.Models.VerticalPoster
+                                  {
+                                      W240 = "https://example.com/hunger-games.jpg"
+                                  }
+                              },
+                              StreamingOptions = new Dictionary<string, List<MoviesMadeEasy.Models.StreamingOption>>
+                              {
+                                  { 
+                                      "us", 
+                                      new List<MoviesMadeEasy.Models.StreamingOption>
+                                      {
+                                          new MoviesMadeEasy.Models.StreamingOption
+                                          {
+                                              Service = new MoviesMadeEasy.Models.Service
+                                              {
+                                                  Name = "Netflix"
+                                              }
+                                          },
+                                          new MoviesMadeEasy.Models.StreamingOption
+                                          {
+                                              Service = new MoviesMadeEasy.Models.Service
+                                              {
+                                                  Name = "Apple TV"
+                                              }
+                                          },
+                                          new MoviesMadeEasy.Models.StreamingOption
+                                          {
+                                              Service = new MoviesMadeEasy.Models.Service
+                                              {
+                                                  Name = "Prime Video"
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          };
+                          
+                          movies.Add(mockMovie1);
+                          
+                          // Add a second movie
+                          var mockMovie2 = new MoviesMadeEasy.Models.Movie
+                          {
+                              Title = "The Hunger Games: Catching Fire",
+                              ReleaseYear = 2013,
+                              Overview = "Katniss Everdeen and Peeta Mellark become targets of the Capitol after their victory.",
+                              Rating = 75,
+                              Genres = new List<MoviesMadeEasy.Models.Genre>
+                              {
+                                  new MoviesMadeEasy.Models.Genre { Id = "1", Name = "Action" },
+                                  new MoviesMadeEasy.Models.Genre { Id = "2", Name = "Adventure" },
+                                  new MoviesMadeEasy.Models.Genre { Id = "3", Name = "Sci-Fi" }
+                              },
+                              ImageSet = new MoviesMadeEasy.Models.ImageSet
+                              {
+                                  VerticalPoster = new MoviesMadeEasy.Models.VerticalPoster
+                                  {
+                                      W240 = "https://example.com/catching-fire.jpg"
+                                  }
+                              },
+                              StreamingOptions = new Dictionary<string, List<MoviesMadeEasy.Models.StreamingOption>>
+                              {
+                                  { 
+                                      "us", 
+                                      new List<MoviesMadeEasy.Models.StreamingOption>
+                                      {
+                                          new MoviesMadeEasy.Models.StreamingOption
+                                          {
+                                              Service = new MoviesMadeEasy.Models.Service
+                                              {
+                                                  Name = "Netflix"
+                                              }
+                                          },
+                                          new MoviesMadeEasy.Models.StreamingOption
+                                          {
+                                              Service = new MoviesMadeEasy.Models.Service
+                                              {
+                                                  Name = "Apple TV"
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+                          };
+                          
+                          movies.Add(mockMovie2);
+                      }
+                      
+                      return movies;
+                  }
+              }
+          }
+          EOL
+          
+          # Create a mock OpenAIService for CI
+          cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/DAL/Concrete/OpenAIService.cs << 'EOL'
+          using System.Net.Http;
+          using System.Net.Http.Headers;
+          using System.Text;
+          using System.Text.Json;
+          using System.Text.Json.Serialization;
+
+          public class OpenAIService : IOpenAIService
+          {
+              private readonly HttpClient _httpClient;
+              private readonly IConfiguration _config;
+              private readonly ILogger<OpenAIService> _logger;
+
+              public OpenAIService(
+                  HttpClient httpClient, 
+                  IConfiguration config,
+                  ILogger<OpenAIService> logger)
+              {
+                  _httpClient = httpClient;
+                  _config = config;
+                  _logger = logger;
+              }
+
+              public async Task<List<MovieRecommendation>> GetSimilarMoviesAsync(string title)
+              {
+                  _logger.LogInformation("Mock OpenAIService handling movie recommendations for: {Title}", title);
+                  
+                  // Return mock data for testing
+                  var recommendations = new List<MovieRecommendation>
+                  {
+                      new MovieRecommendation { Title = "The Maze Runner", Year = 2014, Reason = "Similar dystopian theme" },
+                      new MovieRecommendation { Title = "Divergent", Year = 2014, Reason = "Features a strong female protagonist in a dystopian future" },
+                      new MovieRecommendation { Title = "Battle Royale", Year = 2000, Reason = "Similar survival competition premise" },
+                      new MovieRecommendation { Title = "The Giver", Year = 2014, Reason = "Dystopian society with controlled roles" },
+                      new MovieRecommendation { Title = "Ender's Game", Year = 2013, Reason = "Young protagonists trained for combat" }
+                  };
+                  
+                  return recommendations;
+              }
+
+              public async Task<string> GetChatCompletionAsync(string prompt)
+              {
+                  _logger.LogInformation("Mock GetChatCompletionAsync called with prompt: {Prompt}", prompt);
+                  
+                  // Return a fixed JSON string for testing
+                  if (prompt.Contains("Hunger Games"))
+                  {
+                      return @"[
+                          {""title"":""The Maze Runner"",""year"":2014,""reason"":""Similar dystopian theme""},
+                          {""title"":""Divergent"",""year"":2014,""reason"":""Features a strong female protagonist in a dystopian future""},
+                          {""title"":""Battle Royale"",""year"":2000,""reason"":""Similar survival competition premise""},
+                          {""title"":""The Giver"",""year"":2014,""reason"":""Dystopian society with controlled roles""},
+                          {""title"":""Ender's Game"",""year"":2013,""reason"":""Young protagonists trained for combat""}
+                      ]";
+                  }
+                  
+                  return "[]";
+              }
+          }
+          EOL
+          
           # Create CI appsettings.json
           cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json << 'EOL'
           {
@@ -385,13 +589,7 @@ jobs:
             exit 1
           fi
 
-      - name: Skip BDD tests for now to get deployment
-        run: |
-          echo "Skipping BDD tests to allow deployment - will fix tests in next PR"
-          exit 0
-
       - name: Run BDD tests (NUnit + Selenium)
-        if: false
         run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
 
       - name: Run frontend tests (Jest)
