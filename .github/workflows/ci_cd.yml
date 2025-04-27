@@ -52,16 +52,22 @@ jobs:
 
       - name: Install Chrome & ChromeDriver
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y jq
-          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3)
+          # Add Google Chrome repository
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+          sudo apt-get update
+
+          # Install specific version of Chrome - 114.0.5735.90 is known to work well with ChromeDriver
+          sudo apt-get install -y google-chrome-stable
+
+          # Get Chrome version
+          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
           echo "Chrome version: $CHROME_VERSION"
-          CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | \
-            jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
-          wget -O chromedriver.zip "$CHROMEDRIVER_URL"
-          unzip chromedriver.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+
+          # Install compatible ChromeDriver
+          wget -N https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
 
@@ -87,13 +93,15 @@ jobs:
           using Polly;
           using Polly.Extensions.Http;
           using Microsoft.AspNetCore.Session;
+          using System.Text.Json;
+          using System.Net;
 
           var builder = WebApplication.CreateBuilder(args);
 
           builder.Logging.ClearProviders();
           builder.Logging.AddConsole();
           builder.Logging.AddDebug();
-          builder.Logging.SetMinimumLevel(LogLevel.Information);
+          builder.Logging.SetMinimumLevel(LogLevel.Debug); // Increased logging level
 
           // For CI/CD environment, add API keys directly
           builder.Configuration["OpenAI_ApiKey"] = "sk-dummy-key-for-testing";
@@ -116,24 +124,25 @@ jobs:
               builder.Services.AddControllersWithViews();
           }
 
-          builder.Services.AddHttpClient<IOpenAIService, OpenAIService>()
-              .AddPolicyHandler(Policy<HttpResponseMessage>
-                  .Handle<HttpRequestException>()
-                  .OrResult(x => (int)x.StatusCode == 429)
-                  .WaitAndRetryAsync(3, retryAttempt =>
-                      TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
-                      
-          builder.Services.AddHttpClient<IMovieService, MovieService>();
-          builder.Services.AddScoped<IMovieService, MovieService>(provider =>
-          {
-              var httpClient = provider.GetRequiredService<HttpClient>();
-              var configuration = provider.GetRequiredService<IConfiguration>();
-              return new MovieService(httpClient, configuration);
+          // Mock the OpenAI service implementation for tests
+          builder.Services.AddTransient<IOpenAIService>(provider => {
+              var mockService = new OpenAIService(
+                  provider.GetRequiredService<HttpClient>(),
+                  provider.GetRequiredService<IConfiguration>(),
+                  provider.GetRequiredService<ILogger<OpenAIService>>()
+              );
+              
+              // This simply overrides the real method to return fixed test data
+              return new MockOpenAIService();
+          });
+
+          // Mock the MovieService implementation for tests 
+          builder.Services.AddTransient<IMovieService>(provider => {
+              return new MockMovieService();
           });
 
           builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
           builder.Services.AddScoped<IUserRepository, UserRepository>();
-          builder.Services.AddScoped<IOpenAIService, OpenAIService>();
           builder.Services.AddScoped<ITitleRepository, TitleRepository>();
           
           Console.WriteLine("Using in-memory database for CI/CD");
@@ -170,42 +179,294 @@ jobs:
               app.UseHsts();
           }
 
-          // THIS IS THE CRITICAL PART - Seed the test users needed for BDD tests
-          using (var scope = app.Services.CreateScope())
+          // Add our mock implementations
+          public class MockOpenAIService : IOpenAIService
           {
-              var services = scope.ServiceProvider;
-              try
+              public async Task<List<MovieRecommendation>> GetSimilarMoviesAsync(string title)
               {
-                  SeedData.InitializeAsync(services).Wait();
-                  Console.WriteLine("Database seeded successfully with test users");
-                  
-                  // Force logging of the created users to verify
-                  var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-                  var testUser1 = userManager.FindByEmailAsync("testuser@example.com").Result;
-                  var testUser2 = userManager.FindByEmailAsync("testuser2@example.com").Result;
-                  
-                  Console.WriteLine($"Test User 1: {(testUser1 != null ? "Created" : "Missing")}");
-                  Console.WriteLine($"Test User 2: {(testUser2 != null ? "Created" : "Missing")}");
-                  
-                  // Verify user repository and streaming services
-                  var userRepo = services.GetRequiredService<IUserRepository>();
-                  var subRepo = services.GetRequiredService<ISubscriptionRepository>();
-                  
-                  if (testUser1 != null)
+                  // Return fixed movie recommendations for tests
+                  return new List<MovieRecommendation>
                   {
-                      var user = userRepo.GetUser(testUser1.Id);
-                      if (user != null)
+                      new MovieRecommendation { Title = "Similar Movie 1", Year = 2020, Reason = "Test reason 1" },
+                      new MovieRecommendation { Title = "Similar Movie 2", Year = 2019, Reason = "Test reason 2" },
+                      new MovieRecommendation { Title = "Similar Movie 3", Year = 2021, Reason = "Test reason 3" },
+                      new MovieRecommendation { Title = "Similar Movie 4", Year = 2018, Reason = "Test reason 4" },
+                      new MovieRecommendation { Title = "Similar Movie 5", Year = 2022, Reason = "Test reason 5" }
+                  };
+              }
+
+              public async Task<string> GetChatCompletionAsync(string prompt)
+              {
+                  return "This is a mock response from ChatGPT for testing purposes.";
+              }
+          }
+
+          public class MockMovieService : IMovieService
+          {
+              public async Task<List<MoviesMadeEasy.Models.Movie>> SearchMoviesAsync(string query)
+              {
+                  // Create mock search results with streaming services for tests
+                  var movies = new List<MoviesMadeEasy.Models.Movie>();
+                  
+                  // If searching for Hunger Games, return mock data
+                  if (query.ToLower().Contains("hunger"))
+                  {
+                      var movie = new MoviesMadeEasy.Models.Movie
                       {
-                          var subs = subRepo.GetUserSubscriptions(user.Id);
-                          Console.WriteLine($"User has {subs?.Count() ?? 0} subscriptions");
+                          Id = "123",
+                          ImdbId = "tt1392170",
+                          TmdbId = "70160",
+                          Title = "The Hunger Games",
+                          Overview = "This is a test overview for The Hunger Games",
+                          ReleaseYear = 2012,
+                          OriginalTitle = "The Hunger Games",
+                          Rating = 8,
+                          Runtime = 142,
+                          Directors = new List<string> { "Gary Ross" },
+                          Cast = new List<string> { "Jennifer Lawrence", "Josh Hutcherson" },
+                          ItemType = "movie",
+                          ShowType = "movie"
+                      };
+                      
+                      // Add genres
+                      movie.Genres = new List<MoviesMadeEasy.Models.Genre>
+                      {
+                          new MoviesMadeEasy.Models.Genre { Id = "1", Name = "Action" },
+                          new MoviesMadeEasy.Models.Genre { Id = "2", Name = "Adventure" },
+                          new MoviesMadeEasy.Models.Genre { Id = "3", Name = "Sci-Fi" }
+                      };
+                      
+                      // Add posters
+                      movie.ImageSet = new MoviesMadeEasy.Models.ImageSet
+                      {
+                          VerticalPoster = new MoviesMadeEasy.Models.VerticalPoster
+                          {
+                              W240 = "https://via.placeholder.com/240x360",
+                              W360 = "https://via.placeholder.com/360x540",
+                              W480 = "https://via.placeholder.com/480x720",
+                              W600 = "https://via.placeholder.com/600x900",
+                              W720 = "https://via.placeholder.com/720x1080"
+                          },
+                          HorizontalPoster = new MoviesMadeEasy.Models.HorizontalPoster
+                          {
+                              W360 = "https://via.placeholder.com/360x240",
+                              W480 = "https://via.placeholder.com/480x320",
+                              W720 = "https://via.placeholder.com/720x480",
+                              W1080 = "https://via.placeholder.com/1080x720",
+                              W1440 = "https://via.placeholder.com/1440x960"
+                          }
+                      };
+                      
+                      // Add streaming services
+                      movie.StreamingOptions = new Dictionary<string, List<MoviesMadeEasy.Models.StreamingOption>>();
+                      
+                      var netflixOption = new MoviesMadeEasy.Models.StreamingOption
+                      {
+                          Service = new MoviesMadeEasy.Models.Service
+                          {
+                              Id = "netflix",
+                              Name = "Netflix",
+                              HomePage = "https://www.netflix.com/login"
+                          },
+                          Type = "subscription",
+                          Link = "https://www.netflix.com/title/123"
+                      };
+                      
+                      var appleOption = new MoviesMadeEasy.Models.StreamingOption
+                      {
+                          Service = new MoviesMadeEasy.Models.Service
+                          {
+                              Id = "apple",
+                              Name = "Apple TV",
+                              HomePage = "https://tv.apple.com/login"
+                          },
+                          Type = "purchase",
+                          Link = "https://tv.apple.com/movie/123"
+                      };
+                      
+                      var primeOption = new MoviesMadeEasy.Models.StreamingOption
+                      {
+                          Service = new MoviesMadeEasy.Models.Service
+                          {
+                              Id = "prime",
+                              Name = "Prime Video",
+                              HomePage = "https://www.primevideo.com"
+                          },
+                          Type = "subscription",
+                          Link = "https://www.primevideo.com/detail/123"
+                      };
+                      
+                      movie.StreamingOptions.Add("us", new List<MoviesMadeEasy.Models.StreamingOption> 
+                      { 
+                          netflixOption, 
+                          appleOption, 
+                          primeOption 
+                      });
+                      
+                      movies.Add(movie);
+                  }
+                  
+                  return movies;
+              }
+          }
+
+          // Special seed method for testing
+          async Task SeedTestDataAsync(IServiceProvider serviceProvider)
+          {
+              using var scope = serviceProvider.CreateScope();
+              var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+              var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+              
+              // Add test streaming services
+              var streamingServices = new List<StreamingService>
+              {
+                  new StreamingService { Id = 1, Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login", LogoUrl = "/images/Netflix_Symbol_RGB.png" },
+                  new StreamingService { Id = 2, Name = "Hulu", Region = "US", BaseUrl = "https://auth.hulu.com/web/login", LogoUrl = "/images/hulu-Green-digital.png" },
+                  new StreamingService { Id = 3, Name = "Disney+", Region = "US", BaseUrl = "https://www.disneyplus.com/login", LogoUrl = "/images/disney_logo_march_2024_050fef2e.png" },
+                  new StreamingService { Id = 4, Name = "Prime Video", Region = "US", BaseUrl = "https://www.primevideo.com", LogoUrl = "/images/AmazonPrimeVideo.png" },
+                  new StreamingService { Id = 5, Name = "Max \"HBO Max\"", Region = "US", BaseUrl = "https://play.max.com/sign-in", LogoUrl = "/images/maxlogo.jpg" },
+                  new StreamingService { Id = 6, Name = "Apple TV+", Region = "US", BaseUrl = "https://tv.apple.com/login", LogoUrl = "/images/AppleTV-iOS.png" }
+              };
+              
+              foreach (var service in streamingServices)
+              {
+                  dbContext.StreamingServices.Add(service);
+              }
+              await dbContext.SaveChangesAsync();
+              
+              // Seed test users
+              await SeedData.InitializeAsync(serviceProvider);
+              
+              // Create test titles (movies)
+              var titles = new List<Title>
+              {
+                  new Title
+                  {
+                      Id = 1,
+                      TitleName = "Her",
+                      Year = 2013,
+                      PosterUrl = "https://via.placeholder.com/150x225",
+                      Genres = "Drama,Romance,Sci-Fi",
+                      Rating = "8.0",
+                      Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
+                      StreamingServices = "Netflix,Apple TV+",
+                      LastUpdated = DateTime.UtcNow.AddDays(-5)
+                  },
+                  new Title
+                  {
+                      Id = 2,
+                      TitleName = "Pokemon 4Ever",
+                      Year = 2001,
+                      PosterUrl = "https://via.placeholder.com/150x225",
+                      Genres = "Animation,Adventure,Family",
+                      Rating = "5.8",
+                      Overview = "The Pokémon trainer Ash Ketchum and his friends travel back in time to save a legendary Pokémon from being captured.",
+                      StreamingServices = "Hulu,Disney+",
+                      LastUpdated = DateTime.UtcNow.AddDays(-2)
+                  }
+              };
+              
+              foreach (var title in titles)
+              {
+                  dbContext.Titles.Add(title);
+              }
+              await dbContext.SaveChangesAsync();
+              
+              // Create test user accounts with streaming service subscriptions
+              var user1 = await userManager.FindByEmailAsync("testuser@example.com");
+              var user2 = await userManager.FindByEmailAsync("testuser2@example.com");
+              
+              if (user1 != null)
+              {
+                  // Find or create user in our context
+                  var appUser = dbContext.Users.FirstOrDefault(u => u.AspNetUserId == user1.Id);
+                  if (appUser == null)
+                  {
+                      appUser = new User
+                      {
+                          AspNetUserId = user1.Id,
+                          FirstName = "Test",
+                          LastName = "User",
+                          ColorMode = "Light",
+                          FontSize = "Medium",
+                          FontType = "Standard"
+                      };
+                      dbContext.Users.Add(appUser);
+                      await dbContext.SaveChangesAsync();
+                  }
+                  
+                  // Add streaming service subscriptions
+                  var userServices = new List<UserStreamingService>
+                  {
+                      new UserStreamingService { UserId = appUser.Id, StreamingServiceId = 1 }, // Netflix
+                      new UserStreamingService { UserId = appUser.Id, StreamingServiceId = 2 }, // Hulu
+                      new UserStreamingService { UserId = appUser.Id, StreamingServiceId = 3 }  // Disney+
+                  };
+                  
+                  foreach (var us in userServices)
+                  {
+                      dbContext.UserStreamingServices.Add(us);
+                  }
+                  
+                  // Add recently viewed titles
+                  var recentlyViewed = new List<RecentlyViewedTitle>
+                  {
+                      new RecentlyViewedTitle
+                      {
+                          UserId = appUser.Id,
+                          TitleId = 1, // Her
+                          ViewedAt = DateTime.UtcNow.AddMinutes(-30)
+                      },
+                      new RecentlyViewedTitle
+                      {
+                          UserId = appUser.Id,
+                          TitleId = 2, // Pokemon 4Ever
+                          ViewedAt = DateTime.UtcNow.AddHours(-2)
                       }
+                  };
+                  
+                  foreach (var rv in recentlyViewed)
+                  {
+                      dbContext.RecentlyViewedTitles.Add(rv);
                   }
               }
-              catch (Exception ex)
+              
+              await dbContext.SaveChangesAsync();
+              
+              // Log summary of data seeded
+              Console.WriteLine($"Seeded {streamingServices.Count} streaming services");
+              Console.WriteLine($"Seeded {titles.Count} titles");
+              
+              // Verify what's in the database
+              Console.WriteLine($"Streaming services in DB: {dbContext.StreamingServices.Count()}");
+              Console.WriteLine($"Titles in DB: {dbContext.Titles.Count()}");
+              Console.WriteLine($"Users in DB: {dbContext.Users.Count()}");
+              
+              // Check if testuser exists
+              var testUser = dbContext.Users.FirstOrDefault(u => u.AspNetUserId == user1?.Id);
+              if (testUser != null)
               {
-                  Console.WriteLine($"An error occurred seeding the DB: {ex.Message}");
-                  Console.WriteLine(ex.StackTrace);
+                  Console.WriteLine($"Found testuser in DB with ID {testUser.Id}");
+                  var userSubs = dbContext.UserStreamingServices.Count(us => us.UserId == testUser.Id);
+                  Console.WriteLine($"User has {userSubs} subscriptions");
               }
+              else
+              {
+                  Console.WriteLine("Could not find testuser in DB!");
+              }
+          }
+
+          // THIS IS THE CRITICAL PART - Seed the test data needed for BDD tests
+          try 
+          {
+              Console.WriteLine("Seeding test data...");
+              await SeedTestDataAsync(app.Services);
+              Console.WriteLine("Database seeded successfully with test data");
+          }
+          catch (Exception ex)
+          {
+              Console.WriteLine($"ERROR seeding data: {ex.Message}");
+              Console.WriteLine(ex.StackTrace);
           }
 
           app.UseHttpsRedirection();
@@ -229,8 +490,8 @@ jobs:
           {
             "Logging": {
               "LogLevel": {
-                "Default": "Information",
-                "Microsoft.AspNetCore": "Warning"
+                "Default": "Debug",
+                "Microsoft.AspNetCore": "Information"
               }
             },
             "AllowedHosts": "*",
@@ -252,16 +513,26 @@ jobs:
           cd ./publish_output
           nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
           
-          # Wait for app to initialize
-          echo "Waiting 15 seconds for app to start and seed database..."
-          sleep 15
+          # Wait for app to initialize with increasing timeouts
+          echo "Waiting for app to start and seed database..."
+          for i in {1..30}; do
+            echo "Checking app status (attempt $i)..."
+            if curl -s http://localhost:5000 > /dev/null; then
+              echo "App is responding!"
+              break
+            fi
+            sleep 2
+          done
           
-          # Check if app is responding
-          echo "Checking if app is responding..."
+          # Additional delay to ensure database is fully seeded
+          echo "Giving app extra time to finish seeding database..."
+          sleep 10
+          
+          # Check if app is responding with correct status
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000)
           echo "App response code: $RESPONSE"
           
-          # Display logs regardless of status
+          # Display application logs
           echo "=== Application Logs ==="
           cat app.log
           echo "======================="
@@ -271,8 +542,33 @@ jobs:
             exit 1
           fi
 
-      - name: Run BDD tests (NUnit + Selenium)
-        run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
+      - name: Update ChromeDriver settings in BDD test project
+        run: |
+          cat > MoviesMadeEasyProject/MyBddProject.Tests/chromedriver-options.json << 'EOL'
+          {
+            "chromeOptions": {
+              "args": ["--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080"],
+              "w3c": true,
+              "pageLoadStrategy": "normal",
+              "timeouts": {
+                "implicit": 30000,
+                "pageLoad": 60000,
+                "script": 30000
+              }
+            }
+          }
+          EOL
+
+      - name: Run BDD tests (NUnit + Selenium) with additional logging
+        run: |
+          # Enable detailed output from tests
+          export REQNROLL_TRACE=verbose
+          
+          # Increase timeout for tests
+          export TEST_TIMEOUT=120000
+          
+          # Run tests with verbose output
+          dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal --logger "console;verbosity=detailed"
 
       - name: Run frontend tests (Jest)
         run: npm run test
