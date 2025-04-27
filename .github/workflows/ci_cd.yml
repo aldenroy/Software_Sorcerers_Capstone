@@ -52,35 +52,22 @@ jobs:
 
       - name: Install Chrome & ChromeDriver
         run: |
-          # Install Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          
-          # Install jq for JSON parsing
           sudo apt-get install -y jq
-          
-          # Download latest ChromeDriver for current Chrome version
           CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3)
           echo "Chrome version: $CHROME_VERSION"
-          
-          # Get matching ChromeDriver URL using Chrome for Testing API
           CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | \
             jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
-          
-          # Download and install ChromeDriver
           wget -O chromedriver.zip "$CHROMEDRIVER_URL"
           unzip chromedriver.zip
-          
-          # Correct path based on actual extraction
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
-      
-      - name: Publish app with in-memory database
+
+      - name: Create Program-CI.cs for testing
         run: |
-          # Create a temporary Program.cs that uses in-memory database
-          cp MoviesMadeEasyProject/MoviesMadeEasy/Program.cs MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak
-          cat > MoviesMadeEasyProject/MoviesMadeEasy/Program.cs << 'EOL'
+          cat > ./MoviesMadeEasyProject/MoviesMadeEasy/Program-CI.cs << 'EOL'
           using MoviesMadeEasy.DAL.Abstract;
           using MoviesMadeEasy.DAL.Concrete;
           using Microsoft.EntityFrameworkCore;
@@ -135,10 +122,7 @@ jobs:
           builder.Services.AddScoped<IUserRepository, UserRepository>();
           builder.Services.AddScoped<IOpenAIService, OpenAIService>();
           builder.Services.AddScoped<ITitleRepository, TitleRepository>();
-
-          var azurePublish = !builder.Environment.IsDevelopment();
-
-          // Use in-memory database for CI/CD
+          
           Console.WriteLine("Using in-memory database for CI/CD");
           builder.Services.AddDbContext<UserDbContext>(options =>
               options.UseInMemoryDatabase("TestDb"));
@@ -179,11 +163,12 @@ jobs:
               try
               {
                   SeedData.InitializeAsync(services).Wait();
+                  Console.WriteLine("Database seeded successfully");
               }
               catch (Exception ex)
               {
-                  var logger = services.GetRequiredService<ILogger<Program>>();
-                  logger.LogError(ex, "An error occurred seeding the DB.");
+                  Console.WriteLine($"An error occurred seeding the DB: {ex.Message}");
+                  Console.WriteLine(ex.StackTrace);
               }
           }
 
@@ -202,37 +187,54 @@ jobs:
 
           app.Run();
           EOL
+
+      - name: Create test API keys
+        run: |
+          echo '{
+            "ApiKeys": {
+              "OpenAI": "sk-dummy-key-for-testing",
+              "TMDB": "dummy-key-for-testing"
+            }
+          }' > ./MoviesMadeEasyProject/MoviesMadeEasy/appsettings.ci.json
+
+      - name: Publish app with CI Program.cs
+        run: |
+          # Backup original Program.cs
+          cp ./MoviesMadeEasyProject/MoviesMadeEasy/Program.cs ./MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak
           
-          # Publish with the temporary CI/CD Program.cs
+          # Use CI-specific Program.cs
+          cp ./MoviesMadeEasyProject/MoviesMadeEasy/Program-CI.cs ./MoviesMadeEasyProject/MoviesMadeEasy/Program.cs
+          
+          # Publish 
           dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
           
-          # Restore original Program.cs (this won't affect the published version)
-          mv MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak MoviesMadeEasyProject/MoviesMadeEasy/Program.cs
+          # Copy CI config
+          cp ./MoviesMadeEasyProject/MoviesMadeEasy/appsettings.ci.json ./publish_output/appsettings.json
+          
+          # Restore original Program.cs (so the git state is clean)
+          mv ./MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak ./MoviesMadeEasyProject/MoviesMadeEasy/Program.cs
 
-      - name: Run web app in background for tests
+      - name: Run web app with detailed logging
         run: |
           cd ./publish_output
           nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
           
-          # Wait for app to fully initialize and verify it's running
-          attempts=0
-          max_attempts=30
+          # Wait for app to initialize
+          echo "Waiting 10 seconds for app to start..."
+          sleep 10
           
-          echo "Waiting for application to start..."
-          while [ $attempts -lt $max_attempts ]; do
-            if curl -s http://localhost:5000 > /dev/null; then
-              echo "Application started successfully!"
-              break
-            fi
-            attempts=$((attempts+1))
-            echo "Attempt $attempts of $max_attempts - waiting 2 seconds..."
-            sleep 2
-          done
+          # Check if app is responding
+          echo "Checking if app is responding..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000)
+          echo "App response code: $RESPONSE"
           
-          if [ $attempts -eq $max_attempts ]; then
-            echo "Application failed to start after $max_attempts attempts"
-            echo "Application log:"
-            cat app.log
+          # Display logs regardless of status
+          echo "=== Application Logs ==="
+          cat app.log
+          echo "======================="
+          
+          if [[ "$RESPONSE" != "200" ]]; then
+            echo "App failed to start properly. Exiting."
             exit 1
           fi
 
