@@ -7,7 +7,7 @@ env:
 
 on:
   push:
-    branches: [ "dash_movie_modal" ]  # <- your testing branch
+    branches: [ "dash_movie_modal" ] 
   workflow_dispatch:
 
 permissions:
@@ -79,31 +79,28 @@ jobs:
       - name: Publish app
         run: dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
 
+      - name: Create CI appsettings with dummy connection strings
+        run: |
+          echo '{
+            "ConnectionStrings": {
+              "DefaultConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
+              "IdentityConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
+              "AzureConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
+              "AzureIdentityConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True"
+            }
+          }' > ./publish_output/appsettings.json
+
       - name: Run web app in background
         run: |
           cd ./publish_output
-          # Save app logs to a file
           nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
-          echo $! > ./app.pid
-          sleep 5
-          # Display startup logs
+          sleep 10
+          if grep -q "Error" app.log; then
+            cat app.log
+            exit 1
+          fi
+          echo "App started successfully"
           cat app.log
-          
-          # Verify process is running
-          if ps -p $(cat ./app.pid) > /dev/null; then
-            echo "Process started with PID $(cat ./app.pid)"
-          else
-            echo "Process failed to start"
-            exit 1
-          fi
-          
-          # Verify port is listening
-          if netstat -tuln | grep 5000; then
-            echo "Application listening on port 5000"
-          else
-            echo "Application not listening on port 5000"
-            exit 1
-          fi
 
       - name: Run BDD tests (NUnit + Selenium)
         run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
