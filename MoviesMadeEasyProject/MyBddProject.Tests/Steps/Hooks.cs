@@ -134,6 +134,9 @@ public class Hooks
 
     private bool IsAppAvailable(string url, int timeoutSeconds = 30)
     {
+        // Log attempt to connect
+        Console.WriteLine($"Checking application availability at {url}");
+
         using var client = new HttpClient();
         client.Timeout = TimeSpan.FromSeconds(1);
 
@@ -142,12 +145,13 @@ public class Hooks
             try
             {
                 var response = client.GetAsync(url).Result;
+                Console.WriteLine($"Response: {(int)response.StatusCode} {response.StatusCode}");
                 return response.IsSuccessStatusCode;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Attempt {i + 1}/{timeoutSeconds}: {ex.GetType().Name} - {ex.Message}");
                 Thread.Sleep(1000);
-                Console.WriteLine($"Waiting for application to start... ({i + 1}/{timeoutSeconds})");
             }
         }
         return false;

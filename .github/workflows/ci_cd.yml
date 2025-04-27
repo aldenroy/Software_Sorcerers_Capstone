@@ -82,16 +82,28 @@ jobs:
       - name: Run web app in background
         run: |
           cd ./publish_output
-          dotnet MoviesMadeEasy.dll --urls http://localhost:5000 &
-          # Wait for app to be responsive
-          for i in {1..30}; do
-            if curl -s http://localhost:5000 > /dev/null; then
-              echo "Application started successfully"
-              break
-            fi
-            echo "Waiting for application to start... ($i/30)"
-            sleep 2
-          done
+          # Save app logs to a file
+          nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
+          echo $! > ./app.pid
+          sleep 5
+          # Display startup logs
+          cat app.log
+          
+          # Verify process is running
+          if ps -p $(cat ./app.pid) > /dev/null; then
+            echo "Process started with PID $(cat ./app.pid)"
+          else
+            echo "Process failed to start"
+            exit 1
+          fi
+          
+          # Verify port is listening
+          if netstat -tuln | grep 5000; then
+            echo "Application listening on port 5000"
+          else
+            echo "Application not listening on port 5000"
+            exit 1
+          fi
 
       - name: Run BDD tests (NUnit + Selenium)
         run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
