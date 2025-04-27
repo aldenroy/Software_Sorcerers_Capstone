@@ -50,21 +50,29 @@ jobs:
       - name: Run backend unit tests (NUnit)
         run: dotnet test MoviesMadeEasyProject/Tests_Unit/Tests_Unit.csproj --verbosity normal
 
-      - name: Install Chrome & ChromeDriver (matching versions)
+      - name: Install Chrome & ChromeDriver
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          # Install latest Chrome
+          # Install Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          # Get Chrome version and install matching ChromeDriver
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1)
-          wget -O chromedriver_latest_release.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
-          CHROMEDRIVER_VERSION=$(cat chromedriver_latest_release.txt)
-          wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+          
+          # Install jq for JSON parsing
+          sudo apt-get install -y jq
+          
+          # Download latest ChromeDriver for current Chrome version
+          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3)
+          echo "Chrome version: $CHROME_VERSION"
+          
+          # Get matching ChromeDriver URL using Chrome for Testing API
+          CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | \
+            jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
+          
+          # Download and install ChromeDriver
+          wget -O chromedriver.zip "$CHROMEDRIVER_URL"
           unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/chromedriver
+          sudo mv chrome-for-testing-*chromedriver-linux64/chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
+          chromedriver --version
       
       - name: Publish app
         run: dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
