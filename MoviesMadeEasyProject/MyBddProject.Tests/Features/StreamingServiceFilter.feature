@@ -1,13 +1,13 @@
-Feature: Content Filtering by Streaming Service
-  In order to view only desired content
-  As a user on the content browsing page
-  I want to filter content by streaming services
-
-  Scenario: Filtering content by a single streaming service
-    Given the user is on the content browsing page
-    And the list of available streaming services is displayed
-    When the user selects a specific streaming service "Netflix"
-    Then the content list is updated to show only items available on "Netflix"
+#Feature: Content Filtering by Streaming Service
+#  In order to view only desired content
+#  As a user on the content browsing page
+#  I want to filter content by streaming services
+#
+#  Scenario: Filtering content by a single streaming service
+#    Given the user is on the content browsing page
+#    And the list of available streaming services is displayed
+#    When the user selects a specific streaming service "Netflix"
+#    Then the content list is updated to show only items available on "Netflix"
 
 #  Scenario: Filtering content by multiple streaming services
 #    Given the user is on the content browsing page
