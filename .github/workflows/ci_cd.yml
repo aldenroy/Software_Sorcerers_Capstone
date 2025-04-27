@@ -50,13 +50,18 @@ jobs:
       - name: Run backend unit tests (NUnit)
         run: dotnet test MoviesMadeEasyProject/Tests_Unit/Tests_Unit.csproj --verbosity normal
 
-      - name: Install Chrome & ChromeDriver (fixed versions)
+      - name: Install Chrome & ChromeDriver (matching versions)
         run: |
           sudo apt-get update
           sudo apt-get install -y wget unzip
+          # Install latest Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          # Get Chrome version and install matching ChromeDriver
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1)
+          wget -O chromedriver_latest_release.txt https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
+          CHROMEDRIVER_VERSION=$(cat chromedriver_latest_release.txt)
+          wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
           unzip chromedriver.zip
           sudo mv chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
