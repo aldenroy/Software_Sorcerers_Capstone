@@ -140,10 +140,7 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"Added {streamingServices.Count} streaming services");
         }
         
-        // Seed users
-        await SeedData.InitializeAsync(services);
-        
-        // Create test movie titles
+        // Create test movie titles FIRST (before seeding users)
         if (!userDbContext.Titles.Any(t => t.TitleName == "Pokemon 4Ever" || t.TitleName == "Her"))
         {
             Console.WriteLine("Adding test movie titles...");
@@ -174,18 +171,27 @@ using (var scope = app.Services.CreateScope())
             userDbContext.Titles.Add(herMovie);
             userDbContext.Titles.Add(pokemonMovie);
             userDbContext.SaveChanges();
+            Console.WriteLine("Test movie titles added successfully");
         }
         
-        // Setup user subscriptions and recently viewed titles
+        // Seed users
+        await SeedData.InitializeAsync(services);
+        Console.WriteLine("User seeding completed");
+        
+        // Setup user subscriptions and recently viewed titles AFTER users are created
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-        var testUser1 = userManager.FindByEmailAsync("testuser@example.com").Result;
+        var testUser1 = await userManager.FindByEmailAsync("testuser@example.com");
         
         if (testUser1 != null)
         {
+            Console.WriteLine($"Found test user: {testUser1.Email}");
             var userRepo = services.GetRequiredService<IUserRepository>();
             var user = userRepo.GetUser(testUser1.Id);
+            
             if (user != null)
             {
+                Console.WriteLine($"Found corresponding user record with ID: {user.Id}");
+                
                 // Add Hulu subscription
                 var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
                 if (huluService != null && !userDbContext.UserStreamingServices.Any(us => us.UserId == user.Id && us.StreamingServiceId == huluService.Id))
@@ -195,51 +201,78 @@ using (var scope = app.Services.CreateScope())
                         StreamingServiceId = huluService.Id
                     });
                     userDbContext.SaveChanges();
+                    Console.WriteLine("Added Hulu subscription to test user");
                 }
                 
-                // Setup recently viewed titles
+                // Setup recently viewed titles with CORRECT ordering
                 var herTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Her");
                 var pokemonTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Pokemon 4Ever");
                 
                 if (herTitle != null && pokemonTitle != null)
                 {
-                    // Update the timestamps to ensure Her is more recent
-                    var herView = userDbContext.RecentlyViewedTitles.FirstOrDefault(r => r.UserId == user.Id && r.TitleId == herTitle.Id);
-                    var pokemonView = userDbContext.RecentlyViewedTitles.FirstOrDefault(r => r.UserId == user.Id && r.TitleId == pokemonTitle.Id);
+                    Console.WriteLine("Setting up recently viewed titles with Her being more recent than Pokemon 4Ever");
                     
-                    if (herView == null)
+                    // Remove any existing views first to prevent ordering issues
+                    var existingViews = userDbContext.RecentlyViewedTitles
+                        .Where(rv => rv.UserId == user.Id && 
+                               (rv.TitleId == herTitle.Id || rv.TitleId == pokemonTitle.Id))
+                        .ToList();
+                        
+                    if (existingViews.Any())
                     {
-                        herView = new RecentlyViewedTitle
-                        {
-                            UserId = user.Id,
-                            TitleId = herTitle.Id,
-                            ViewedAt = DateTime.UtcNow // More recent
-                        };
-                        userDbContext.RecentlyViewedTitles.Add(herView);
-                    }
-                    else
-                    {
-                        herView.ViewedAt = DateTime.UtcNow;
+                        Console.WriteLine($"Removing {existingViews.Count} existing recently viewed entries");
+                        userDbContext.RecentlyViewedTitles.RemoveRange(existingViews);
+                        userDbContext.SaveChanges();
                     }
                     
-                    if (pokemonView == null)
+                    // First add Pokemon 4Ever (older timestamp)
+                    Console.WriteLine("Adding Pokemon 4Ever with older timestamp");
+                    userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
                     {
-                        pokemonView = new RecentlyViewedTitle
-                        {
-                            UserId = user.Id,
-                            TitleId = pokemonTitle.Id,
-                            ViewedAt = DateTime.UtcNow.AddMinutes(-30) // Older
-                        };
-                        userDbContext.RecentlyViewedTitles.Add(pokemonView);
-                    }
-                    else
-                    {
-                        pokemonView.ViewedAt = DateTime.UtcNow.AddMinutes(-30);
-                    }
-                    
+                        UserId = user.Id,
+                        TitleId = pokemonTitle.Id,
+                        ViewedAt = DateTime.UtcNow.AddHours(-2) // Older timestamp
+                    });
                     userDbContext.SaveChanges();
+                    
+                    // Then add Her with a newer timestamp
+                    Console.WriteLine("Adding Her with newer timestamp");
+                    userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
+                    {
+                        UserId = user.Id,
+                        TitleId = herTitle.Id,
+                        ViewedAt = DateTime.UtcNow // More recent timestamp
+                    });
+                    userDbContext.SaveChanges();
+                    
+                    Console.WriteLine("Recently viewed titles created with Her having more recent timestamp than Pokemon 4Ever");
+                    
+                    // Verify the order just to be sure
+                    var checkOrder = userDbContext.RecentlyViewedTitles
+                        .Where(rv => rv.UserId == user.Id)
+                        .OrderByDescending(rv => rv.ViewedAt)
+                        .ToList();
+                    
+                    if (checkOrder.Count >= 2)
+                    {
+                        var first = userDbContext.Titles.Find(checkOrder[0].TitleId);
+                        var second = userDbContext.Titles.Find(checkOrder[1].TitleId);
+                        Console.WriteLine($"Verified order: 1st={first?.TitleName} (at {checkOrder[0].ViewedAt}), 2nd={second?.TitleName} (at {checkOrder[1].ViewedAt})");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Could not find one or both movie titles!");
                 }
             }
+            else
+            {
+                Console.WriteLine("ERROR: Could not find user record for test user!");
+            }
+        }
+        else
+        {
+            Console.WriteLine("ERROR: Could not find test user in identity system!");
         }
     }
     catch (Exception ex)
