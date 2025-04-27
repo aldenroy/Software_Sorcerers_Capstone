@@ -76,31 +76,165 @@ jobs:
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
       
-      - name: Publish app
-        run: dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
-
-      - name: Create CI appsettings with dummy connection strings
+      - name: Publish app with in-memory database
         run: |
-          echo '{
-            "ConnectionStrings": {
-              "DefaultConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
-              "IdentityConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
-              "AzureConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True",
-              "AzureIdentityConnection": "Server=dummy;Database=dummy;User Id=dummy;Password=dummy;TrustServerCertificate=True"
-            }
-          }' > ./publish_output/appsettings.json
+          # Create a temporary Program.cs that uses in-memory database
+          cp MoviesMadeEasyProject/MoviesMadeEasy/Program.cs MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak
+          cat > MoviesMadeEasyProject/MoviesMadeEasy/Program.cs << 'EOL'
+          using MoviesMadeEasy.DAL.Abstract;
+          using MoviesMadeEasy.DAL.Concrete;
+          using Microsoft.EntityFrameworkCore;
+          using MoviesMadeEasy.Models;
+          using MoviesMadeEasy.Data;
+          using Microsoft.AspNetCore.Identity;
+          using Microsoft.AspNetCore.Authentication;
+          using Microsoft.Extensions.Logging;
+          using Microsoft.Extensions.DependencyInjection;
+          using Polly;
+          using Polly.Extensions.Http;
+          using Microsoft.AspNetCore.Session;
 
-      - name: Run web app in background
+          var builder = WebApplication.CreateBuilder(args);
+
+          builder.Logging.ClearProviders();
+          builder.Logging.AddConsole();
+          builder.Logging.AddDebug();
+          builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+          if (builder.Environment.IsDevelopment())
+          {
+              builder.Configuration.AddUserSecrets<Program>();
+          }
+
+          if (builder.Environment.IsDevelopment())
+          {
+              builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+              builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+          }
+          else
+          {
+              builder.Services.AddControllersWithViews();
+          }
+
+          builder.Services.AddHttpClient<IOpenAIService, OpenAIService>()
+              .AddPolicyHandler(Policy<HttpResponseMessage>
+                  .Handle<HttpRequestException>()
+                  .OrResult(x => (int)x.StatusCode == 429)
+                  .WaitAndRetryAsync(3, retryAttempt =>
+                      TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                      
+          builder.Services.AddHttpClient<IMovieService, MovieService>();
+          builder.Services.AddScoped<IMovieService, MovieService>(provider =>
+          {
+              var httpClient = provider.GetRequiredService<HttpClient>();
+              var configuration = provider.GetRequiredService<IConfiguration>();
+              return new MovieService(httpClient, configuration);
+          });
+
+          builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+          builder.Services.AddScoped<IUserRepository, UserRepository>();
+          builder.Services.AddScoped<IOpenAIService, OpenAIService>();
+          builder.Services.AddScoped<ITitleRepository, TitleRepository>();
+
+          var azurePublish = !builder.Environment.IsDevelopment();
+
+          // Use in-memory database for CI/CD
+          Console.WriteLine("Using in-memory database for CI/CD");
+          builder.Services.AddDbContext<UserDbContext>(options =>
+              options.UseInMemoryDatabase("TestDb"));
+
+          builder.Services.AddDbContext<IdentityDbContext>(options =>
+              options.UseInMemoryDatabase("TestAuthDb"));
+
+          builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<UserDbContext>());
+
+          builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+          {
+              options.SignIn.RequireConfirmedAccount = false;
+              options.User.RequireUniqueEmail = true;
+          })
+          .AddEntityFrameworkStores<IdentityDbContext>();
+
+          builder.Services.AddRazorPages();
+
+          builder.Services.AddDistributedMemoryCache();
+          builder.Services.AddSession(options =>
+          {
+              options.IdleTimeout = TimeSpan.FromMinutes(30);
+              options.Cookie.HttpOnly = true;
+              options.Cookie.IsEssential = true;
+          });
+
+          var app = builder.Build();
+
+          if (!app.Environment.IsDevelopment())
+          {
+              app.UseExceptionHandler("/Home/Error");
+              app.UseHsts();
+          }
+
+          using (var scope = app.Services.CreateScope())
+          {
+              var services = scope.ServiceProvider;
+              try
+              {
+                  SeedData.InitializeAsync(services).Wait();
+              }
+              catch (Exception ex)
+              {
+                  var logger = services.GetRequiredService<ILogger<Program>>();
+                  logger.LogError(ex, "An error occurred seeding the DB.");
+              }
+          }
+
+          app.UseHttpsRedirection();
+          app.UseStaticFiles();
+          app.UseRouting();
+          app.UseSession();
+          app.UseAuthentication();
+          app.UseAuthorization();
+
+          app.MapControllerRoute(
+              name: "default",
+              pattern: "{controller=Home}/{action=Index}/{id?}");
+
+          app.MapRazorPages();
+
+          app.Run();
+          EOL
+          
+          # Publish with the temporary CI/CD Program.cs
+          dotnet publish MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
+          
+          # Restore original Program.cs (this won't affect the published version)
+          mv MoviesMadeEasyProject/MoviesMadeEasy/Program.cs.bak MoviesMadeEasyProject/MoviesMadeEasy/Program.cs
+
+      - name: Run web app in background for tests
         run: |
           cd ./publish_output
           nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
-          sleep 10
-          if grep -q "Error" app.log; then
+          
+          # Wait for app to fully initialize and verify it's running
+          attempts=0
+          max_attempts=30
+          
+          echo "Waiting for application to start..."
+          while [ $attempts -lt $max_attempts ]; do
+            if curl -s http://localhost:5000 > /dev/null; then
+              echo "Application started successfully!"
+              break
+            fi
+            attempts=$((attempts+1))
+            echo "Attempt $attempts of $max_attempts - waiting 2 seconds..."
+            sleep 2
+          done
+          
+          if [ $attempts -eq $max_attempts ]; then
+            echo "Application failed to start after $max_attempts attempts"
+            echo "Application log:"
             cat app.log
             exit 1
           fi
-          echo "App started successfully"
-          cat app.log
 
       - name: Run BDD tests (NUnit + Selenium)
         run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --verbosity normal
