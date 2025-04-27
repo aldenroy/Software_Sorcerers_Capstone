@@ -5,7 +5,7 @@ using OpenQA.Selenium.Support.UI;
 using NUnit.Framework;
 using MyBddProject.Tests.PageObjects;
 
-namespace MyProject.Tests.StepDefinitions
+namespace MyBddProject.Tests.Steps
 {
     [Binding]
     public class UserManagementSteps
@@ -21,6 +21,19 @@ namespace MyProject.Tests.StepDefinitions
             _registrationPage = new RegistrationPageTestSetup(_driver);
         }
 
+        [BeforeScenario]
+        public void SetupImplicitWait()
+        {
+            try
+            {
+                _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Could not set implicit wait: {ex.Message}");
+            }
+        }
+
         private bool IsElementPresent(By by)
         {
             try
@@ -33,13 +46,13 @@ namespace MyProject.Tests.StepDefinitions
             }
         }
 
-        [AfterScenario]
-        public void CleanupUserData()
+        private void DeleteUserAccount()
         {
             try
             {
-                if (_driver != null && IsLoggedIn())
+                if (IsLoggedIn())
                 {
+                    Console.WriteLine("Cleaning up test user account");
                     _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
 
                     var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
@@ -60,7 +73,7 @@ namespace MyProject.Tests.StepDefinitions
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CleanupUserData error: {ex.Message}");
+                Console.WriteLine($"Error deleting user account: {ex.Message}");
             }
         }
 
@@ -202,6 +215,9 @@ namespace MyProject.Tests.StepDefinitions
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
             wait.Until(driver => driver.Url.Contains("/Preferences"));
             Assert.That(_driver.Url, Does.Contain("/Preferences"));
+
+            // Cleanup the user account immediately after the successful registration test
+            DeleteUserAccount();
         }
 
         [Then(@"the user should see an error message for the duplicate email")]
