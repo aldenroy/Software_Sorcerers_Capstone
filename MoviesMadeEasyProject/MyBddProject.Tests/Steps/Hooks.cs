@@ -4,7 +4,11 @@ using OpenQA.Selenium.Chrome;
 using Reqnroll.BoDi;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
-using System.Net.Http;
+using MoviesMadeEasy.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using MoviesMadeEasy.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyBddProject.Tests.Steps
 {
@@ -14,7 +18,8 @@ namespace MyBddProject.Tests.Steps
         private readonly IObjectContainer _objectContainer;
         private IWebDriver? _driver;
         private readonly IConfiguration _configuration;
-        private Process? _serverProcess;
+        private TestWebApplicationFactory _factory;
+        private IServiceScope _serviceScope;
 
         public Hooks(IObjectContainer objectContainer)
         {
@@ -24,27 +29,32 @@ namespace MyBddProject.Tests.Steps
                 .Build();
         }
 
+        [BeforeTestRun]
+        public static void BeforeTestRun()
+        {
+            // Set environment variable to indicate we're in a test environment
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        }
+
         [BeforeScenario]
         public void BeforeScenario()
         {
             try
             {
-                // Only start the server locally
-                if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
-                {
-                    StartApplicationServer();
-                }
-                else
-                {
-                    Console.WriteLine("Running in GitHub Actions - using workflow-started app server");
-                }
+                // Create the factory and scope
+                _factory = new TestWebApplicationFactory();
+                _serviceScope = _factory.Services.CreateScope();
 
+                // Seed test data
+                SeedTestData();
+
+                // Start the server and get a client
+                var client = _factory.CreateClient();
+
+                // Setup ChromeDriver
                 var options = new ChromeOptions();
-
-                // Basic options for headless testing
                 options.AddArguments("--headless", "--disable-gpu");
 
-                // Add GitHub Actions specific options
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
                     options.AddArguments(
@@ -54,10 +64,8 @@ namespace MyBddProject.Tests.Steps
                     );
                 }
 
-                // Create ChromeDriver with appropriate settings
                 _driver = new ChromeDriver(options);
 
-                // Set longer timeouts for GitHub Actions
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
                     _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
@@ -66,16 +74,8 @@ namespace MyBddProject.Tests.Steps
 
                 _objectContainer.RegisterInstanceAs(_driver);
 
-                // Wait for app to be available
+                // Navigate to the application
                 var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:5000";
-                bool isAvailable = WaitForAppAvailability(baseUrl,
-                    Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? 60 : 30);
-
-                if (!isAvailable)
-                {
-                    throw new Exception($"Application not available at {baseUrl}");
-                }
-
                 _driver.Navigate().GoToUrl(baseUrl);
             }
             catch (Exception ex)
@@ -102,84 +102,148 @@ namespace MyBddProject.Tests.Steps
                 }
             }
 
-            if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
-            {
-                StopApplicationServer();
-            }
+            _serviceScope?.Dispose();
+            _factory?.Dispose();
         }
 
-        private bool WaitForAppAvailability(string url, int timeoutSeconds)
+        private void SeedTestData()
         {
-            Console.WriteLine($"Checking application availability at {url}");
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(5);
+            var userDbContext = _serviceScope.ServiceProvider.GetRequiredService<UserDbContext>();
+            var userManager = _serviceScope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            DateTime endTime = DateTime.Now.AddSeconds(timeoutSeconds);
-            bool isSuccess = false;
-            int attempts = 0;
+            // Ensure database is created
+            userDbContext.Database.EnsureCreated();
 
-            while (DateTime.Now < endTime && !isSuccess)
+            // Clear existing data
+            userDbContext.RecentlyViewedTitles.RemoveRange(userDbContext.RecentlyViewedTitles);
+            userDbContext.UserStreamingServices.RemoveRange(userDbContext.UserStreamingServices);
+            userDbContext.Titles.RemoveRange(userDbContext.Titles);
+            userDbContext.Users.RemoveRange(userDbContext.Users);
+            userDbContext.StreamingServices.RemoveRange(userDbContext.StreamingServices);
+            userDbContext.SaveChanges();
+
+            // Seed streaming services
+            var streamingServices = new List<StreamingService>
             {
-                attempts++;
-                try
-                {
-                    var response = client.GetAsync(url).Result;
-                    Console.WriteLine($"Attempt {attempts}: Response {(int)response.StatusCode} {response.StatusCode}");
-                    isSuccess = response.IsSuccessStatusCode;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Attempt {attempts}: {ex.GetType().Name}");
-                    Thread.Sleep(1000);
-                }
+                new StreamingService { Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login", LogoUrl = "/images/Netflix_Symbol_RGB.png" },
+                new StreamingService { Name = "Hulu", Region = "US", BaseUrl = "https://auth.hulu.com/web/login", LogoUrl = "/images/hulu-Green-digital.png" },
+                new StreamingService { Name = "Disney+", Region = "US", BaseUrl = "https://www.disneyplus.com/login", LogoUrl = "/images/disney_logo_march_2024_050fef2e.png" },
+                new StreamingService { Name = "Amazon Prime Video", Region = "US", BaseUrl = "https://www.primevideo.com", LogoUrl = "/images/AmazonPrimeVideo.png" },
+                new StreamingService { Name = "Max \"HBO Max\"", Region = "US", BaseUrl = "https://play.max.com/sign-in", LogoUrl = "/images/maxlogo.jpg" },
+                new StreamingService { Name = "Apple TV+", Region = "US", BaseUrl = "https://tv.apple.com/login", LogoUrl = "/images/AppleTV-iOS.png" }
+            };
 
-                if (!isSuccess && DateTime.Now < endTime)
+            foreach (var service in streamingServices)
+            {
+                userDbContext.StreamingServices.Add(service);
+            }
+            userDbContext.SaveChanges();
+
+            // Seed movies
+            var pokemonMovie = new Title
+            {
+                TitleName = "Pokemon 4Ever",
+                Year = 2001,
+                PosterUrl = "https://example.com/pokemon4ever.jpg",
+                Genres = "Animation,Adventure",
+                Rating = "5.8",
+                Overview = "Ash and friends must save a Celebi from a hunter and a corrupted future.",
+                StreamingServices = "Hulu,Disney+",
+                LastUpdated = DateTime.UtcNow.AddDays(-1)
+            };
+            userDbContext.Titles.Add(pokemonMovie);
+
+            var herMovie = new Title
+            {
+                TitleName = "Her",
+                Year = 2013,
+                PosterUrl = "https://example.com/her.jpg",
+                Genres = "Romance,Drama,Sci-Fi",
+                Rating = "8.0",
+                Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
+                StreamingServices = "Netflix",
+                LastUpdated = DateTime.UtcNow.AddDays(-1)
+            };
+            userDbContext.Titles.Add(herMovie);
+            userDbContext.SaveChanges();
+
+            int pokemonId = pokemonMovie.Id;
+            int herId = herMovie.Id;
+
+            // Create test users
+            var userId = SeedUser(userManager, userDbContext, "testuser@example.com", "Ab+1234");
+            var userId2 = SeedUser(userManager, userDbContext, "testuser2@example.com", "Ab+1234");
+
+            // Add subscriptions
+            var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
+            if (huluService != null)
+            {
+                userDbContext.UserStreamingServices.Add(new UserStreamingService
                 {
-                    Thread.Sleep(1000);
-                }
+                    UserId = userId,
+                    StreamingServiceId = huluService.Id
+                });
+
+                userDbContext.UserStreamingServices.Add(new UserStreamingService
+                {
+                    UserId = userId2,
+                    StreamingServiceId = huluService.Id
+                });
+
+                userDbContext.SaveChanges();
             }
 
-            return isSuccess;
+            // Add recently viewed titles
+            userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
+            {
+                UserId = userId,
+                TitleId = pokemonId,
+                ViewedAt = DateTime.UtcNow.AddDays(-30)
+            });
+
+            userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
+            {
+                UserId = userId,
+                TitleId = herId,
+                ViewedAt = DateTime.UtcNow
+            });
+
+            userDbContext.SaveChanges();
         }
 
-        private void StartApplicationServer()
+        private int SeedUser(UserManager<IdentityUser> userManager, UserDbContext userDbContext,
+            string email, string password)
         {
-            try
+            // Create identity user
+            var testUser = new IdentityUser
             {
-                _serverProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "dotnet",
-                        Arguments = "run --project ../../../MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj",
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    }
-                };
-                _serverProcess.Start();
-                Console.WriteLine("Started application server locally");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to start application server: {ex.Message}");
-            }
-        }
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
 
-        private void StopApplicationServer()
-        {
-            try
+            var existingUser = userManager.FindByEmailAsync(email).GetAwaiter().GetResult();
+            if (existingUser != null)
             {
-                if (_serverProcess != null && !_serverProcess.HasExited)
-                {
-                    _serverProcess.Kill();
-                    _serverProcess = null;
-                    Console.WriteLine("Stopped local application server");
-                }
+                userManager.DeleteAsync(existingUser).GetAwaiter().GetResult();
             }
-            catch (Exception ex)
+
+            var result = userManager.CreateAsync(testUser, password).GetAwaiter().GetResult();
+
+            // Create custom user
+            var customUser = new User
             {
-                Console.WriteLine($"Error stopping server: {ex.Message}");
-            }
+                AspNetUserId = testUser.Id,
+                FirstName = "Test",
+                LastName = "User",
+                ColorMode = "Light",
+                FontSize = "Medium",
+                FontType = "Standard"
+            };
+            userDbContext.Users.Add(customUser);
+            userDbContext.SaveChanges();
+
+            return customUser.Id;
         }
     }
 }
