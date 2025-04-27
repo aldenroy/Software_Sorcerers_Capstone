@@ -157,6 +157,17 @@ using (var scope = app.Services.CreateScope())
         if (!userDbContext.Titles.Any(t => t.TitleName == "Pokemon 4Ever" || t.TitleName == "Her"))
         {
             Console.WriteLine("Adding test movie titles for recently viewed tests...");
+                        var herMovie = new Title
+            {
+                TitleName = "Her",
+                Year = 2013,
+                PosterUrl = "https://example.com/her.jpg",
+                Genres = "Romance,Drama,Sci-Fi",
+                Rating = "8.0",
+                Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
+                StreamingServices = "Netflix",
+                LastUpdated = DateTime.UtcNow.AddDays(-1)
+            };
             
             var pokemonMovie = new Title
             {
@@ -167,18 +178,6 @@ using (var scope = app.Services.CreateScope())
                 Rating = "5.8",
                 Overview = "Ash and friends must save a Celebi from a hunter and a corrupted future.",
                 StreamingServices = "Hulu,Disney+",
-                LastUpdated = DateTime.UtcNow.AddDays(-1)
-            };
-            
-            var herMovie = new Title
-            {
-                TitleName = "Her",
-                Year = 2013,
-                PosterUrl = "https://example.com/her.jpg",
-                Genres = "Romance,Drama,Sci-Fi",
-                Rating = "8.0",
-                Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
-                StreamingServices = "Netflix",
                 LastUpdated = DateTime.UtcNow.AddDays(-1)
             };
             
