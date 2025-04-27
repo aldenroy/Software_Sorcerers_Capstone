@@ -31,7 +31,7 @@ namespace MyBddProject.Tests.Features
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "RecentViewedTitles", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "RecentViewedTitles.feature"
+#line 1 "SSC116_RecentViewedTitles.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]

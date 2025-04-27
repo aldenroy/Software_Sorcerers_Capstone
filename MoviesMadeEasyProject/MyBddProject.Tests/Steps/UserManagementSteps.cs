@@ -1,5 +1,4 @@
 using System;
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using Reqnroll;
 using OpenQA.Selenium.Support.UI;
@@ -11,18 +10,15 @@ namespace MyProject.Tests.StepDefinitions
     [Binding]
     public class UserManagementSteps
     {
-        private IWebDriver _driver;
-        private LoginPageTestSetup _loginPage;
-        private RegistrationPageTestSetup _registrationPage;
+        private readonly IWebDriver _driver;
+        private readonly LoginPageTestSetup _loginPage;
+        private readonly RegistrationPageTestSetup _registrationPage;
 
-        [BeforeScenario]
-        public void Setup()
+        public UserManagementSteps(IWebDriver driver)
         {
-            _driver = new ChromeDriver();
+            _driver = driver;
             _loginPage = new LoginPageTestSetup(_driver);
             _registrationPage = new RegistrationPageTestSetup(_driver);
-            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
         private bool IsElementPresent(By by)
@@ -38,37 +34,45 @@ namespace MyProject.Tests.StepDefinitions
         }
 
         [AfterScenario]
-        public void TearDown()
+        public void CleanupUserData()
         {
-            if (_driver != null)
+            try
             {
-                try
+                if (_driver != null && IsLoggedIn())
                 {
                     _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
 
                     var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-                    wait.Until(d => d.FindElement(By.Id("Input_Password")));
 
-                    var passwordInput = _driver.FindElement(By.Id("Input_Password"));
-                    passwordInput.SendKeys("Test!123");
+                    if (_driver.Url.Contains("DeletePersonalData"))
+                    {
+                        wait.Until(d => d.FindElement(By.Id("Input_Password")));
 
-                    var deleteButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
-                    deleteButton.Click();
+                        var passwordInput = _driver.FindElement(By.Id("Input_Password"));
+                        passwordInput.SendKeys("Test!123");
 
-                    wait.Until(d => d.Url.Contains("http://localhost:5000/"));
+                        var deleteButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
+                        deleteButton.Click();
 
-                    var homePageText = _driver.FindElement(By.CssSelector("h2")).Text;
-                    Assert.That(homePageText, Is.EqualTo("MoviesMadeEasy"));
+                        wait.Until(d => d.Url.Contains("http://localhost:5000/"));
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"TearDown error: {ex.Message}");
-                }
-                finally
-                {
-                    _driver.Quit();
-                    _driver.Dispose();
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CleanupUserData error: {ex.Message}");
+            }
+        }
+
+        private bool IsLoggedIn()
+        {
+            try
+            {
+                return IsElementPresent(By.LinkText("Logout"));
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -76,25 +80,28 @@ namespace MyProject.Tests.StepDefinitions
         public void GivenAUserWithTheEmailExistsInTheSystem(string email)
         {
             _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
-            _registrationPage.FillFirstName("Test");
-            _registrationPage.FillLastName("User");
-            _registrationPage.FillEmail(email);
-            _registrationPage.FillPassword("Test!123");
-            _registrationPage.FillConfirmPassword("Test!123");
-            _registrationPage.Submit();
 
             try
             {
+                _registrationPage.FillFirstName("Test");
+                _registrationPage.FillLastName("User");
+                _registrationPage.FillEmail(email);
+                _registrationPage.FillPassword("Test!123");
+                _registrationPage.FillConfirmPassword("Test!123");
+                _registrationPage.Submit();
+
                 var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+                wait.Until(d => d.Url.Contains("/Dashboard") || IsElementPresent(By.CssSelector(".validation-summary-errors")));
+
                 if (IsElementPresent(By.LinkText("Logout")))
                 {
-                    var logoutLink = wait.Until(d => d.FindElement(By.LinkText("Logout")));
-                    logoutLink.Click();
+                    _driver.FindElement(By.LinkText("Logout")).Click();
+                    wait.Until(d => d.Url.Contains("http://localhost:5000/"));
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Given Step] Error during logout: {ex.Message}");
+                Console.WriteLine($"[Given Step] Error during user setup: {ex.Message}");
             }
         }
 
@@ -102,6 +109,9 @@ namespace MyProject.Tests.StepDefinitions
         public void GivenTheUserIsOnTheLoginPage()
         {
             _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Login");
+
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(d => d.FindElement(By.Id("Input_Email")).Displayed);
         }
 
         private string _email;
@@ -110,17 +120,16 @@ namespace MyProject.Tests.StepDefinitions
         [When(@"the user enters ""(.*)"" in the email field")]
         public void WhenTheUserEntersInTheEmailField(string email)
         {
-            _email = email; 
+            _email = email;
         }
 
         [When(@"the user enters ""(.*)"" in the password field")]
         public void WhenTheUserEntersInThePasswordField(string password)
         {
             _password = password;
-            _loginPage.Login(_email, _password); 
+            _loginPage.Login(_email, _password);
         }
 
-        // Unsuccessful Login
         [Then(@"the user should see an error message")]
         public void ThenTheUserShouldSeeAnErrorMessage()
         {
@@ -134,7 +143,6 @@ namespace MyProject.Tests.StepDefinitions
             Assert.That(_driver.Url, Is.EqualTo("http://localhost:5000/Identity/Account/Login"));
         }
 
-        // Successful Login
         [Then(@"the user will be logged in and redirected to the dashboard page")]
         public void ThenTheUserWillBeLoggedInAndRedirectedToTheDashboardPage()
         {
@@ -147,6 +155,9 @@ namespace MyProject.Tests.StepDefinitions
         public void GivenTheUserIsOnTheRegistrationPage()
         {
             _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Register");
+
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(d => d.FindElement(By.Id("Input_Email")).Displayed);
         }
 
         [When(@"the user enters ""(.*)"" in the first name field")]
@@ -185,7 +196,6 @@ namespace MyProject.Tests.StepDefinitions
             _registrationPage.Submit();
         }
 
-        // Successful Registration
         [Then(@"the user should be redirected to the preferences page")]
         public void ThenTheUserShouldBeRedirectedToThePreferencesPage()
         {
@@ -194,7 +204,6 @@ namespace MyProject.Tests.StepDefinitions
             Assert.That(_driver.Url, Does.Contain("/Preferences"));
         }
 
-        // Unsuccessful Registration Duplicate Email
         [Then(@"the user should see an error message for the duplicate email")]
         public void ThenTheUserShouldSeeAnErrorMessageForTheDuplicateEmail()
         {

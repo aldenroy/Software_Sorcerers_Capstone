@@ -27,58 +27,32 @@ public class Hooks
     {
         try
         {
-            // Start application server if needed
             StartApplicationServer();
 
-            // Configure ChromeDriver
             var options = new ChromeOptions();
+            string uniqueUserDir = Path.Combine(Path.GetTempPath(), "chrome-test-" + Guid.NewGuid().ToString());
+
             options.AddArguments(
-                "--headless", // Run in headless mode (no visible window)
+                "--headless",
                 "--disable-gpu",
                 "--no-sandbox",
                 "--disable-dev-shm-usage",
-                "--window-size=1920,1080"
+                "--window-size=1920,1080",
+                $"--user-data-dir={uniqueUserDir}"
             );
-            if (!OperatingSystem.IsWindows())
-            {
-                options.AddArgument("--user-data-dir=/tmp/chrome-profile");
-            }
 
-            string? driverPath = null;
+            var service = ChromeDriverService.CreateDefaultService();
+            service.LogPath = "chromedriver.log";
+            service.EnableVerboseLogging = true;
 
-            if (OperatingSystem.IsLinux())
-            {
-                // On Linux (including GitHub Actions), just create the driver
-                // The chromedriver should be in PATH from your GitHub workflow
-                _driver = new ChromeDriver(options);
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                driverPath = _configuration["DriverPaths:Mac"];
-                if (string.IsNullOrWhiteSpace(driverPath))
-                {
-                    throw new Exception("ChromeDriver path for Mac is not configured in appsettings.json.");
-                }
-
-                _driver = new ChromeDriver(driverPath, options);
-            }
-            else if (OperatingSystem.IsWindows())
-            {
-                _driver = new ChromeDriver(options);
-            }
-            else
-            {
-                throw new PlatformNotSupportedException("Unsupported OS.");
-            }
-
+            _driver = new ChromeDriver(service, options);
             _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
 
-            var baseUrl = _configuration["BaseUrl"];
+            var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:5000";
 
-            // Check if application is available before proceeding
-            if (!IsAppAvailable(baseUrl))
+            if (!IsAppAvailable(baseUrl, 30))
             {
-                throw new Exception($"Application not available at {baseUrl}. Please ensure it's running.");
+                throw new Exception($"Application not available at {baseUrl}");
             }
 
             _driver.Navigate().GoToUrl(baseUrl);
@@ -86,7 +60,6 @@ public class Hooks
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to setup WebDriver: {ex.Message}");
-            Console.WriteLine($"Make sure your application is running at {_configuration["BaseUrl"]}");
             throw;
         }
     }
@@ -94,13 +67,27 @@ public class Hooks
     [AfterScenario]
     public void AfterScenario()
     {
-        _driver?.Quit();
-        StopApplicationServer();
+        try
+        {
+            if (_driver != null)
+            {
+                _driver.Quit();
+                _driver.Dispose();
+                _driver = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during WebDriver cleanup: {ex.Message}");
+        }
+        finally
+        {
+            StopApplicationServer();
+        }
     }
 
     private void StartApplicationServer()
     {
-        // Skip starting server in GitHub Actions - it's started by workflow
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
             return;
 
@@ -118,8 +105,7 @@ public class Hooks
             };
             _serverProcess.Start();
 
-            // Wait for app to be ready
-            var baseUrl = _configuration["BaseUrl"];
+            var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:5000";
             if (!IsAppAvailable(baseUrl))
             {
                 Console.WriteLine($"Warning: Application not responsive at {baseUrl}");
@@ -128,13 +114,11 @@ public class Hooks
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to start application server: {ex.Message}");
-            // Continue - maybe server is already running
         }
     }
 
     private bool IsAppAvailable(string url, int timeoutSeconds = 30)
     {
-        // Log attempt to connect
         Console.WriteLine($"Checking application availability at {url}");
 
         using var client = new HttpClient();
@@ -161,11 +145,14 @@ public class Hooks
     {
         try
         {
-            _serverProcess?.Kill();
+            if (_serverProcess != null && !_serverProcess.HasExited)
+            {
+                _serverProcess.Kill();
+                _serverProcess = null;
+            }
         }
         catch
         {
-            // Ignore
         }
     }
 }
