@@ -170,13 +170,36 @@ jobs:
               app.UseHsts();
           }
 
+          // THIS IS THE CRITICAL PART - Seed the test users needed for BDD tests
           using (var scope = app.Services.CreateScope())
           {
               var services = scope.ServiceProvider;
               try
               {
                   SeedData.InitializeAsync(services).Wait();
-                  Console.WriteLine("Database seeded successfully");
+                  Console.WriteLine("Database seeded successfully with test users");
+                  
+                  // Force logging of the created users to verify
+                  var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                  var testUser1 = userManager.FindByEmailAsync("testuser@example.com").Result;
+                  var testUser2 = userManager.FindByEmailAsync("testuser2@example.com").Result;
+                  
+                  Console.WriteLine($"Test User 1: {(testUser1 != null ? "Created" : "Missing")}");
+                  Console.WriteLine($"Test User 2: {(testUser2 != null ? "Created" : "Missing")}");
+                  
+                  // Verify user repository and streaming services
+                  var userRepo = services.GetRequiredService<IUserRepository>();
+                  var subRepo = services.GetRequiredService<ISubscriptionRepository>();
+                  
+                  if (testUser1 != null)
+                  {
+                      var user = userRepo.GetUser(testUser1.Id);
+                      if (user != null)
+                      {
+                          var subs = subRepo.GetUserSubscriptions(user.Id);
+                          Console.WriteLine($"User has {subs?.Count() ?? 0} subscriptions");
+                      }
+                  }
               }
               catch (Exception ex)
               {
@@ -230,8 +253,8 @@ jobs:
           nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
           
           # Wait for app to initialize
-          echo "Waiting 10 seconds for app to start..."
-          sleep 10
+          echo "Waiting 15 seconds for app to start and seed database..."
+          sleep 15
           
           # Check if app is responding
           echo "Checking if app is responding..."
