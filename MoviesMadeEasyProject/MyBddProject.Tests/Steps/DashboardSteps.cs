@@ -167,7 +167,8 @@ namespace MyBddProject.Tests.Steps
 
             var existingWindows = _driver.WindowHandles.ToList();
 
-            link.Click();
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", link);
+            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", link);
 
             new WebDriverWait(_driver, TimeSpan.FromSeconds(5)).Until(
                 driver => driver.WindowHandles.Count > existingWindows.Count

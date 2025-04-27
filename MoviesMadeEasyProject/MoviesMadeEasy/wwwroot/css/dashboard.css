@@ -235,3 +235,25 @@ ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
     background-color: #555;
     border-color: lightblue;
 }
+
+.movie-card {
+    position: relative;
+}
+
+.movie-card .btn-close.remove-rvt {
+    position: absolute;
+    top: 4px; 
+    right: 4px;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity .15s ease-in-out;
+}
+
+.movie-card:hover .btn-close.remove-rvt,
+.movie-card .btn-close.remove-rvt:focus {
+    opacity: 1; 
+

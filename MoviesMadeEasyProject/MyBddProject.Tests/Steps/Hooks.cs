@@ -65,8 +65,7 @@ public class Hooks
             }
 
             _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
-            
-            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
+           
             
             var baseUrl = _configuration["BaseUrl"];
             _driver.Navigate().GoToUrl(baseUrl);
@@ -101,7 +100,7 @@ public class Hooks
                 }
             };
             _serverProcess.Start();
-            Thread.Sleep(5000); // Wait for server to start
+
         }
         catch (Exception ex)
         {

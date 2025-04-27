@@ -28,21 +28,15 @@
                                      data-overview="@t.Overview"
                                      data-streaming="@(t.StreamingServices ?? "")">
 
+                                    <button type="button"
+                                            class="btn-close remove-rvt"
+                                            aria-label="Remove from recently viewed"
+                                            data-title-id="@t.Id"></button>
+
                                     <a href="javascript:void(0)" aria-label="@t.TitleName, view details">
                                         <img src="@t.PosterUrl" alt="" class="img-fluid mb-2" />
                                         <span class="movie-title mb-0">@t.TitleName</span>
                                     </a>
-                                    <h5 class="d-none">@t.TitleName</h5>
-
-                                    <div class="movie-genres d-none">
-                                        Genres: @(string.IsNullOrWhiteSpace(t.Genres) ? "Unknown" : t.Genres)
-                                    </div>
-
-                                    <div class="movie-rating d-none">
-                                        Rating: @(string.IsNullOrWhiteSpace(t.Rating) ? "N/A" : t.Rating)
-                                    </div>
-
-                                    <button type="button" class="btn btn-primary d-none">View Details</button>
                                 </div>
                             }
 

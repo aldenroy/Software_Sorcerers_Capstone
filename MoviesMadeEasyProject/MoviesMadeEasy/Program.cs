@@ -54,7 +54,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<ITitleRepository, TitleRepository>();
 
-var azurePublish = false;
+var azurePublish = !builder.Environment.IsDevelopment();
 
 var connectionString = builder.Configuration.GetConnectionString(
     azurePublish ? "AzureConnection" : "DefaultConnection") ??
