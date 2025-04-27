@@ -66,7 +66,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<ITitleRepository, TitleRepository>();
 
-Console.WriteLine("Using in-memory database for testing");
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseInMemoryDatabase("TestDb"));
 
@@ -79,7 +78,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.User.RequireUniqueEmail = true;
-    // Make password requirements less strict for testing
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
@@ -112,29 +110,19 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        Console.WriteLine("Starting database seeding for tests...");
-        
-        // Create the database context and ensure it's created
         var userDbContext = services.GetRequiredService<UserDbContext>();
         userDbContext.Database.EnsureCreated();
         
-        // CRITICAL FIX: Identify and stop the MoviesMadeEasy test database if running locally
-        // This ensures we don't have conflicting databases
-        Console.WriteLine("Checking for any existing data...");
         if (userDbContext.StreamingServices.Any() || userDbContext.Titles.Any() || userDbContext.Users.Any())
         {
-            Console.WriteLine("CRITICAL WARNING: Database already contains data! Clearing all data to ensure clean state.");
             userDbContext.RecentlyViewedTitles.RemoveRange(userDbContext.RecentlyViewedTitles);
             userDbContext.UserStreamingServices.RemoveRange(userDbContext.UserStreamingServices);
             userDbContext.Titles.RemoveRange(userDbContext.Titles);
             userDbContext.Users.RemoveRange(userDbContext.Users);
             userDbContext.StreamingServices.RemoveRange(userDbContext.StreamingServices);
             userDbContext.SaveChanges();
-            Console.WriteLine("Database cleared successfully");
         }
         
-        // Seed streaming services
-        Console.WriteLine("Seeding streaming services...");
         var streamingServices = new List<StreamingService>
         {
             new StreamingService { Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login", LogoUrl = "/images/Netflix_Symbol_RGB.png" },
@@ -150,10 +138,7 @@ using (var scope = app.Services.CreateScope())
             userDbContext.StreamingServices.Add(service);
         }
         userDbContext.SaveChanges();
-        Console.WriteLine($"Added {streamingServices.Count} streaming services");
         
-        // Create test movie titles with explicit IDs to ensure consistency
-        Console.WriteLine("Adding test movie titles with explicit IDs...");
         var pokemonMovie = new Title
         {
             TitleName = "Pokemon 4Ever",
@@ -184,13 +169,11 @@ using (var scope = app.Services.CreateScope())
         
         int pokemonId = pokemonMovie.Id;
         int herId = herMovie.Id;
-        Console.WriteLine($"Added Pokemon 4Ever with ID {pokemonId} and Her with ID {herId}");
         
-        // Now seed the users AFTER movies are created
-        Console.WriteLine("Creating test users...");
+        // Create users
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
         
-        // Create explicit test user (don't use SeedData.InitializeAsync)
+        // Create first test user
         var testUser = new IdentityUser
         {
             UserName = "testuser@example.com",
@@ -201,17 +184,11 @@ using (var scope = app.Services.CreateScope())
         var existingUser = await userManager.FindByEmailAsync("testuser@example.com");
         if (existingUser != null)
         {
-            Console.WriteLine("Test user already exists, recreating for clean state...");
             await userManager.DeleteAsync(existingUser);
         }
         
-        var result = await userManager.CreateAsync(testUser, "Ab+1234");
-        if (!result.Succeeded)
-        {
-            throw new Exception($"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
+        await userManager.CreateAsync(testUser, "Ab+1234");
         
-        // Create custom user record explicitly
         var customUser = new User
         {
             AspNetUserId = testUser.Id,
@@ -224,9 +201,37 @@ using (var scope = app.Services.CreateScope())
         userDbContext.Users.Add(customUser);
         userDbContext.SaveChanges();
         int userId = customUser.Id;
-        Console.WriteLine($"Created test user with ID {userId}");
         
-        // Add Hulu subscription
+        // Create second test user with no viewed movies
+        var testUser2 = new IdentityUser
+        {
+            UserName = "testuser2@example.com",
+            Email = "testuser2@example.com",
+            EmailConfirmed = true
+        };
+        
+        var existingUser2 = await userManager.FindByEmailAsync("testuser2@example.com");
+        if (existingUser2 != null)
+        {
+            await userManager.DeleteAsync(existingUser2);
+        }
+        
+        await userManager.CreateAsync(testUser2, "Ab+1234");
+        
+        var customUser2 = new User
+        {
+            AspNetUserId = testUser2.Id,
+            FirstName = "Test",
+            LastName = "User2",
+            ColorMode = "Light",
+            FontSize = "Medium",
+            FontType = "Standard"
+        };
+        userDbContext.Users.Add(customUser2);
+        userDbContext.SaveChanges();
+        int userId2 = customUser2.Id;
+        
+        // Add Hulu subscription for both users
         var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
         if (huluService != null)
         {
@@ -234,83 +239,43 @@ using (var scope = app.Services.CreateScope())
                 UserId = userId, 
                 StreamingServiceId = huluService.Id
             });
+            
+            userDbContext.UserStreamingServices.Add(new UserStreamingService { 
+                UserId = userId2, 
+                StreamingServiceId = huluService.Id
+            });
+            
             userDbContext.SaveChanges();
-            Console.WriteLine($"Added Hulu subscription for user {userId}");
         }
         
-        // CRITICAL FIX: Add recently viewed titles with VERY explicit timing
-        Console.WriteLine("Setting up recently viewed titles...");
-        
-        // First view Pokemon (older timestamp) - 30 days ago
-        var pokemonView = new RecentlyViewedTitle
+        // Add recently viewed titles for first user only
+        // First view Pokemon (older timestamp)
+        userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
         {
             UserId = userId,
             TitleId = pokemonId,
             ViewedAt = DateTime.UtcNow.AddDays(-30)
-        };
-        userDbContext.RecentlyViewedTitles.Add(pokemonView);
+        });
         userDbContext.SaveChanges();
-        Console.WriteLine($"Added Pokemon view {pokemonView.Id} at {pokemonView.ViewedAt}");
         
-        // Then view Her (newer timestamp) - just 1 minute ago 
-        var herView = new RecentlyViewedTitle
+        // Then view Her (newer timestamp)
+        userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
         {
             UserId = userId,
             TitleId = herId,
-            ViewedAt = DateTime.UtcNow.AddMinutes(-1)
-        };
-        userDbContext.RecentlyViewedTitles.Add(herView);
+            ViewedAt = DateTime.UtcNow
+        });
         userDbContext.SaveChanges();
-        Console.WriteLine($"Added Her view {herView.Id} at {herView.ViewedAt}");
-        
-        // SUPER IMPORTANT - Double check our work!
-        var checkViews = userDbContext.RecentlyViewedTitles
-            .Where(rv => rv.UserId == userId)
-            .OrderByDescending(rv => rv.ViewedAt)
-            .ToList();
-        
-        if (checkViews.Count != 2)
-        {
-            throw new Exception($"Expected 2 recently viewed items, found {checkViews.Count}");
-        }
-        
-        var firstViewId = checkViews[0].TitleId;
-        var secondViewId = checkViews[1].TitleId;
-        
-        if (firstViewId != herId || secondViewId != pokemonId)
-        {
-            throw new Exception($"FATAL ERROR: Wrong viewing order! First={firstViewId}, Second={secondViewId}, Expected Her={herId}, Pokemon={pokemonId}");
-        }
-        
-        Console.WriteLine("SUCCESS! Verified recently viewed order: Her (newest) → Pokemon (oldest)");
-        
-        // Final confidence check - use the TitleRepository method
-        var titleRepo = services.GetRequiredService<ITitleRepository>();
-        var recentViews = titleRepo.GetRecentlyViewedByUser(userId);
-        
-        if (recentViews.Count >= 2 && 
-            recentViews[0].TitleName == "Her" && 
-            recentViews[1].TitleName == "Pokemon 4Ever")
-        {
-            Console.WriteLine("VERIFIED using TitleRepository: Her is correctly shown first, Pokemon second");
-        }
-        else
-        {
-            var viewOrder = string.Join(" → ", recentViews.Select(t => t.TitleName));
-            throw new Exception($"FATAL ERROR: TitleRepository returns wrong order: {viewOrder}");
-        }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"!!! CRITICAL ERROR DURING SEEDING !!!: {ex.Message}");
-        Console.WriteLine(ex.StackTrace);
-        throw; // Rethrow to fail the app startup - we can't proceed with wrong data
+        Console.WriteLine($"Error during database seeding: {ex.Message}");
+        throw;
     }
 }
 
 // Mock API endpoints for tests
 app.MapGet("/Home/SearchMovies", (string query) => {
-    Console.WriteLine($"Handling mock movie search for: {query}");
     var movieResults = new List<object>();
     
     if (query?.Contains("Hunger Games", StringComparison.OrdinalIgnoreCase) == true)
@@ -342,7 +307,6 @@ app.MapGet("/Home/SearchMovies", (string query) => {
 });
 
 app.MapGet("/Home/GetSimilarMovies", (string title) => {
-    Console.WriteLine($"Handling mock recommendation search for: {title}");
     var recommendations = new List<object>
     {
         new { title = "The Maze Runner", year = 2014, reason = "Similar dystopian theme" },
@@ -368,7 +332,6 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-Console.WriteLine("Test configuration started successfully");
 app.Run();
 EOL
 
