@@ -1,27 +1,26 @@
 #!/bin/bash
 
-# Create temporary directory for CI build
-mkdir -p ci_build
+# Create temporary directory for test build
+mkdir -p test_build
+mkdir -p prod_build
 
-# Copy entire project excluding Program.cs
-cp -r MoviesMadeEasyProject ci_build/
+# Step 1: Prepare the test environment with mocks
+echo "Setting up test environment..."
+cp -r MoviesMadeEasyProject test_build/
 
-# Create modified Program.cs for CI
-cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/Program.cs << 'EOL'
+# Create modified Program.cs for testing
+cat > test_build/MoviesMadeEasyProject/MoviesMadeEasy/Program.cs << 'EOL'
 using MoviesMadeEasy.DAL.Abstract;
 using MoviesMadeEasy.DAL.Concrete;
 using Microsoft.EntityFrameworkCore;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
 using Microsoft.AspNetCore.Session;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,16 +29,11 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
-// For CI/CD environment, add API keys directly
+// For CI/CD testing environment only
 builder.Configuration["OpenAI_ApiKey"] = "sk-dummy-key-for-testing";
 builder.Configuration["TMDBApiKey"] = "dummy-key-for-testing";
 builder.Configuration["RapidApiKey"] = "dummy-rapid-api-key-for-testing";
 builder.Configuration["OpenAI_Model"] = "gpt-3.5-turbo";
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddUserSecrets<Program>();
-}
 
 if (builder.Environment.IsDevelopment())
 {
@@ -49,6 +43,7 @@ if (builder.Environment.IsDevelopment())
 else
 {
     builder.Services.AddControllersWithViews();
+    builder.Services.AddRazorPages();
 }
 
 builder.Services.AddHttpClient<IOpenAIService, OpenAIService>()
@@ -71,7 +66,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<ITitleRepository, TitleRepository>();
 
-Console.WriteLine("Using in-memory database for CI/CD");
+Console.WriteLine("Using in-memory database for testing");
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseInMemoryDatabase("TestDb"));
 
@@ -111,19 +106,19 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// THIS IS THE CRITICAL PART - Seed the test users and streaming services
+// Seed test data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        Console.WriteLine("Starting database seeding...");
+        Console.WriteLine("Starting database seeding for tests...");
         
         // Create the database context and ensure it's created
         var userDbContext = services.GetRequiredService<UserDbContext>();
         userDbContext.Database.EnsureCreated();
         
-        // Seed streaming services first
+        // Seed streaming services
         if (!userDbContext.StreamingServices.Any())
         {
             Console.WriteLine("Seeding streaming services...");
@@ -144,20 +139,15 @@ using (var scope = app.Services.CreateScope())
             userDbContext.SaveChanges();
             Console.WriteLine($"Added {streamingServices.Count} streaming services");
         }
-        else
-        {
-            Console.WriteLine($"Streaming services already exist: {userDbContext.StreamingServices.Count()}");
-        }
         
-        // Now seed the users with SeedData.InitializeAsync
+        // Seed users
         await SeedData.InitializeAsync(services);
-        Console.WriteLine("User seeding completed successfully");
         
-        // Create test movie titles if they don't exist
+        // Create test movie titles
         if (!userDbContext.Titles.Any(t => t.TitleName == "Pokemon 4Ever" || t.TitleName == "Her"))
         {
-            Console.WriteLine("Adding test movie titles for recently viewed tests...");
-                        var herMovie = new Title
+            Console.WriteLine("Adding test movie titles...");
+            var herMovie = new Title
             {
                 TitleName = "Her",
                 Year = 2013,
@@ -184,35 +174,22 @@ using (var scope = app.Services.CreateScope())
             userDbContext.Titles.Add(herMovie);
             userDbContext.Titles.Add(pokemonMovie);
             userDbContext.SaveChanges();
-            
-            Console.WriteLine("Test movie titles added successfully");
         }
         
-        // Verify users and services for debugging
+        // Setup user subscriptions and recently viewed titles
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
         var testUser1 = userManager.FindByEmailAsync("testuser@example.com").Result;
-        var testUser2 = userManager.FindByEmailAsync("testuser2@example.com").Result;
-        
-        Console.WriteLine($"Test User 1: {(testUser1 != null ? "Created" : "Missing")}");
-        Console.WriteLine($"Test User 2: {(testUser2 != null ? "Created" : "Missing")}");
-        
-        // Verify subscriptions
-        var userRepo = services.GetRequiredService<IUserRepository>();
-        var subRepo = services.GetRequiredService<ISubscriptionRepository>();
         
         if (testUser1 != null)
         {
+            var userRepo = services.GetRequiredService<IUserRepository>();
             var user = userRepo.GetUser(testUser1.Id);
             if (user != null)
             {
-                var subs = subRepo.GetUserSubscriptions(user.Id);
-                Console.WriteLine($"User has {subs?.Count() ?? 0} subscriptions");
-                
-                // Make sure user has Hulu subscription
+                // Add Hulu subscription
                 var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
                 if (huluService != null && !userDbContext.UserStreamingServices.Any(us => us.UserId == user.Id && us.StreamingServiceId == huluService.Id))
                 {
-                    Console.WriteLine("Adding Hulu subscription to testuser");
                     userDbContext.UserStreamingServices.Add(new UserStreamingService { 
                         UserId = user.Id, 
                         StreamingServiceId = huluService.Id
@@ -220,7 +197,7 @@ using (var scope = app.Services.CreateScope())
                     userDbContext.SaveChanges();
                 }
                 
-                // Ensure proper order of recently viewed titles for tests
+                // Setup recently viewed titles
                 var herTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Her");
                 var pokemonTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Pokemon 4Ever");
                 
@@ -230,7 +207,6 @@ using (var scope = app.Services.CreateScope())
                     var herView = userDbContext.RecentlyViewedTitles.FirstOrDefault(r => r.UserId == user.Id && r.TitleId == herTitle.Id);
                     var pokemonView = userDbContext.RecentlyViewedTitles.FirstOrDefault(r => r.UserId == user.Id && r.TitleId == pokemonTitle.Id);
                     
-                    // If views exist, update them, otherwise create new ones
                     if (herView == null)
                     {
                         herView = new RecentlyViewedTitle
@@ -262,7 +238,6 @@ using (var scope = app.Services.CreateScope())
                     }
                     
                     userDbContext.SaveChanges();
-                    Console.WriteLine("Updated view times to ensure Her is more recent than Pokemon 4Ever");
                 }
             }
         }
@@ -274,7 +249,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Mock API endpoints for BDD tests
+// Mock API endpoints for tests
 app.MapGet("/Home/SearchMovies", (string query) => {
     Console.WriteLine($"Handling mock movie search for: {query}");
     var movieResults = new List<object>();
@@ -307,7 +282,6 @@ app.MapGet("/Home/SearchMovies", (string query) => {
     return Results.Json(movieResults);
 });
 
-// Mock API response for recommendations
 app.MapGet("/Home/GetSimilarMovies", (string title) => {
     Console.WriteLine($"Handling mock recommendation search for: {title}");
     var recommendations = new List<object>
@@ -335,11 +309,12 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+Console.WriteLine("Test configuration started successfully");
 app.Run();
 EOL
 
-# Create CI appsettings.json
-cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json << 'EOL'
+# Create test appsettings.json
+cat > test_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json << 'EOL'
 {
   "Logging": {
     "LogLevel": {
@@ -355,10 +330,35 @@ cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json << 'EOL'
 }
 EOL
 
-# Build from the CI directory
-dotnet publish ci_build/MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
+# Build test app
+dotnet publish test_build/MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./test_output
 
-# Run the app
-cd ./publish_output
+# Step 2: Prepare the production build (unmodified code)
+echo "Setting up production build..."
+cp -r MoviesMadeEasyProject prod_build/
+
+# Build production app for deployment
+dotnet publish prod_build/MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
+
+# Run the test app
+cd ./test_output
 nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
+echo "Test app started on http://localhost:5000"
 cd ..
+
+# Wait for app to initialize
+echo "Waiting for test app to start..."
+sleep 15
+
+# Check if test app is responding
+response_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000)
+echo "Test app response code: $response_code"
+
+if [[ "$response_code" != "200" ]]; then
+  echo "WARNING: Test app may not have started properly. Check logs at ./test_output/app.log"
+  cat ./test_output/app.log
+else
+  echo "Test app is running successfully for BDD tests"
+fi
+
+echo "Production build ready for deployment at ./publish_output"

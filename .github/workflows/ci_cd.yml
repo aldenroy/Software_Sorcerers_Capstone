@@ -65,27 +65,22 @@ jobs:
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
 
-      - name: Run Test Setup Script
+      - name: Run Modified Test Setup Script
         run: |
           chmod +x .github/workflows/test-setup.sh
           .github/workflows/test-setup.sh
           
-          # Wait for app to initialize
-          echo "Waiting 30 seconds for app to start and seed database..."
-          sleep 30
-          
-          # Check if app is responding
-          echo "Checking if app is responding..."
+          # Check if test app is responding
+          echo "Checking if test app is responding..."
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000)
-          echo "App response code: $RESPONSE"
+          echo "Test app response code: $RESPONSE"
           
-          # Display logs regardless of status
-          echo "=== Application Logs ==="
-          cat ./publish_output/app.log
-          echo "======================="
-          
+          # Display logs if needed
           if [[ "$RESPONSE" != "200" ]]; then
-            echo "App failed to start properly. Exiting."
+            echo "=== Test Application Logs ==="
+            cat ./test_output/app.log
+            echo "==========================="
+            echo "Test app failed to start properly. Exiting."
             exit 1
           fi
 
