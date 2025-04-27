@@ -70,7 +70,9 @@ jobs:
           # Download and install ChromeDriver
           wget -O chromedriver.zip "$CHROMEDRIVER_URL"
           unzip chromedriver.zip
-          sudo mv chrome-for-testing-*chromedriver-linux64/chromedriver /usr/local/bin/
+          
+          # Correct path based on actual extraction
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
       
