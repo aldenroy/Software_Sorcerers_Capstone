@@ -45,7 +45,13 @@ public class Hooks
 
             string? driverPath = null;
 
-            if (OperatingSystem.IsMacOS())
+            if (OperatingSystem.IsLinux())
+            {
+                // On Linux (including GitHub Actions), just create the driver
+                // The chromedriver should be in PATH from your GitHub workflow
+                _driver = new ChromeDriver(options);
+            }
+            else if (OperatingSystem.IsMacOS())
             {
                 driverPath = _configuration["DriverPaths:Mac"];
                 if (string.IsNullOrWhiteSpace(driverPath))
@@ -65,8 +71,7 @@ public class Hooks
             }
 
             _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
-           
-            
+
             var baseUrl = _configuration["BaseUrl"];
             _driver.Navigate().GoToUrl(baseUrl);
         }
@@ -100,7 +105,6 @@ public class Hooks
                 }
             };
             _serverProcess.Start();
-
         }
         catch (Exception ex)
         {

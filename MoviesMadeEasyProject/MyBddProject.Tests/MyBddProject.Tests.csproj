@@ -41,7 +41,7 @@
 
 
   <ItemGroup>
-    <ReqnrollFeatureFiles Update="Features\ModalRecentlyViewedTitle.feature">
+    <ReqnrollFeatureFiles Update="Features\SSC124_ModalRecentlyViewedTitle.feature">
       <Generator Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">ReqnrollSingleFileGenerator</Generator>
     </ReqnrollFeatureFiles>
   </ItemGroup>

@@ -44,7 +44,7 @@ namespace MyProject.Tests.StepDefinitions
             {
                 try
                 {
-                    // _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
+                    _driver.Navigate().GoToUrl("http://localhost:5000/Identity/Account/Manage/DeletePersonalData");
 
                     var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
                     wait.Until(d => d.FindElement(By.Id("Input_Password")));
