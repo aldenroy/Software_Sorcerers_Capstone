@@ -4,6 +4,7 @@ using OpenQA.Selenium.Chrome;
 using Reqnroll.BoDi;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
+using System.Net.Http;
 
 [Binding]
 public class Hooks
@@ -73,6 +74,13 @@ public class Hooks
             _objectContainer.RegisterInstanceAs<IWebDriver>(_driver);
 
             var baseUrl = _configuration["BaseUrl"];
+
+            // Check if application is available before proceeding
+            if (!IsAppAvailable(baseUrl))
+            {
+                throw new Exception($"Application not available at {baseUrl}. Please ensure it's running.");
+            }
+
             _driver.Navigate().GoToUrl(baseUrl);
         }
         catch (Exception ex)
@@ -92,6 +100,10 @@ public class Hooks
 
     private void StartApplicationServer()
     {
+        // Skip starting server in GitHub Actions - it's started by workflow
+        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            return;
+
         try
         {
             _serverProcess = new Process
@@ -105,12 +117,40 @@ public class Hooks
                 }
             };
             _serverProcess.Start();
+
+            // Wait for app to be ready
+            var baseUrl = _configuration["BaseUrl"];
+            if (!IsAppAvailable(baseUrl))
+            {
+                Console.WriteLine($"Warning: Application not responsive at {baseUrl}");
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to start application server: {ex.Message}");
             // Continue - maybe server is already running
         }
+    }
+
+    private bool IsAppAvailable(string url, int timeoutSeconds = 30)
+    {
+        using var client = new HttpClient();
+        client.Timeout = TimeSpan.FromSeconds(1);
+
+        for (int i = 0; i < timeoutSeconds; i++)
+        {
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine($"Waiting for application to start... ({i + 1}/{timeoutSeconds})");
+            }
+        }
+        return false;
     }
 
     private void StopApplicationServer()
