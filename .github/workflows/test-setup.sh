@@ -118,167 +118,193 @@ using (var scope = app.Services.CreateScope())
         var userDbContext = services.GetRequiredService<UserDbContext>();
         userDbContext.Database.EnsureCreated();
         
+        // CRITICAL FIX: Identify and stop the MoviesMadeEasy test database if running locally
+        // This ensures we don't have conflicting databases
+        Console.WriteLine("Checking for any existing data...");
+        if (userDbContext.StreamingServices.Any() || userDbContext.Titles.Any() || userDbContext.Users.Any())
+        {
+            Console.WriteLine("CRITICAL WARNING: Database already contains data! Clearing all data to ensure clean state.");
+            userDbContext.RecentlyViewedTitles.RemoveRange(userDbContext.RecentlyViewedTitles);
+            userDbContext.UserStreamingServices.RemoveRange(userDbContext.UserStreamingServices);
+            userDbContext.Titles.RemoveRange(userDbContext.Titles);
+            userDbContext.Users.RemoveRange(userDbContext.Users);
+            userDbContext.StreamingServices.RemoveRange(userDbContext.StreamingServices);
+            userDbContext.SaveChanges();
+            Console.WriteLine("Database cleared successfully");
+        }
+        
         // Seed streaming services
-        if (!userDbContext.StreamingServices.Any())
+        Console.WriteLine("Seeding streaming services...");
+        var streamingServices = new List<StreamingService>
         {
-            Console.WriteLine("Seeding streaming services...");
-            var streamingServices = new List<StreamingService>
-            {
-                new StreamingService { Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login", LogoUrl = "/images/Netflix_Symbol_RGB.png" },
-                new StreamingService { Name = "Hulu", Region = "US", BaseUrl = "https://auth.hulu.com/web/login", LogoUrl = "/images/hulu-Green-digital.png" },
-                new StreamingService { Name = "Disney+", Region = "US", BaseUrl = "https://www.disneyplus.com/login", LogoUrl = "/images/disney_logo_march_2024_050fef2e.png" },
-                new StreamingService { Name = "Amazon Prime Video", Region = "US", BaseUrl = "https://www.primevideo.com", LogoUrl = "/images/AmazonPrimeVideo.png" },
-                new StreamingService { Name = "Max \"HBO Max\"", Region = "US", BaseUrl = "https://play.max.com/sign-in", LogoUrl = "/images/maxlogo.jpg" },
-                new StreamingService { Name = "Apple TV+", Region = "US", BaseUrl = "https://tv.apple.com/login", LogoUrl = "/images/AppleTV-iOS.png" }
-            };
-            
-            foreach (var service in streamingServices)
-            {
-                userDbContext.StreamingServices.Add(service);
-            }
-            userDbContext.SaveChanges();
-            Console.WriteLine($"Added {streamingServices.Count} streaming services");
-        }
+            new StreamingService { Name = "Netflix", Region = "US", BaseUrl = "https://www.netflix.com/login", LogoUrl = "/images/Netflix_Symbol_RGB.png" },
+            new StreamingService { Name = "Hulu", Region = "US", BaseUrl = "https://auth.hulu.com/web/login", LogoUrl = "/images/hulu-Green-digital.png" },
+            new StreamingService { Name = "Disney+", Region = "US", BaseUrl = "https://www.disneyplus.com/login", LogoUrl = "/images/disney_logo_march_2024_050fef2e.png" },
+            new StreamingService { Name = "Amazon Prime Video", Region = "US", BaseUrl = "https://www.primevideo.com", LogoUrl = "/images/AmazonPrimeVideo.png" },
+            new StreamingService { Name = "Max \"HBO Max\"", Region = "US", BaseUrl = "https://play.max.com/sign-in", LogoUrl = "/images/maxlogo.jpg" },
+            new StreamingService { Name = "Apple TV+", Region = "US", BaseUrl = "https://tv.apple.com/login", LogoUrl = "/images/AppleTV-iOS.png" }
+        };
         
-        // Create test movie titles FIRST (before seeding users)
-        if (!userDbContext.Titles.Any(t => t.TitleName == "Pokemon 4Ever" || t.TitleName == "Her"))
+        foreach (var service in streamingServices)
         {
-            Console.WriteLine("Adding test movie titles...");
-            var herMovie = new Title
-            {
-                TitleName = "Her",
-                Year = 2013,
-                PosterUrl = "https://example.com/her.jpg",
-                Genres = "Romance,Drama,Sci-Fi",
-                Rating = "8.0",
-                Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
-                StreamingServices = "Netflix",
-                LastUpdated = DateTime.UtcNow.AddDays(-1)
-            };
-
-            var pokemonMovie = new Title
-            {
-                TitleName = "Pokemon 4Ever",
-                Year = 2001,
-                PosterUrl = "https://example.com/pokemon4ever.jpg",
-                Genres = "Animation,Adventure",
-                Rating = "5.8",
-                Overview = "Ash and friends must save a Celebi from a hunter and a corrupted future.",
-                StreamingServices = "Hulu,Disney+",
-                LastUpdated = DateTime.UtcNow.AddDays(-1)
-            };
-            
-            userDbContext.Titles.Add(herMovie);
-            userDbContext.Titles.Add(pokemonMovie);
-            userDbContext.SaveChanges();
-            Console.WriteLine("Test movie titles added successfully");
+            userDbContext.StreamingServices.Add(service);
         }
+        userDbContext.SaveChanges();
+        Console.WriteLine($"Added {streamingServices.Count} streaming services");
         
-        // Seed users
-        await SeedData.InitializeAsync(services);
-        Console.WriteLine("User seeding completed");
+        // Create test movie titles with explicit IDs to ensure consistency
+        Console.WriteLine("Adding test movie titles with explicit IDs...");
+        var pokemonMovie = new Title
+        {
+            TitleName = "Pokemon 4Ever",
+            Year = 2001,
+            PosterUrl = "https://example.com/pokemon4ever.jpg",
+            Genres = "Animation,Adventure",
+            Rating = "5.8",
+            Overview = "Ash and friends must save a Celebi from a hunter and a corrupted future.",
+            StreamingServices = "Hulu,Disney+",
+            LastUpdated = DateTime.UtcNow.AddDays(-1)
+        };
+        userDbContext.Titles.Add(pokemonMovie);
+        userDbContext.SaveChanges();
         
-        // Setup user subscriptions and recently viewed titles AFTER users are created
+        var herMovie = new Title
+        {
+            TitleName = "Her",
+            Year = 2013,
+            PosterUrl = "https://example.com/her.jpg",
+            Genres = "Romance,Drama,Sci-Fi",
+            Rating = "8.0",
+            Overview = "In a near future, a lonely writer develops an unlikely relationship with an operating system.",
+            StreamingServices = "Netflix",
+            LastUpdated = DateTime.UtcNow.AddDays(-1)
+        };
+        userDbContext.Titles.Add(herMovie);
+        userDbContext.SaveChanges();
+        
+        int pokemonId = pokemonMovie.Id;
+        int herId = herMovie.Id;
+        Console.WriteLine($"Added Pokemon 4Ever with ID {pokemonId} and Her with ID {herId}");
+        
+        // Now seed the users AFTER movies are created
+        Console.WriteLine("Creating test users...");
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-        var testUser1 = await userManager.FindByEmailAsync("testuser@example.com");
         
-        if (testUser1 != null)
+        // Create explicit test user (don't use SeedData.InitializeAsync)
+        var testUser = new IdentityUser
         {
-            Console.WriteLine($"Found test user: {testUser1.Email}");
-            var userRepo = services.GetRequiredService<IUserRepository>();
-            var user = userRepo.GetUser(testUser1.Id);
-            
-            if (user != null)
-            {
-                Console.WriteLine($"Found corresponding user record with ID: {user.Id}");
-                
-                // Add Hulu subscription
-                var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
-                if (huluService != null && !userDbContext.UserStreamingServices.Any(us => us.UserId == user.Id && us.StreamingServiceId == huluService.Id))
-                {
-                    userDbContext.UserStreamingServices.Add(new UserStreamingService { 
-                        UserId = user.Id, 
-                        StreamingServiceId = huluService.Id
-                    });
-                    userDbContext.SaveChanges();
-                    Console.WriteLine("Added Hulu subscription to test user");
-                }
-                
-                // Setup recently viewed titles with CORRECT ordering
-                var herTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Her");
-                var pokemonTitle = userDbContext.Titles.FirstOrDefault(t => t.TitleName == "Pokemon 4Ever");
-                
-                if (herTitle != null && pokemonTitle != null)
-                {
-                    Console.WriteLine("Setting up recently viewed titles with Her being more recent than Pokemon 4Ever");
-                    
-                    // Remove any existing views first to prevent ordering issues
-                    var existingViews = userDbContext.RecentlyViewedTitles
-                        .Where(rv => rv.UserId == user.Id && 
-                               (rv.TitleId == herTitle.Id || rv.TitleId == pokemonTitle.Id))
-                        .ToList();
-                        
-                    if (existingViews.Any())
-                    {
-                        Console.WriteLine($"Removing {existingViews.Count} existing recently viewed entries");
-                        userDbContext.RecentlyViewedTitles.RemoveRange(existingViews);
-                        userDbContext.SaveChanges();
-                    }
-                    
-                    // First add Pokemon 4Ever (older timestamp)
-                    Console.WriteLine("Adding Pokemon 4Ever with older timestamp");
-                    userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
-                    {
-                        UserId = user.Id,
-                        TitleId = pokemonTitle.Id,
-                        ViewedAt = DateTime.UtcNow.AddHours(-2) // Older timestamp
-                    });
-                    userDbContext.SaveChanges();
-                    
-                    // Then add Her with a newer timestamp
-                    Console.WriteLine("Adding Her with newer timestamp");
-                    userDbContext.RecentlyViewedTitles.Add(new RecentlyViewedTitle
-                    {
-                        UserId = user.Id,
-                        TitleId = herTitle.Id,
-                        ViewedAt = DateTime.UtcNow // More recent timestamp
-                    });
-                    userDbContext.SaveChanges();
-                    
-                    Console.WriteLine("Recently viewed titles created with Her having more recent timestamp than Pokemon 4Ever");
-                    
-                    // Verify the order just to be sure
-                    var checkOrder = userDbContext.RecentlyViewedTitles
-                        .Where(rv => rv.UserId == user.Id)
-                        .OrderByDescending(rv => rv.ViewedAt)
-                        .ToList();
-                    
-                    if (checkOrder.Count >= 2)
-                    {
-                        var first = userDbContext.Titles.Find(checkOrder[0].TitleId);
-                        var second = userDbContext.Titles.Find(checkOrder[1].TitleId);
-                        Console.WriteLine($"Verified order: 1st={first?.TitleName} (at {checkOrder[0].ViewedAt}), 2nd={second?.TitleName} (at {checkOrder[1].ViewedAt})");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("ERROR: Could not find one or both movie titles!");
-                }
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Could not find user record for test user!");
-            }
+            UserName = "testuser@example.com",
+            Email = "testuser@example.com",
+            EmailConfirmed = true
+        };
+        
+        var existingUser = await userManager.FindByEmailAsync("testuser@example.com");
+        if (existingUser != null)
+        {
+            Console.WriteLine("Test user already exists, recreating for clean state...");
+            await userManager.DeleteAsync(existingUser);
+        }
+        
+        var result = await userManager.CreateAsync(testUser, "Ab+1234");
+        if (!result.Succeeded)
+        {
+            throw new Exception($"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+        
+        // Create custom user record explicitly
+        var customUser = new User
+        {
+            AspNetUserId = testUser.Id,
+            FirstName = "Test",
+            LastName = "User",
+            ColorMode = "Light",
+            FontSize = "Medium",
+            FontType = "Standard"
+        };
+        userDbContext.Users.Add(customUser);
+        userDbContext.SaveChanges();
+        int userId = customUser.Id;
+        Console.WriteLine($"Created test user with ID {userId}");
+        
+        // Add Hulu subscription
+        var huluService = userDbContext.StreamingServices.FirstOrDefault(s => s.Name == "Hulu");
+        if (huluService != null)
+        {
+            userDbContext.UserStreamingServices.Add(new UserStreamingService { 
+                UserId = userId, 
+                StreamingServiceId = huluService.Id
+            });
+            userDbContext.SaveChanges();
+            Console.WriteLine($"Added Hulu subscription for user {userId}");
+        }
+        
+        // CRITICAL FIX: Add recently viewed titles with VERY explicit timing
+        Console.WriteLine("Setting up recently viewed titles...");
+        
+        // First view Pokemon (older timestamp) - 30 days ago
+        var pokemonView = new RecentlyViewedTitle
+        {
+            UserId = userId,
+            TitleId = pokemonId,
+            ViewedAt = DateTime.UtcNow.AddDays(-30)
+        };
+        userDbContext.RecentlyViewedTitles.Add(pokemonView);
+        userDbContext.SaveChanges();
+        Console.WriteLine($"Added Pokemon view {pokemonView.Id} at {pokemonView.ViewedAt}");
+        
+        // Then view Her (newer timestamp) - just 1 minute ago 
+        var herView = new RecentlyViewedTitle
+        {
+            UserId = userId,
+            TitleId = herId,
+            ViewedAt = DateTime.UtcNow.AddMinutes(-1)
+        };
+        userDbContext.RecentlyViewedTitles.Add(herView);
+        userDbContext.SaveChanges();
+        Console.WriteLine($"Added Her view {herView.Id} at {herView.ViewedAt}");
+        
+        // SUPER IMPORTANT - Double check our work!
+        var checkViews = userDbContext.RecentlyViewedTitles
+            .Where(rv => rv.UserId == userId)
+            .OrderByDescending(rv => rv.ViewedAt)
+            .ToList();
+        
+        if (checkViews.Count != 2)
+        {
+            throw new Exception($"Expected 2 recently viewed items, found {checkViews.Count}");
+        }
+        
+        var firstViewId = checkViews[0].TitleId;
+        var secondViewId = checkViews[1].TitleId;
+        
+        if (firstViewId != herId || secondViewId != pokemonId)
+        {
+            throw new Exception($"FATAL ERROR: Wrong viewing order! First={firstViewId}, Second={secondViewId}, Expected Her={herId}, Pokemon={pokemonId}");
+        }
+        
+        Console.WriteLine("SUCCESS! Verified recently viewed order: Her (newest) → Pokemon (oldest)");
+        
+        // Final confidence check - use the TitleRepository method
+        var titleRepo = services.GetRequiredService<ITitleRepository>();
+        var recentViews = titleRepo.GetRecentlyViewedByUser(userId);
+        
+        if (recentViews.Count >= 2 && 
+            recentViews[0].TitleName == "Her" && 
+            recentViews[1].TitleName == "Pokemon 4Ever")
+        {
+            Console.WriteLine("VERIFIED using TitleRepository: Her is correctly shown first, Pokemon second");
         }
         else
         {
-            Console.WriteLine("ERROR: Could not find test user in identity system!");
+            var viewOrder = string.Join(" → ", recentViews.Select(t => t.TitleName));
+            throw new Exception($"FATAL ERROR: TitleRepository returns wrong order: {viewOrder}");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred seeding the DB: {ex.Message}");
+        Console.WriteLine($"!!! CRITICAL ERROR DURING SEEDING !!!: {ex.Message}");
         Console.WriteLine(ex.StackTrace);
+        throw; // Rethrow to fail the app startup - we can't proceed with wrong data
     }
 }
 
@@ -376,7 +402,8 @@ dotnet publish prod_build/MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.cs
 # Run the test app
 cd ./test_output
 nohup dotnet MoviesMadeEasy.dll --urls http://localhost:5000 > app.log 2>&1 &
-echo "Test app started on http://localhost:5000"
+TEST_APP_PID=$!
+echo "Test app started on http://localhost:5000 with PID $TEST_APP_PID"
 cd ..
 
 # Wait for app to initialize
@@ -390,6 +417,7 @@ echo "Test app response code: $response_code"
 if [[ "$response_code" != "200" ]]; then
   echo "WARNING: Test app may not have started properly. Check logs at ./test_output/app.log"
   cat ./test_output/app.log
+  exit 1
 else
   echo "Test app is running successfully for BDD tests"
 fi
