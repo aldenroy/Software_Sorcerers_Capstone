@@ -65,15 +65,6 @@ jobs:
          sudo chmod +x /usr/local/bin/chromedriver
          chromedriver --version
 
-     - name: Create test API keys
-       run: |
-         echo '{
-           "ApiKeys": {
-             "OpenAI": "sk-dummy-key-for-testing",
-             "TMDB": "dummy-key-for-testing"
-           }
-         }' > ./MoviesMadeEasyProject/MoviesMadeEasy/appsettings.ci.json
-
      - name: Create CI Program and publish directly
        run: |
          # Create temporary directory for CI build
@@ -82,7 +73,7 @@ jobs:
          # Copy entire project excluding Program.cs
          cp -r MoviesMadeEasyProject ci_build/
          
-         # Create Program.cs file directly in the CI build directory
+         # Create modified Program.cs for CI
          cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/Program.cs << 'EOL'
          using MoviesMadeEasy.DAL.Abstract;
          using MoviesMadeEasy.DAL.Concrete;
@@ -103,6 +94,10 @@ jobs:
          builder.Logging.AddConsole();
          builder.Logging.AddDebug();
          builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+         // For CI/CD environment, add API keys directly
+         builder.Configuration["OpenAI_ApiKey"] = "sk-dummy-key-for-testing";
+         builder.Configuration["TMDBApiKey"] = "dummy-key-for-testing";
 
          if (builder.Environment.IsDevelopment())
          {
@@ -127,12 +122,7 @@ jobs:
                      TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
                      
          builder.Services.AddHttpClient<IMovieService, MovieService>();
-         builder.Services.AddScoped<IMovieService, MovieService>(provider =>
-         {
-             var httpClient = provider.GetRequiredService<HttpClient>();
-             var configuration = provider.GetRequiredService<IConfiguration>();
-             return new MovieService(httpClient, configuration);
-         });
+         builder.Services.AddScoped<IMovieService, MovieService>();
 
          builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
          builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -204,14 +194,26 @@ jobs:
          app.Run();
          EOL
          
-         # Copy CI config to the build directory
-         cp ./MoviesMadeEasyProject/MoviesMadeEasy/appsettings.ci.json ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json
+         # Create CI appsettings.json
+         cat > ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json << 'EOL'
+         {
+           "Logging": {
+             "LogLevel": {
+               "Default": "Information",
+               "Microsoft.AspNetCore": "Warning"
+             }
+           },
+           "AllowedHosts": "*",
+           "OpenAI_ApiKey": "sk-dummy-key-for-testing",
+           "TMDBApiKey": "dummy-key-for-testing"
+         }
+         EOL
          
          # Build from the CI directory
          dotnet publish ci_build/MoviesMadeEasyProject/MoviesMadeEasy/MoviesMadeEasy.csproj --configuration Release --output ./publish_output
          
          # Copy the CI config to output
-         cp ./MoviesMadeEasyProject/MoviesMadeEasy/appsettings.ci.json ./publish_output/appsettings.json
+         cp ci_build/MoviesMadeEasyProject/MoviesMadeEasy/appsettings.json ./publish_output/appsettings.json
 
      - name: Run web app with detailed logging
        run: |
