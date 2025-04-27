@@ -33,7 +33,7 @@ namespace MyBddProject.Tests.Features
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Openai", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "Openai.feature"
+#line 1 "SSC191_Openai.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
