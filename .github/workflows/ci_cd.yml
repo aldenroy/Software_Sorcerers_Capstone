@@ -67,9 +67,8 @@ jobs:
 
       - name: Run Test Setup Script
         run: |
-          # Run the setup script that will create a test environment
-          chmod +x test-setup.sh
-          ./test-setup.sh
+          chmod +x .github/workflows/test-setup.sh
+          .github/workflows/test-setup.sh
           
           # Wait for app to initialize
           echo "Waiting 30 seconds for app to start and seed database..."
