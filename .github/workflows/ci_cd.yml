@@ -7,7 +7,7 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dash_movie_modal" ]
   workflow_dispatch:
 
 permissions:
