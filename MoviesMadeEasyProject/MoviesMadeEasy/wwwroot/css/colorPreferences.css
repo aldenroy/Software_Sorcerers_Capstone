@@ -279,6 +279,20 @@ input[type="number"]::placeholder {
     color: var(--placeholder-color);
 }
 
+:root input::placeholder {
+    color: var(--placeholder-color);
+}
+
+.dark-theme input::placeholder,
+html[data-theme="dark"] input::placeholder {
+    color: var(--placeholder-color);
+}
+
+.high-contrast-theme input::placeholder,
+html[data-theme="high-contrast"] input::placeholder {
+    color: var(--placeholder-color);
+}
+
 select {
     appearance: none; /* Removes default browser styling */
     -webkit-appearance: none;
