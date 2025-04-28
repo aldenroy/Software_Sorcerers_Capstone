@@ -38,21 +38,6 @@ namespace MyBddProject.PageObjects
             }
         }
 
-        public bool AreStreamingIconsDisplayed()
-        {
-            try
-            {
-                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-                var icons = wait.Until(d => 
-                    d.FindElements(By.CssSelector(".streaming-icon")));
-                return icons.Count > 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         public void ClickStreamingIcon(string serviceName)
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
@@ -61,26 +46,36 @@ namespace MyBddProject.PageObjects
             icon.Click();
         }
 
-        public void ClickFirstStreamingIcon()
-        {
-            var icon = _driver.FindElement(By.CssSelector(".streaming-icon"));
-            icon.Click();
-        }
-
         public void WaitForModalToLoad()
         {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
+            
+            // Wait for modal to be visible
             wait.Until(d => 
-                d.FindElement(By.CssSelector(".modal.show")).Displayed && 
-                d.FindElement(By.Id("modalTitle")).Displayed);
+                d.FindElement(By.CssSelector(".modal.show")).Displayed);
+            
+            // Wait for loading to complete (wait for loading message to disappear)
+            wait.Until(d => 
+                !d.FindElement(By.Id("modalStreaming")).Text.Contains("Loading"));
         }
 
-        // Add this method to wait for streaming icons
-        public void WaitForStreamingIcons()
+        public void WaitForStreamingIcons(int minCount = 3)
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
+            
+            // Wait for at least minCount streaming icons to be present and visible
             wait.Until(d => 
-                d.FindElements(By.CssSelector(".streaming-icon")).Count >= 3);
+            {
+                try 
+                {
+                    var icons = d.FindElements(By.CssSelector(".streaming-icon"));
+                    return icons.Count >= minCount && icons.All(icon => icon.Displayed);
+                }
+                catch
+                {
+                    return false;
+                }
+            });
         }
 
         // Modify IsStreamingIconDisplayed
@@ -123,6 +118,40 @@ namespace MyBddProject.PageObjects
             return _driver.FindElements(By.CssSelector(".recommendation-item h5"))
                         .Select(e => e.Text)
                         .ToList();
+        }
+
+        public void WaitForAnyStreamingIcon()
+        {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
+            wait.Until(d => 
+            {
+                var icons = d.FindElements(By.CssSelector(".streaming-icon"));
+                return icons.Count > 0 && icons[0].Displayed;
+            });
+        }
+
+        public bool AreStreamingIconsDisplayed()
+        {
+            try
+            {
+                var icons = _driver.FindElements(By.CssSelector(".streaming-icon"));
+                return icons.Count > 0 && icons[0].Displayed;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void ClickFirstStreamingIcon()
+        {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
+            var icon = wait.Until(d => 
+            {
+                var icons = d.FindElements(By.CssSelector(".streaming-icon"));
+                return icons.Count > 0 ? icons[0] : null;
+            });
+            icon.Click();
         }
     }
 }

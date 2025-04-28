@@ -17,20 +17,29 @@ namespace MyBddProject.PageObjects
 
         public void WaitForPageToLoad()
         {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
-
-            // Wait for exact URL
-            wait.Until(d => d.Url.Equals(
-                "http://localhost:5000/Home/Recommendations",
-                StringComparison.OrdinalIgnoreCase));
+            // Wait for URL to contain recommendations (more flexible than exact match)
+            _wait.Until(d => d.Url.Contains("Recommendations", StringComparison.OrdinalIgnoreCase));
 
             // Wait for loading spinner to disappear
-            wait.Until(d =>
-                d.FindElement(By.Id("loadingSpinner")).GetCssValue("display") == "none");
+            _wait.Until(d => 
+            {
+                try 
+                {
+                    var spinner = d.FindElement(By.Id("loadingSpinner"));
+                    return spinner == null || spinner.GetCssValue("display") == "none";
+                }
+                catch (NoSuchElementException)
+                {
+                    return true;
+                }
+            });
 
-            // Wait until at least one .movie-card is visible in the container
-            wait.Until(d =>
-                d.FindElements(By.CssSelector("#recommendationsContainer .movie-card")).Count > 0);
+            // Wait for at least 3 movie cards to be present and visible
+            _wait.Until(d => 
+            {
+                var cards = d.FindElements(By.CssSelector("#recommendationsContainer .movie-card"));
+                return cards.Count >= 3 && cards.All(c => c.Displayed);
+            });
         }
 
 

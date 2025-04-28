@@ -2,6 +2,8 @@
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MoviesMadeEasy.DAL.Concrete
 {
@@ -74,6 +76,15 @@ namespace MoviesMadeEasy.DAL.Concrete
                 });
             }
 
+            _context.SaveChanges();
+        }
+
+        public void Delete(int titleId, int userId)
+        {
+            var rvt = _rvt.SingleOrDefault(x => x.UserId == userId && x.TitleId == titleId);
+            if (rvt == null) return;
+
+            _rvt.Remove(rvt);
             _context.SaveChanges();
         }
     }

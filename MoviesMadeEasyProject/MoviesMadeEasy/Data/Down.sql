@@ -1,4 +1,4 @@
-﻿USE [MoviesMadeEasyDB];
+USE [MoviesMadeEasyDB];
 GO
 
 IF OBJECT_ID('dbo.RecentlyViewedTitles', 'U') IS NOT NULL

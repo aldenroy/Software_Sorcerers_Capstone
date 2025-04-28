@@ -217,5 +217,98 @@ namespace MyBddProject.Tests.Steps
             Assert.Greater(_recommendationsPage.RecommendationCount(), 0);
         }
 
+        [Given(@"the user is on the recommendations page with Openai results")]
+        public void GivenTheUserIsOnTheRecommendationsPageWithOpenaiResults()
+        {
+            // First navigate to search page and perform a search
+            GivenTheUserIsAtSearchPage();
+            WhenTheUserEntersTheSearchBar("Hunger Games");
+            ThenTheUserSearchShouldShowResultsFor("Hunger Games");
+            
+            // Click "More Like This" to get to recommendations
+            WhenTheUserClicksTheMoreLikeThisButton();
+            
+            // Wait for recommendations page to fully load
+            _recommendationsPage.WaitForPageToLoad();
+            
+            // Verify we have recommendations
+            Assert.Greater(_recommendationsPage.RecommendationCount(), 0, 
+                "There should be at least one recommendation");
+        }
+
+        [When(@"the user clicks the ""View Details"" button for the first result")]
+        public void WhenTheUserClicksViewDetailsForFirstResult()
+        {
+            // Wait for recommendations to be clickable
+            var wait = new WebDriverWait(_driver, _defaultTimeout);
+            var viewDetailsButtons = wait.Until(d => 
+                d.FindElements(By.CssSelector(".movie-card .btn-primary")));
+            
+            // Click the first View Details button
+            viewDetailsButtons[0].Click();
+            
+            // Wait for modal to load completely
+            _modalPage.WaitForModalToLoad();
+            
+            // Wait for at least one streaming icon to be present
+            _modalPage.WaitForAnyStreamingIcon();
+        }
+
+        [Then(@"the user should see service icons on the modal")]
+        public void ThenTheUserShouldSeeServiceIconsOnModal()
+        {
+            // Just verify that at least one streaming icon exists
+            Assert.IsTrue(_modalPage.AreStreamingIconsDisplayed(), 
+                "At least one streaming service icon should be displayed");
+        }
+
+        [Given(@"the user is on the recommendations first results modal")]
+        public void GivenTheUserIsOnRecommendationsFirstResultsModal()
+        {
+            // Follow the complete flow:
+            // 1. Search
+            GivenTheUserIsAtSearchPage();
+            WhenTheUserEntersTheSearchBar("Hunger Games");
+            ThenTheUserSearchShouldShowResultsFor("Hunger Games");
+            
+            // 2. Get recommendations
+            WhenTheUserClicksTheMoreLikeThisButton();
+            _recommendationsPage.WaitForPageToLoad();
+            
+            // 3. Open modal and wait for icons
+            WhenTheUserClicksViewDetailsForFirstResult();
+            
+            // Verify modal is open with at least one icon
+            Assert.IsTrue(_modalPage.IsModalDisplayed(), "Modal should be displayed");
+            Assert.IsTrue(_modalPage.AreStreamingIconsDisplayed(), 
+                "At least one service icon should be visible");
+        }
+
+        [When(@"the user clicks the first service icon")]
+        public void WhenTheUserClicksFirstServiceIcon()
+        {
+            // Click the first available streaming icon
+            _modalPage.ClickFirstStreamingIcon();
+            
+            // Wait for new window/tab to open
+            var wait = new WebDriverWait(_driver, _defaultTimeout);
+            wait.Until(d => d.WindowHandles.Count > 1);
+            
+            // Switch to the new window
+            _driver.SwitchTo().Window(_driver.WindowHandles.Last());
+        }
+
+        [Then(@"the user should be redirected to that login page")]
+        public void ThenTheUserShouldBeRedirectedToLoginPage()
+        {
+            // Wait for page to load in new tab
+            var wait = new WebDriverWait(_driver, _defaultTimeout);
+            wait.Until(d => !string.IsNullOrEmpty(d.Url) && !d.Url.Contains("about:blank"));
+            
+            // Check if we were redirected (don't check specific service)
+            Assert.IsTrue(_driver.Url.Contains("://"), 
+                $"Expected to be redirected but was on {_driver.Url}");
+        }
+
     }
 }

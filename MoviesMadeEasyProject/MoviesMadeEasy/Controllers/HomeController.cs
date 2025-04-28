@@ -82,7 +82,7 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpGet]
-            public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
+        public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
         {
             try
             {

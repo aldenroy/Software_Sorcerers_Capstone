@@ -34,7 +34,7 @@ const dom = new JSDOM(`
                         <p id="modalGenres"></p>
                         <p id="modalRating"></p>
                         <p id="modalOverview"></p>
-                        <p id="modalStreaming"></p>
+                        <div id="modalStreaming"></div>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,16 @@ jest.mock('bootstrap', () => ({
     })),
 }));
 
-// Mock the openModal function
+// Mock the helper functions
+function getStreamingServiceLogo(serviceName) {
+    return `/images/${serviceName.toLowerCase()}_logo.png`;
+}
+
+function getStreamingServiceLink(serviceName) {
+    return `https://${serviceName.toLowerCase()}.com/`;
+}
+
+// Mock the openModal function with full implementation
 function openModal(button) {
     const movieCard = button.closest('.movie-card');
 
@@ -64,14 +73,46 @@ function openModal(button) {
     const genres = movieCard.querySelector('.movie-genres').textContent.replace("Genres: ", "");
     const rating = movieCard.querySelector('.movie-rating').textContent.replace("Rating: ", "");
     const overview = movieCard.getAttribute('data-overview') || "No overview available.";
-    const streamingServices = movieCard.getAttribute('data-streaming') || "Not available on streaming platforms.";
+    const streamingServices = movieCard.getAttribute('data-streaming') || "";
 
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalPoster').src = posterUrl;
     document.getElementById('modalGenres').textContent = `Genres: ${genres}`;
     document.getElementById('modalRating').textContent = `Rating: ${rating}`;
     document.getElementById('modalOverview').textContent = `Overview: ${overview}`;
-    document.getElementById('modalStreaming').textContent = `Streaming Services: ${streamingServices}`;
+    
+    // Clear previous streaming icons
+    const streamingContainer = document.getElementById('modalStreaming');
+    streamingContainer.innerHTML = '';
+    
+    // Add streaming service icons if available
+    if (streamingServices) {
+        const services = streamingServices.split(',');
+        services.forEach(service => {
+            const trimmedService = service.trim();
+            if (trimmedService) {
+                const link = document.createElement('a');
+                link.href = getStreamingServiceLink(trimmedService);
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                
+                const icon = document.createElement('img');
+                icon.src = getStreamingServiceLogo(trimmedService);
+                icon.alt = trimmedService;
+                icon.title = trimmedService;
+                icon.className = 'streaming-icon';
+                icon.style.width = '40px';
+                icon.style.height = '40px';
+                icon.style.objectFit = 'contain';
+                icon.style.marginRight = '5px';
+                
+                link.appendChild(icon);
+                streamingContainer.appendChild(link);
+            }
+        });
+    } else {
+        streamingContainer.textContent = 'Not available on streaming platforms.';
+    }
 
     const movieModal = new (require('bootstrap').Modal)(document.getElementById('movieModal'));
     movieModal.show();
@@ -79,6 +120,8 @@ function openModal(button) {
 
 // Attach the mock function to the global scope
 global.openModal = openModal;
+global.getStreamingServiceLogo = getStreamingServiceLogo;
+global.getStreamingServiceLink = getStreamingServiceLink;
 
 // Test suite for modal functionality
 describe('Modal Functionality', () => {
@@ -102,7 +145,6 @@ describe('Modal Functionality', () => {
         expect(document.getElementById('modalGenres').textContent).toBe('Genres: Action, Adventure');
         expect(document.getElementById('modalRating').textContent).toBe('Rating: 8.5');
         expect(document.getElementById('modalOverview').textContent).toBe('Overview: This is a test overview.');
-        expect(document.getElementById('modalStreaming').textContent).toBe('Streaming Services: Netflix, Hulu');
         expect(mockShow).toHaveBeenCalled();
     });
 
@@ -123,6 +165,30 @@ describe('Modal Functionality', () => {
         expect(document.getElementById('modalOverview').textContent).toBe('Overview: No overview available.');
 
         // Check if the modal streaming services display the default message
-        expect(document.getElementById('modalStreaming').textContent).toBe('Streaming Services: Not available on streaming platforms.');
+        expect(document.getElementById('modalStreaming').textContent).toBe('Not available on streaming platforms.');
+    });
+});
+
+describe('Modal Behavior Tests', () => {
+    // trying to make some tests that the BDD tests don't cover. Mostly checking if it will fail in certain case.
+    test('should not break if no streaming services are provided', () => {
+        const movieCard = document.querySelector('.movie-card');
+        movieCard.setAttribute('data-streaming', '');
+
+        const button = movieCard.querySelector('.btn-primary');
+        openModal(button);
+
+        const streamingContainer = document.getElementById('modalStreaming');
+        expect(streamingContainer.textContent).toBe('Not available on streaming platforms.');
+    });
+
+    test('should handle missing overview gracefully', () => {
+        const movieCard = document.querySelector('.movie-card');
+        movieCard.removeAttribute('data-overview');
+
+        const button = movieCard.querySelector('.btn-primary');
+        openModal(button);
+
+        expect(document.getElementById('modalOverview').textContent).toBe('Overview: No overview available.');
     });
 });
