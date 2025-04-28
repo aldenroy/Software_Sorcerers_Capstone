@@ -22,12 +22,14 @@ namespace MyBddProject.Tests.Features
     [NUnit.Framework.TestFixtureAttribute()]
     [NUnit.Framework.DescriptionAttribute("Content Filtering by Streaming Service")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
+    [NUnit.Framework.CategoryAttribute("StreamingServiceFilter")]
     public partial class ContentFilteringByStreamingServiceFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = ((string[])(null));
+        private static string[] featureTags = new string[] {
+                "StreamingServiceFilter"};
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Content Filtering by Streaming Service", "  In order to view only desired content\r\n  As a user on the content browsing page" +
                 "\r\n  I want to filter content by streaming services", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
@@ -90,7 +92,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filtering content by a single streaming service", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 6
+#line 7
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -100,16 +102,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 7
+#line 8
     await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 8
+#line 9
     await testRunner.AndAsync("the list of available streaming services is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 9
+#line 10
     await testRunner.WhenAsync("the user selects a specific streaming service \"Netflix\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 10
+#line 11
     await testRunner.ThenAsync("the content list is updated to show only items available on \"Netflix\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -123,7 +125,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filtering content by multiple streaming services", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 12
+#line 13
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -133,16 +135,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 13
+#line 14
     await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 14
+#line 15
     await testRunner.AndAsync("the list of available streaming services is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 15
+#line 16
     await testRunner.WhenAsync("the user selects streaming services \"Netflix\" and \"Hulu\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 16
+#line 17
     await testRunner.ThenAsync("the content list is updated to show items available on either \"Netflix\" or \"Hulu\"" +
                         "", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
@@ -157,7 +159,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Clearing applied streaming service filters", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 18
+#line 19
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -167,16 +169,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 19
+#line 20
     await testRunner.GivenAsync("the user has one or more streaming service filters applied", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 20
+#line 21
     await testRunner.WhenAsync("the user clicks the \"Clear Filters\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 21
+#line 22
     await testRunner.ThenAsync("all streaming service filters are removed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 22
+#line 23
     await testRunner.AndAsync("the content list returns to the default unfiltered view", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -190,7 +192,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filter response time performance", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 24
+#line 25
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -200,16 +202,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 25
+#line 26
     await testRunner.GivenAsync("the user is on the content browsing page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 26
+#line 27
     await testRunner.AndAsync("the user has one or more streaming service filters applied", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 27
+#line 28
     await testRunner.WhenAsync("the user selects a streaming service filter", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 28
+#line 29
     await testRunner.ThenAsync("the content list should update within 2 seconds", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

@@ -1,3 +1,4 @@
+@StreamingServiceFilter
 Feature: Content Filtering by Streaming Service
   In order to view only desired content
   As a user on the content browsing page
