@@ -1,10 +1,10 @@
-using Reqnroll;
+using System;
+using System.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using Reqnroll;
 using Reqnroll.BoDi;
-using Microsoft.Extensions.Configuration;
-using System.Diagnostics;
-using System.Net.Http;
 
 namespace MyBddProject.Tests.Steps
 {
@@ -12,8 +12,8 @@ namespace MyBddProject.Tests.Steps
     public class Hooks
     {
         private readonly IObjectContainer _objectContainer;
-        private IWebDriver? _driver;
         private readonly IConfiguration _configuration;
+        private IWebDriver? _driver;
         private Process? _serverProcess;
 
         public Hooks(IObjectContainer objectContainer)
@@ -39,12 +39,17 @@ namespace MyBddProject.Tests.Steps
                     Console.WriteLine("Running in GitHub Actions - using workflow-started app server");
                 }
 
+                // Build Chrome options
                 var options = new ChromeOptions();
-
-                // Basic options for headless testing
                 options.AddArguments("--headless", "--disable-gpu");
 
-                // Add GitHub Actions specific options
+                // If running on Linux or macOS, isolate a user-data-dir to avoid profile lock errors
+                if (!OperatingSystem.IsWindows())
+                {
+                    options.AddArgument("--user-data-dir=/tmp/chrome-profile");
+                }
+
+                // GitHub Actions–specific flags
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
                     options.AddArguments(
@@ -54,27 +59,47 @@ namespace MyBddProject.Tests.Steps
                     );
                 }
 
-                // Create ChromeDriver with appropriate settings
-                _driver = new ChromeDriver(options);
+                // Instantiate ChromeDriver based on OS
+                if (OperatingSystem.IsLinux())
+                {
+                    // On Linux (including GH Actions), chromedriver is on PATH
+                    _driver = new ChromeDriver(options);
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    // On macOS, we need an explicit path from configuration
+                    var driverPath = _configuration["DriverPaths:Mac"];
+                    if (string.IsNullOrWhiteSpace(driverPath))
+                        throw new Exception("ChromeDriver path for Mac is not configured in appsettings.json.");
+                    _driver = new ChromeDriver(driverPath, options);
+                }
+                else if (OperatingSystem.IsWindows())
+                {
+                    _driver = new ChromeDriver(options);
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException("Unsupported OS.");
+                }
 
-                // Set longer timeouts for GitHub Actions
+                _objectContainer.RegisterInstanceAs(_driver!);
+
+                // Apply longer timeouts in GH Actions
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
-                    _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+                    _driver!.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
                     _driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
                 }
 
-                _objectContainer.RegisterInstanceAs(_driver);
-
-                // Wait for app to be available
+                // Wait for and navigate to the app
                 var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:5000";
-                bool isAvailable = WaitForAppAvailability(baseUrl,
-                    Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? 60 : 30);
+                bool isAvailable = WaitForAppAvailability(
+                    baseUrl,
+                    Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ? 60 : 30
+                );
 
                 if (!isAvailable)
-                {
                     throw new Exception($"Application not available at {baseUrl}");
-                }
 
                 _driver.Navigate().GoToUrl(baseUrl);
             }
@@ -111,10 +136,9 @@ namespace MyBddProject.Tests.Steps
         private bool WaitForAppAvailability(string url, int timeoutSeconds)
         {
             Console.WriteLine($"Checking application availability at {url}");
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(5);
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
 
-            DateTime endTime = DateTime.Now.AddSeconds(timeoutSeconds);
+            var endTime = DateTime.Now.AddSeconds(timeoutSeconds);
             bool isSuccess = false;
             int attempts = 0;
 
@@ -124,13 +148,12 @@ namespace MyBddProject.Tests.Steps
                 try
                 {
                     var response = client.GetAsync(url).Result;
-                    Console.WriteLine($"Attempt {attempts}: Response {(int)response.StatusCode} {response.StatusCode}");
+                    Console.WriteLine($"Attempt {attempts}: {(int)response.StatusCode} {response.StatusCode}");
                     isSuccess = response.IsSuccessStatusCode;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Attempt {attempts}: {ex.GetType().Name}");
-                    Thread.Sleep(1000);
                 }
 
                 if (!isSuccess && DateTime.Now < endTime)
