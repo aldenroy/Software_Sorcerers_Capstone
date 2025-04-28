@@ -3,12 +3,18 @@
  */
 
 require('@testing-library/jest-dom');
-require('../MoviesMadeEasy/wwwroot/js/dashboardModalHelper.js');
+require("../MoviesMadeEasy/wwwroot/js/dashboardModalHelper.js");
 
 const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('dashboardModalHelper click delegation', () => {
+  // Initialize your event‐handlers exactly once
+  beforeAll(() => {
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+  });
+
   beforeEach(() => {
+    // fresh DOM for each test
     document.body.innerHTML = `
       <div class="movie-card">
         <a href="javascript:void(0)">
@@ -23,14 +29,13 @@ describe('dashboardModalHelper click delegation', () => {
         >Remove</button>
       </div>`;
 
-    // stub fetch so .mockResolvedValue will work
     global.fetch = jest.fn();
   });
 
   test('poster click triggers hidden button', () => {
-    const button = document.querySelector('button'); // first button is .btn-primary
+    const btn = document.querySelector('button.btn-primary');
     const spy = jest.fn();
-    button.addEventListener('click', spy);
+    btn.addEventListener('click', spy);
 
     document.querySelector('img')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -39,9 +44,9 @@ describe('dashboardModalHelper click delegation', () => {
   });
 
   test('title click triggers hidden button', () => {
-    const button = document.querySelector('button');
+    const btn = document.querySelector('button.btn-primary');
     const spy = jest.fn();
-    button.addEventListener('click', spy);
+    btn.addEventListener('click', spy);
 
     document.querySelector('.movie-title')
       .dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -50,9 +55,9 @@ describe('dashboardModalHelper click delegation', () => {
   });
 
   test('click outside movie card does not trigger button', () => {
-    const button = document.querySelector('button');
+    const btn = document.querySelector('button.btn-primary');
     const spy = jest.fn();
-    button.addEventListener('click', spy);
+    btn.addEventListener('click', spy);
 
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
