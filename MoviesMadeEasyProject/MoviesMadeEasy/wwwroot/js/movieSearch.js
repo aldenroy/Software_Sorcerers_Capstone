@@ -108,6 +108,18 @@ async function searchMovies() {
     }
 }
 
+function updateMinYearLabel() {
+    const slider = document.getElementById("minYear");
+    const box    = document.getElementById("minYearTextBox");
+    if (slider && box) box.value = slider.value;
+  }
+  
+  function updateMaxYearLabel() {
+    const slider = document.getElementById("maxYear");
+    const box    = document.getElementById("maxYearTextBox");
+    if (slider && box) box.value = slider.value;
+  }
+  
 function setupGenreFilter(availableGenres) {
     const filterContainer = document.getElementById("genre-filters");
     const contentList = document.getElementById("results");
@@ -178,8 +190,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const availableStreamingServices = ["Netflix", "Hulu", "Disney+", "Amazon Prime Video", "Max \"HBO Max\"", "Apple TV+", "Peacock", "Starz", "Tubi", "Pluto TV", "BritBox", "AMC+"];
     setupStreamingFilter(availableStreamingServices);
     setupGenreFilter(allGenres);
+    updateMinYearLabel();
+    updateMaxYearLabel();
+    ["minYear", "maxYear"].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener("change", (e) => {
+          if (!searchExecuted) {
+            // if they haven't searched yet, show your existing alert
+            handleFilterInteraction(e);
+          } else {
+            // otherwise, fire off a new filtered search
+            searchMovies();
+          }
+        });
+      });
 });
-
 function enableFilters() {
     searchExecuted = true;
     document.getElementById("sortBy").disabled = false;
@@ -305,9 +330,12 @@ function updateStreamingFilters() {
 
 function clearFilters() {
     document.getElementById("sortBy").value = "default";
-    document.getElementById("minYear").value = "";
-    document.getElementById("maxYear").value = "";
-
+    const minSlider = document.getElementById("minYear");
+    const maxSlider = document.getElementById("maxYear");
+    minSlider.value = minSlider.min;
+    maxSlider.value = maxSlider.max;
+    updateMinYearLabel();
+    updateMaxYearLabel();
     const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
     genreCheckboxes.forEach(cb => {
         cb.checked = false;
