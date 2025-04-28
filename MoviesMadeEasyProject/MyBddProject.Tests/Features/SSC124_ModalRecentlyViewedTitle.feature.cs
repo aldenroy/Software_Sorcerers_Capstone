@@ -20,18 +20,18 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Dashboard UI for authenticated users")]
+    [NUnit.Framework.DescriptionAttribute("Recently-viewed show modal")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class DashboardUIForAuthenticatedUsersFeature
+    public partial class Recently_ViewedShowModalFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dashboard UI for authenticated users", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Recently-viewed show modal", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "NavbarDashboardLink.feature"
+#line 1 "SSC124_ModalRecentlyViewedTitle.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -85,117 +85,27 @@ namespace MyBddProject.Tests.Features
         public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
         {
 #line 3
-#line hidden
+  #line hidden
 #line 4
- await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Display Dashboard link for Authenticated User")]
-        public async System.Threading.Tasks.Task DisplayDashboardLinkForAuthenticatedUser()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Display Dashboard link for Authenticated User", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 6
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 7
-    await testRunner.WhenAsync("the page loads", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 8
-    await testRunner.ThenAsync("I should see a \"Dashboard\" link in the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Navigate to the Dashboard Page")]
-        public async System.Threading.Tasks.Task NavigateToTheDashboardPage()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Navigate to the Dashboard Page", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 10
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 11
-    await testRunner.GivenAsync("I navigate to the \"Home\" page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 12
-    await testRunner.WhenAsync("I click the \"Dashboard\" link on the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 13
-    await testRunner.ThenAsync("I should be redirected to my dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Keyboard Navigation for Dashboard Button")]
-        public async System.Threading.Tasks.Task KeyboardNavigationForDashboardButton()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Keyboard Navigation for Dashboard Button", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 15
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 16
     await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 17
-    await testRunner.WhenAsync("I tab through the navbar until I reach the \"Dashboard\" link", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 5
+      await testRunner.AndAsync("I have viewed \"Pokemon 4Ever\" movie", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 18
-    await testRunner.ThenAsync("I should be able to focus on and activate the button using the keyboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 6
+      await testRunner.AndAsync("I see a \"Recently Viewed\" section listing the movies, including \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            }
-            await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Screen Reader Accessibility for Dashboard link")]
-        public async System.Threading.Tasks.Task ScreenReaderAccessibilityForDashboardLink()
+        [NUnit.Framework.DescriptionAttribute("Clicking a recently viewed show opens its modal")]
+        public async System.Threading.Tasks.Task ClickingARecentlyViewedShowOpensItsModal()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Screen Reader Accessibility for Dashboard link", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 20
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Clicking a recently viewed show opens its modal", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 8
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -205,14 +115,82 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
 #line 3
-await this.FeatureBackgroundAsync();
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 9
+    await testRunner.WhenAsync("I click the show \"Pokemon 4Ever\" in the recently viewed section", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 10
+    await testRunner.ThenAsync("a show-details modal is displayed for \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Modal can be closed")]
+        public async System.Threading.Tasks.Task ModalCanBeClosed()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Modal can be closed", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 12
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 3
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 13
+    await testRunner.GivenAsync("the show-details modal is displayed for \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 14
+     await testRunner.WhenAsync("I click the modal close button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 15
+     await testRunner.ThenAsync("the modal is no longer visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Modal is accessible via keyboard navigation")]
+        public async System.Threading.Tasks.Task ModalIsAccessibleViaKeyboardNavigation()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Modal is accessible via keyboard navigation", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 17
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 3
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 18
+     await testRunner.WhenAsync("I tab to \"Pokemon 4Ever\" in the recently viewed section", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 19
+      await testRunner.AndAsync("I press Enter", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 20
+     await testRunner.ThenAsync("a show-details modal is displayed for \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 21
-    await testRunner.WhenAsync("I navigate to the navbar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 22
-    await testRunner.ThenAsync("the \"Dashboard\" link should include a clear, descriptive label that lets my scree" +
-                        "n reader announce its purpose.", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+      await testRunner.AndAsync("focus moves inside the modal", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

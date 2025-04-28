@@ -20,18 +20,20 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("RecentViewedTitles")]
+    [NUnit.Framework.DescriptionAttribute("Show streaming service icons and links in view details")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class RecentViewedTitlesFeature
+    [NUnit.Framework.CategoryAttribute("service_links")]
+    public partial class ShowStreamingServiceIconsAndLinksInViewDetailsFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = ((string[])(null));
+        private static string[] featureTags = new string[] {
+                "service_links"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "RecentViewedTitles", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Show streaming service icons and links in view details", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "RecentViewedTitles.feature"
+#line 1 "SSC201_test_icons.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -83,14 +85,14 @@ namespace MyBddProject.Tests.Features
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Log a movie view when \"View Details\" is activated for \"Pokemon 4Ever\"")]
-        public async System.Threading.Tasks.Task LogAMovieViewWhenViewDetailsIsActivatedForPokemon4Ever()
+        [NUnit.Framework.DescriptionAttribute("Search result")]
+        public async System.Threading.Tasks.Task SearchResult()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Log a movie view when \"View Details\" is activated for \"Pokemon 4Ever\"", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Search result", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 3
-this.ScenarioInitialize(scenarioInfo);
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -100,27 +102,27 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
 #line 4
-  await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the user is on the search page for icons test", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 5
-  await testRunner.AndAsync("I have viewed \"Pokemon 4Ever\" movie", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("the user enters \"Hunger Games\" into the search bar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 6
-  await testRunner.ThenAsync("I see a \"Recently Viewed\" section listing the movies, including \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the search should show results for \"Hunger Games\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Display recently viewed movies on the dashboard")]
-        public async System.Threading.Tasks.Task DisplayRecentlyViewedMoviesOnTheDashboard()
+        [NUnit.Framework.DescriptionAttribute("Triggering View Details button")]
+        public async System.Threading.Tasks.Task TriggeringViewDetailsButton()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Display recently viewed movies on the dashboard", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Triggering View Details button", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 8
-this.ScenarioInitialize(scenarioInfo);
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -130,28 +132,27 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
 #line 9
-  await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the user has searched for the \"Hunger Games\" movie", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 10
-  await testRunner.AndAsync("I have viewed \"Pokemon 4Ever\" and then \"Her\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("the user clicks View Details on the first result", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 11
-  await testRunner.ThenAsync("I see a \"Recently Viewed\" section listing the movies with the most recently viewe" +
-                        "d on the left, so \"Her\" appears to the left of \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the user should see the view details modal pop up", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Screen reader announces movies on the dashboard")]
-        public async System.Threading.Tasks.Task ScreenReaderAnnouncesMoviesOnTheDashboard()
+        [NUnit.Framework.DescriptionAttribute("Check if streaming service icons exist")]
+        public async System.Threading.Tasks.Task CheckIfStreamingServiceIconsExist()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Screen reader announces movies on the dashboard", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Check if streaming service icons exist", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 13
-this.ScenarioInitialize(scenarioInfo);
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -161,30 +162,27 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
 #line 14
-  await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the user has clicked the View Details button from search results", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 15
-  await testRunner.AndAsync("I have viewed \"Her\" and then \"Pokemon 4Ever\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("the user is on the modal pop up", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 16
-  await testRunner.ThenAsync("a screen reader reads the \"Recently Viewed\" section", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 17
-  await testRunner.ThenAsync("I hear descriptive labels for each movie that include the movie title", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the user should see the Apple TV, Netflix, and Prime Video icons", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Screen reader announces no viewed movies message")]
-        public async System.Threading.Tasks.Task ScreenReaderAnnouncesNoViewedMoviesMessage()
+        [NUnit.Framework.DescriptionAttribute("Check that redirection to service works")]
+        public async System.Threading.Tasks.Task CheckThatRedirectionToServiceWorks()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Screen reader announces no viewed movies message", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 19
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Check that redirection to service works", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 18
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -193,26 +191,28 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
+#line 19
+    await testRunner.GivenAsync("the user is on the modal pop up", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
 #line 20
-  await testRunner.GivenAsync("I am logged in as a new user with no viewed movies", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.WhenAsync("the user clicks the netflix icon", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 21
-  await testRunner.ThenAsync("I see the message \"You haven\'t viewed any titles yet.\" announced as a status mess" +
-                        "age", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the user should be redirected to the Netflix login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Movies on the dashboard are selectable by keyboard commands")]
-        public async System.Threading.Tasks.Task MoviesOnTheDashboardAreSelectableByKeyboardCommands()
+        [NUnit.Framework.DescriptionAttribute("Opening recommendation details")]
+        public async System.Threading.Tasks.Task OpeningRecommendationDetails()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Movies on the dashboard are selectable by keyboard commands", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Opening recommendation details", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 23
-this.ScenarioInitialize(scenarioInfo);
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -222,17 +222,43 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
 #line 24
-  await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the user is on the recommendations page with Openai results", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 25
-  await testRunner.AndAsync("I have viewed \"Pokemon 4Ever\" movie", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("the user clicks the \"View Details\" button for the first result", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 26
-  await testRunner.WhenAsync("I navigate through the movies using keyboard commands (such as Tab or arrow keys)" +
-                        "", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.ThenAsync("the user should see service icons on the modal", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 27
-  await testRunner.ThenAsync("I can select and activate a movie using keyboard only, without requiring a mouse", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Checking recommendation icons")]
+        public async System.Threading.Tasks.Task CheckingRecommendationIcons()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Checking recommendation icons", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 28
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 29
+    await testRunner.GivenAsync("the user is on the recommendations first results modal", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 30
+    await testRunner.WhenAsync("the user clicks the first service icon", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 31
+    await testRunner.ThenAsync("the user should be redirected to that login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

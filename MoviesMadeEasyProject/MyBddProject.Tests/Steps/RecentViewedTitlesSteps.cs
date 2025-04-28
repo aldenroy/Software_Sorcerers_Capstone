@@ -30,6 +30,7 @@ namespace MyNamespace.Steps
             }
         }
 
+        [Given(@"I see a ""(.*)"" section listing the movies, including ""(.*)""")]
         [Then("I see a \"(.*)\" section listing the movies, including \"(.*)\"")]
         public void ThenISeeASectionListingTheMoviesIncluding(string section, string movieTitle)
         {
