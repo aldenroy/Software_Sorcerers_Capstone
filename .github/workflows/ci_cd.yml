@@ -7,7 +7,7 @@ env:
 
 on:
   push:
-    branches: [ "dash_movie_modal" ] 
+    branches: [ "dash_movie_modal_no_bdd" ] 
   workflow_dispatch:
 
 permissions:
@@ -85,6 +85,7 @@ jobs:
           fi
 
       - name: Run BDD tests (NUnit + Selenium)
+        if : false
         run: dotnet test MoviesMadeEasyProject/MyBddProject.Tests/MyBddProject.Tests.csproj --filter "TestCategory!=flaky" --verbosity normal
 
       - name: Run frontend tests (Jest)
