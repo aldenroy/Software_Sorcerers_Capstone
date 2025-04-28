@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Movie Search";
 }
 <head>
@@ -102,20 +102,31 @@
 
             <div class="mb-3">
                 <h5>Year</h5>
-                <input type="number" id="minYear" class="form-control" placeholder="Min Year" min="1600"
-                    max="2100" />
-                <input type="number" id="maxYear" class="form-control mt-2" placeholder="Max Year" min="1600"
-                    max="2100" />
+                <div class="mb-2">
+                    <label for="minYear" class="form-label">Minimum Year:</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" id="minYear" class="form-range me-2" min="1600" max="2100" value="1600" 
+                            oninput="updateMinYearLabel()" />
+                        <input type="text" id="minYearTextBox" class="form-control w-auto" value="1600" readonly />
+                    </div>
+                </div>
+                <div>
+                    <label for="maxYear" class="form-label">Maximum Year:</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" id="maxYear" class="form-range me-2" min="1600" max="2100" value="2100" 
+                            oninput="updateMaxYearLabel()" />
+                        <input type="text" id="maxYearTextBox" class="form-control w-auto" value="2100" readonly />
+                    </div>
+                </div>
             </div>
 
             <div>
                 <button id="clearFilters" class="btn btn-warning w-100 mb-2" aria-label="Clear Filters">Clear
                     Filters</button>
-                <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas">Apply Filters</button>
+                <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas" onclick="applyFilters()">Apply Filters</button>
             </div>
         </div>
     </div>
-
     <!-- Movie Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-dialog">

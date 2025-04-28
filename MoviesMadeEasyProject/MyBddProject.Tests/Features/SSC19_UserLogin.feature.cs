@@ -20,10 +20,10 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("User Management")]
+    [NUnit.Framework.DescriptionAttribute("User Login")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
     [NUnit.Framework.CategoryAttribute("kira")]
-    public partial class UserManagementFeature
+    public partial class UserLoginFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
@@ -31,9 +31,9 @@ namespace MyBddProject.Tests.Features
         private static string[] featureTags = new string[] {
                 "kira"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "User Management", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "User Login", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "UserManagement.feature"
+#line 1 "SSC19_UserLogin.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -163,105 +163,6 @@ namespace MyBddProject.Tests.Features
 #line hidden
 #line 18
     await testRunner.AndAsync("the user should remain on the login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Successful Registration")]
-        public async System.Threading.Tasks.Task SuccessfulRegistration()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successful Registration", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 20
-  this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 4
-  await this.FeatureBackgroundAsync();
-#line hidden
-#line 21
-    await testRunner.GivenAsync("the user is on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 22
-    await testRunner.WhenAsync("the user enters \"Test\" in the first name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 23
-    await testRunner.AndAsync("the user enters \"Testing\" in the last name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 24
-    await testRunner.AndAsync("the user enters \"test@testing.com\" in the registration email field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 25
-    await testRunner.AndAsync("the user enters \"Test!123\" in the registration password field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 26
-    await testRunner.AndAsync("the user enters \"Test!123\" in the password confirmation field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 27
-    await testRunner.AndAsync("the user submits the form", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 28
-    await testRunner.ThenAsync("the user should be redirected to the preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Unsuccessful Registration Duplicate Email")]
-        public async System.Threading.Tasks.Task UnsuccessfulRegistrationDuplicateEmail()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Unsuccessful Registration Duplicate Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 30
-  this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 4
-  await this.FeatureBackgroundAsync();
-#line hidden
-#line 31
-    await testRunner.GivenAsync("the user is on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 32
-    await testRunner.WhenAsync("the user enters \"Test\" in the first name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 33
-    await testRunner.AndAsync("the user enters \"Testing\" in the last name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 34
-    await testRunner.AndAsync("the user enters \"test@test.com\" in the registration email field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 35
-    await testRunner.AndAsync("the user enters \"Test!123\" in the registration password field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 36
-    await testRunner.AndAsync("the user enters \"Test!123\" in the password confirmation field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 37
-    await testRunner.AndAsync("the user submits the form", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 38
-    await testRunner.ThenAsync("the user should see an error message for the duplicate email", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 39
-    await testRunner.AndAsync("the user should remain on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
