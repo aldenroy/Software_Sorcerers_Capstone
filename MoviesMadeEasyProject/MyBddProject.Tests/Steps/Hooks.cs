@@ -49,7 +49,7 @@ namespace MyBddProject.Tests.Steps
                     options.AddArgument("--user-data-dir=/tmp/chrome-profile");
                 }
 
-                // GitHub Actions–specific flags
+                // GitHub Actionsï¿½specific flags
                 if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                 {
                     options.AddArguments(

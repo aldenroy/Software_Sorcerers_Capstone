@@ -1,4 +1,4 @@
-﻿namespace MoviesMadeEasy.Models.ModelView
+namespace MoviesMadeEasy.Models.ModelView
 {
     public class DashboardModelView
     {

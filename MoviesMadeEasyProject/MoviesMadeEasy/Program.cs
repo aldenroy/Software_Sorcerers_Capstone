@@ -6,10 +6,9 @@ using MoviesMadeEasy.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 using Polly;
-using Polly.Extensions.Http;
-using Microsoft.AspNetCore.Session; // Add this for session support
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +124,7 @@ app.UseRouting();
 app.UseSession();  // Add this line to use session middleware
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
