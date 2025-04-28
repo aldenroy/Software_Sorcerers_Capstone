@@ -4,8 +4,6 @@ using MoviesMadeEasy.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using MoviesMadeEasy.DAL.Abstract;
-using MoviesMadeEasy.Data;
-using Microsoft.AspNetCore.Mvc.Filters;
 using MoviesMadeEasy.Models.ModelView;
 
 namespace MoviesMadeEasy.Controllers
@@ -116,16 +114,29 @@ namespace MoviesMadeEasy.Controllers
             }
         }
 
+        [HttpDelete("User/RemoveRecentlyViewed/{titleId:int}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveRecentlyViewed(int titleId)
+        {
+            var identityUser = await _userManager.GetUserAsync(User);
+            if (identityUser == null) return Unauthorized();
+
+            var user = _userRepository.GetUser(identityUser.Id);   
+            _titleRepository.Delete(titleId, user.Id);
+
+            return Ok();                                           
+        }
+
         public IActionResult Cancel()
         {
             return RedirectToAction("Dashboard");
         }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
     }
 }

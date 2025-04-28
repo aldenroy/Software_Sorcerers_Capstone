@@ -31,7 +31,7 @@ namespace MyBddProject.Tests.Features
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "SSC126SubscriptionLinks", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "SubscriptionLinks.feature"
+#line 1 "SSC119_SubscriptionLinks.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]

@@ -6,5 +6,6 @@ namespace MoviesMadeEasy.DAL.Abstract
     {
         void RecordTitleView(Title title, int userId);
         List<Title> GetRecentlyViewedByUser(int userId, int count = 10);
+        void Delete(int id, int userId);
     }
 }
