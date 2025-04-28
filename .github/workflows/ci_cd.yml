@@ -7,7 +7,9 @@ env:
 
 on:
   push:
-    branches: [ "dash_movie_modal_no_bdd" ] 
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
