@@ -20,18 +20,20 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("SSC126SubscriptionLinks")]
+    [NUnit.Framework.DescriptionAttribute("User Registration")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class SSC126SubscriptionLinksFeature
+    [NUnit.Framework.CategoryAttribute("kira")]
+    public partial class UserRegistrationFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = ((string[])(null));
+        private static string[] featureTags = new string[] {
+                "kira"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "SSC126SubscriptionLinks", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "User Registration", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "SSC119SubscriptionLinks.feature"
+#line 1 "SSC18_UserRegistration.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -84,22 +86,22 @@ namespace MyBddProject.Tests.Features
         
         public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
         {
-#line 3
-#line hidden
 #line 4
- await testRunner.GivenAsync("I am logged in on the dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+  #line hidden
+#line 5
+    await testRunner.GivenAsync("a user with the email \"test@test.com\" exists in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Icon Navigation to Subscription Login")]
-        public async System.Threading.Tasks.Task IconNavigationToSubscriptionLogin()
+        [NUnit.Framework.DescriptionAttribute("Successful Registration")]
+        public async System.Threading.Tasks.Task SuccessfulRegistration()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Icon Navigation to Subscription Login", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 6
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successful Registration", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 7
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -108,63 +110,46 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 7
-    await testRunner.WhenAsync("I click on a subscription bubble for \"Hulu\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 4
+  await this.FeatureBackgroundAsync();
 #line hidden
 #line 8
-    await testRunner.ThenAsync("I should be redirected to that services website login page \"https://auth.hulu.com" +
-                        "/web/login\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.GivenAsync("the user is on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Keyboard Navigation for Subscription Icons")]
-        public async System.Threading.Tasks.Task KeyboardNavigationForSubscriptionIcons()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Keyboard Navigation for Subscription Icons", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 9
+    await testRunner.WhenAsync("the user enters \"Test\" in the first name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 10
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
+    await testRunner.AndAsync("the user enters \"Testing\" in the last name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 11
-    await testRunner.WhenAsync("I tab through the subscription icons until I reach the \"Hulu\" icon", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("the user enters \"test@testing.com\" in the registration email field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 12
-    await testRunner.AndAsync("I focus on and activate the subscription icon using the keyboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the user enters \"Test!123\" in the registration password field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 13
-    await testRunner.ThenAsync("I should be redirected to that services website login page \"https://auth.hulu.com" +
-                        "/web/login\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the user enters \"Test!123\" in the password confirmation field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 14
+    await testRunner.AndAsync("the user submits the form", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 15
+    await testRunner.ThenAsync("the user should be redirected to the preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Screen Reader Accessibility for Subscription Icons")]
-        public async System.Threading.Tasks.Task ScreenReaderAccessibilityForSubscriptionIcons()
+        [NUnit.Framework.DescriptionAttribute("Unsuccessful Registration Duplicate Email")]
+        public async System.Threading.Tasks.Task UnsuccessfulRegistrationDuplicateEmail()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Screen Reader Accessibility for Subscription Icons", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 15
-this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Unsuccessful Registration Duplicate Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 17
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -173,15 +158,35 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 3
-await this.FeatureBackgroundAsync();
+#line 4
+  await this.FeatureBackgroundAsync();
 #line hidden
-#line 16
-    await testRunner.WhenAsync("I navigate to the subscription icons", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 18
+    await testRunner.GivenAsync("the user is on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 17
-    await testRunner.ThenAsync("the \"Hulu\" subscription icon should include a clear, descriptive accessible label" +
-                        "", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 19
+    await testRunner.WhenAsync("the user enters \"Test\" in the first name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 20
+    await testRunner.AndAsync("the user enters \"Testing\" in the last name field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 21
+    await testRunner.AndAsync("the user enters \"test@test.com\" in the registration email field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 22
+    await testRunner.AndAsync("the user enters \"Test!123\" in the registration password field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 23
+    await testRunner.AndAsync("the user enters \"Test!123\" in the password confirmation field", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 24
+    await testRunner.AndAsync("the user submits the form", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 25
+    await testRunner.ThenAsync("the user should see an error message for the duplicate email", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 26
+    await testRunner.AndAsync("the user should remain on the registration page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -20,20 +20,20 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Openai")]
+    [NUnit.Framework.DescriptionAttribute("Dynamic Preferences")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    [NUnit.Framework.CategoryAttribute("openai")]
-    public partial class OpenaiFeature
+    [NUnit.Framework.CategoryAttribute("kiraa")]
+    public partial class DynamicPreferencesFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
-                "openai"};
+                "kiraa"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Openai", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dynamic Preferences", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "Openai.feature"
+#line 1 "SSC156_DynamicPreferences.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -84,15 +84,24 @@ namespace MyBddProject.Tests.Features
             await testRunner.CollectScenarioErrorsAsync();
         }
         
+        public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
+        {
+#line 4
+   #line hidden
+#line 5
+      await testRunner.GivenAsync("a user with the email \"test@test.com\" exists in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+        }
+        
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Search result")]
-        public async System.Threading.Tasks.Task SearchResult()
+        [NUnit.Framework.DescriptionAttribute("User updates theme to Dark Mode")]
+        public async System.Threading.Tasks.Task UserUpdatesThemeToDarkMode()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Search result", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 3
-  this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates theme to Dark Mode", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 7
+   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -102,57 +111,33 @@ namespace MyBddProject.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 4
-    await testRunner.GivenAsync("the user is on the search page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+   await this.FeatureBackgroundAsync();
 #line hidden
-#line 5
-    await testRunner.WhenAsync("the user enters \"Hunger Games\" in the search bar", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 6
-    await testRunner.ThenAsync("the user search should show results for \"Hunger Games\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Triggering More Like This button")]
-        public async System.Threading.Tasks.Task TriggeringMoreLikeThisButton()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Triggering More Like This button", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 8
-  this.ScenarioInitialize(scenarioInfo);
+      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
 #line 9
-    await testRunner.GivenAsync("the user has searched for \"Hunger Games\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+      await testRunner.WhenAsync("the user selects \"Dark\" from the Theme dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 10
-    await testRunner.WhenAsync("the user clicks the \"More Like This\" button on the first result", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+      await testRunner.ThenAsync("the page should immediately switch to dark mode", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 11
-    await testRunner.ThenAsync("the user should be redirected to a new page with the Openai results", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+      await testRunner.AndAsync("the \"team_logo_dark.png\" logo should appear", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check if results exist")]
-        public async System.Threading.Tasks.Task CheckIfResultsExist()
+        [NUnit.Framework.DescriptionAttribute("User updates font size to large")]
+        public async System.Threading.Tasks.Task UserUpdatesFontSizeToLarge()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Check if results exist", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates font size to large", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 13
-  this.ScenarioInitialize(scenarioInfo);
+   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -161,28 +146,31 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 4
+   await this.FeatureBackgroundAsync();
+#line hidden
 #line 14
-    await testRunner.GivenAsync("the user has clicked the More Like This button", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 15
-    await testRunner.WhenAsync("the user is on the recommendations page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+      await testRunner.WhenAsync("the user selects \"Large\" from the font size dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 16
-    await testRunner.ThenAsync("the user should see five suggested results", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+      await testRunner.ThenAsync("the font size should immediately switch to large", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Navigate back to search page")]
-        public async System.Threading.Tasks.Task NavigateBackToSearchPage()
+        [NUnit.Framework.DescriptionAttribute("User updates font type to open dyslexic")]
+        public async System.Threading.Tasks.Task UserUpdatesFontTypeToOpenDyslexic()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Navigate back to search page", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates font type to open dyslexic", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 18
-  this.ScenarioInitialize(scenarioInfo);
+   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -191,14 +179,17 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 4
+   await this.FeatureBackgroundAsync();
+#line hidden
 #line 19
-  await testRunner.GivenAsync("the user is on the recommendations page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 20
-  await testRunner.WhenAsync("the user clicks the Back to search button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+      await testRunner.WhenAsync("the user selects \"Open Dyslexic\" from the font type dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 21
-  await testRunner.ThenAsync("the user should be redirected back to the search page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+      await testRunner.ThenAsync("the font type should immediately switch to open dyslexic", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

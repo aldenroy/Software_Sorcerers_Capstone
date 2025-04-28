@@ -1,3 +1,4 @@
+@using MoviesMadeEasy.Models
 @using MoviesMadeEasy.Models.ModelView
 @model DashboardModelView
 
@@ -15,7 +16,10 @@
 @if (total > 0)
 {
     <div id="results">
-        <div id="recentlyViewedCarousel" class="carousel slide" data-bs-ride="carousel" aria-labelledby="recently-viewed-title">
+        <div id="recentlyViewedCarousel"
+             class="carousel slide"
+             data-bs-ride="carousel"
+             aria-labelledby="recently-viewed-title">
             <div class="carousel-inner">
                 @for (int i = 0; i < total; i += itemsPerSlide)
                 {
@@ -33,32 +37,58 @@
                                             aria-label="Remove from recently viewed"
                                             data-title-id="@t.Id"></button>
 
-                                    <a href="javascript:void(0)" aria-label="@t.TitleName, view details">
-                                        <img src="@t.PosterUrl" alt="" class="img-fluid mb-2" />
-                                        <span class="movie-title mb-0">@t.TitleName</span>
+                                    <a href="javascript:void(0)"
+                                       aria-label="@t.TitleName, view details">
+                                        <img src="@t.PosterUrl"
+                                             alt="@t.TitleName poster"
+                                             class="img-fluid mb-2 btn-primary" />
+                                        <h5 class="movie-title mb-0">
+                                            @t.TitleName
+                                        </h5>
+
+                                        @* Hidden data for modal script *@
+                                        <span class="movie-genres d-none">
+                                            Genres: @(string.IsNullOrEmpty(t.Genres)
+                                        ? "Unknown"
+                                        : t.Genres)
+                                        </span>
+                                        <span class="movie-rating d-none">
+                                            Rating: @(string.IsNullOrEmpty(t.Rating)
+                                        ? "N/A"
+                                        : t.Rating)
+                                        </span>
                                     </a>
                                 </div>
                             }
-
                         </div>
                     </div>
                 }
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#recentlyViewedCarousel" data-bs-slide="prev" aria-label="Previous slide">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <button class="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#recentlyViewedCarousel"
+                    data-bs-slide="prev"
+                    aria-label="Previous slide">
+                <span class="carousel-control-prev-icon"
+                      aria-hidden="true"></span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#recentlyViewedCarousel" data-bs-slide="next" aria-label="Next slide">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <button class="carousel-control-next"
+                    type="button"
+                    data-bs-target="#recentlyViewedCarousel"
+                    data-bs-slide="next"
+                    aria-label="Next slide">
+                <span class="carousel-control-next-icon"
+                      aria-hidden="true"></span>
             </button>
         </div>
     </div>
 }
 else
 {
-    <p id="no-recent-titles" role="status">You haven't viewed any titles yet.</p>
+    <p id="no-recent-titles" role="status">
+        You haven't viewed any titles yet.
+    </p>
 }
-
-<h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
 
 @if (TempData["Message"] != null)
 {
@@ -83,7 +113,7 @@ else
                     <li class="subscription-item d-flex align-items-center justify-content-center">
                         @if (!string.IsNullOrEmpty(service.LogoUrl))
                         {
-                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website" role="link" tabindex="0">
+                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website">
                                 <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
                             </a>
                         }
