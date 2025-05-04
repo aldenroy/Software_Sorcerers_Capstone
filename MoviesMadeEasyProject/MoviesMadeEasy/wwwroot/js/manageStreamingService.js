@@ -25,6 +25,7 @@ function manageStreamingService() {
 
     function updateCardAppearance(card) {
         const serviceId = card.getAttribute('data-id');
+        let stateText = "";
         if (preselectedServices.has(serviceId)) {
             if (!selectedServices.has(serviceId)) {
                 card.classList.add('marked-for-deletion');
@@ -42,7 +43,8 @@ function manageStreamingService() {
                 stateText = "Not selected";
             }
         }
-        const baseLabel = card.querySelector('.card-text') ? card.querySelector('.card-text').innerText : "";
+        const baseLabelEl = card.querySelector('.card-text');
+        const baseLabel = baseLabelEl ? baseLabelEl.innerText : "";
         card.setAttribute('aria-label', `${baseLabel}, ${stateText}`);
     }
 
@@ -60,6 +62,21 @@ function manageStreamingService() {
     }
 
     document.querySelectorAll('.subscription-container .card').forEach(card => {
+        // inject optional price input
+        card.insertAdjacentHTML('beforeend', `
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            class="price-input"
+            placeholder="Price (optional)"
+          >
+        `);
+        const priceInput = card.querySelector('.price-input');
+        ['click', 'keydown', 'keypress'].forEach(evt =>
+            priceInput.addEventListener(evt, e => e.stopPropagation())
+        );
+
         card.setAttribute('tabindex', '0');
         const serviceId = card.getAttribute('data-id');
 
@@ -90,16 +107,17 @@ function manageStreamingService() {
 document.addEventListener("DOMContentLoaded", function () {
     manageStreamingService();
     const form = document.getElementById('subscriptionForm');
-    form.addEventListener('submit', function (event) {
-        const currentSelection = document.getElementById('selectedServices').value;
-        if (currentSelection === originalSelection) {
-            alert("No changes were made");
-            event.preventDefault();
-        }
-    });
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            const currentSelection = document.getElementById('selectedServices').value;
+            if (currentSelection === originalSelection) {
+                alert("No changes were made");
+                event.preventDefault();
+            }
+        });
+    }
 });
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = { manageStreamingService };
 }
-

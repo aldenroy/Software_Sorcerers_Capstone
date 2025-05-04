@@ -267,3 +267,39 @@ describe('Subscription Selection Functionality', () => {
         expect(window.alert).toHaveBeenCalledWith("No changes were made");
     });
 });
+
+    describe('Pricing input integration', () => {
+        let card, priceInput;
+      
+        beforeEach(() => {
+          setupDOM("");
+          initializeModule();
+      
+          card = document.querySelector('.subscription-container .card[data-id="1"]');
+          priceInput = card.querySelector('.price-input');
+        });
+      
+        test('each card gets a number input with placeholder "Price (optional)"', () => {
+          expect(priceInput).not.toBeNull();
+          expect(priceInput).toHaveAttribute('type', 'number');
+          expect(priceInput).toHaveAttribute('placeholder', 'Price (optional)');
+        });
+      
+        test('clicking inside the price input does NOT toggle the card selection', () => {
+          // initially not selected
+          expect(card).not.toHaveClass('selected');
+          priceInput.click();
+          expect(card).not.toHaveClass('selected');
+        });
+      
+        test('clicking the card (outside the input) still toggles selection', () => {
+          expect(card).not.toHaveClass('selected');
+          card.click();
+          expect(card).toHaveClass('selected');
+        });
+      
+        test('the price input is associated with the correct service card', () => {
+          // since this card has data-id="1"
+          expect(priceInput.closest('.card').dataset.id).toBe('1');
+        });
+    });

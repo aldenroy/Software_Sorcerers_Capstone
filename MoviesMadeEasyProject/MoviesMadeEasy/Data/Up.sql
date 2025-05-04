@@ -33,7 +33,8 @@ CREATE TABLE [dbo].[StreamingService] (
     [name]     NVARCHAR(255)    NOT NULL,
     [region]   NVARCHAR(50)     NULL,
     [base_url] NVARCHAR(MAX)    NULL,
-    [logo_url] NVARCHAR(MAX)    NULL
+    [logo_url] NVARCHAR(MAX)    NULL,
+    [monthly_price] DECIMAL(10,2) NULL
 );
 GO
 
