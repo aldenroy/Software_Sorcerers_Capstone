@@ -3,6 +3,7 @@ public interface IOpenAIService
 {
     Task<List<MovieRecommendation>> GetSimilarMoviesAsync(string title);
     Task<string> GetChatCompletionAsync(string prompt);
+    Task<string> GetChatResponse(string query);
     // Add other OpenAI operations you might need
 }
 
