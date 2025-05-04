@@ -22,14 +22,14 @@ namespace MyBddProject.Tests.Features
     [NUnit.Framework.TestFixtureAttribute()]
     [NUnit.Framework.DescriptionAttribute("Dynamic Preferences")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    [NUnit.Framework.CategoryAttribute("kiraa")]
+    [NUnit.Framework.CategoryAttribute("kira")]
     public partial class DynamicPreferencesFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
-                "kiraa"};
+                "kira"};
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dynamic Preferences", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         

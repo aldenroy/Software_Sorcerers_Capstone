@@ -19,15 +19,21 @@ namespace MyBddProject.Tests.PageObjects
                 try
                 {
                     var element = driver.FindElement(by);
-                    var displayed = element.Displayed;
-                    var enabled = element.Enabled;
-                    return (displayed && enabled) ? element : null;
+                    if (element.Displayed && element.Enabled)
+                    {
+                        return element;
+                    }
+                    return null;
                 }
                 catch (StaleElementReferenceException)
                 {
                     return null; 
                 }
                 catch (NoSuchElementException)
+                {
+                    return null;
+                }
+                catch (WebDriverException)
                 {
                     return null;
                 }
