@@ -42,7 +42,9 @@ namespace MoviesMadeEasy.Controllers
                       .OrderByDescending(tv => tv.LastUpdated)
                       .Take(10)
                       .ToList();
-
+            var rawSubs = _subscriptionService.GetUserSubscriptionRecords(userId);
+            var priceLookup = rawSubs
+                .ToDictionary(us => us.StreamingServiceId, us => us.MonthlyCost);
             return new DashboardModelView
             {
                 UserId = userId,
@@ -53,7 +55,8 @@ namespace MoviesMadeEasy.Controllers
                 PreSelectedServiceIds = userSubscriptions != null
                                         ? string.Join(",", userSubscriptions.Select(s => s.Id))
                                         : "",
-               RecentlyViewedTitles = recentTitles
+               RecentlyViewedTitles = recentTitles,
+               ServicePrices = priceLookup
             };
         }
 

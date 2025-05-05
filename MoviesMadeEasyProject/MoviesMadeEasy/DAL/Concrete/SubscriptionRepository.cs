@@ -32,7 +32,14 @@ namespace MoviesMadeEasy.DAL.Concrete
                 .ToList();
         }
 
-        private List<UserStreamingService> GetUserSubscriptionRecords(int userId)
+        public List<UserStreamingService> GetUserSubscriptionsWithCost(int userId)
+        {
+            return _uss
+                .Where(us => us.UserId == userId)
+                .ToList();
+        }
+
+        public List<UserStreamingService> GetUserSubscriptionRecords(int userId)
         {
             return _context.UserStreamingServices
                 .Where(us => us.UserId == userId)
