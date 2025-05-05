@@ -9,6 +9,7 @@ namespace MoviesMadeEasy.Models.ModelView
         public List<Title> RecentlyViewedTitles { get; set; } = new List<Title>();
         public List<StreamingService> AllServicesList { get; set; }
         public string PreSelectedServiceIds { get; set; }
-
+        public decimal TotalMonthlyCost { get; set; }
+        public string ServicePrices { get; set; }
     }
 }

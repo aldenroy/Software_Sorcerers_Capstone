@@ -279,10 +279,10 @@ describe('Subscription Selection Functionality', () => {
           priceInput = card.querySelector('.price-input');
         });
       
-        test('each card gets a number input with placeholder "Price (optional)"', () => {
+        test('each card gets a number input with placeholder "Price"', () => {
           expect(priceInput).not.toBeNull();
           expect(priceInput).toHaveAttribute('type', 'number');
-          expect(priceInput).toHaveAttribute('placeholder', 'Price (optional)');
+          expect(priceInput).toHaveAttribute('placeholder', 'Price');
         });
       
         test('clicking inside the price input does NOT toggle the card selection', () => {

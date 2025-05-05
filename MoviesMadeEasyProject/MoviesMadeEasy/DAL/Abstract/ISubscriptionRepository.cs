@@ -7,7 +7,6 @@ namespace MoviesMadeEasy.DAL.Abstract
     {
         IEnumerable<StreamingService> GetAllServices();
         List<StreamingService> GetUserSubscriptions(int userId);
-
-        void UpdateUserSubscriptions(int userId, List<int> selectedServiceIds);
+        void UpdateUserSubscriptions(int userId, Dictionary<int, decimal> priceDict);
     }
 }

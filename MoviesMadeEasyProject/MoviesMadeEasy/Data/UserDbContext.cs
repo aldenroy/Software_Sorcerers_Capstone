@@ -20,19 +20,25 @@ namespace MoviesMadeEasy.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<UserStreamingService>()
-                .HasKey(us => new { us.UserId, us.StreamingServiceId });
+            builder.Entity<UserStreamingService>(entity =>
+            {
+                entity.ToTable("UserStreamingServices");
+                entity.HasKey(us => new { us.UserId, us.StreamingServiceId });
 
-            builder.Entity<UserStreamingService>()
-                .HasOne(us => us.User)
-                .WithMany(u => u.UserStreamingServices)
-                .HasForeignKey(us => us.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(us => us.User)
+                      .WithMany(u => u.UserStreamingServices)
+                      .HasForeignKey(us => us.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<UserStreamingService>()
-                .HasOne(us => us.StreamingService)
-                .WithMany(s => s.UserStreamingServices)
-                .HasForeignKey(us => us.StreamingServiceId);
+                entity.HasOne(us => us.StreamingService)
+                      .WithMany(s => s.UserStreamingServices)
+                      .HasForeignKey(us => us.StreamingServiceId);
+
+                entity.Property(us => us.MonthlyCost)
+                      .HasColumnName("MonthlyCost")
+                      .HasColumnType("decimal(18,2)");
+            });
+
 
             builder.Entity<StreamingService>(entity =>
             {
@@ -186,6 +192,11 @@ namespace MoviesMadeEasy.Data
                       .WithOne(rv => rv.User)
                       .HasForeignKey(rv => rv.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(u => u.UserStreamingServices)
+                        .WithOne(us => us.User)
+                        .HasForeignKey(us => us.UserId)
+                        .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

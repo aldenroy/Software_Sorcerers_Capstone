@@ -26,7 +26,6 @@
 
 <form id="subscriptionForm" method="post" action="/User/SaveSubscriptions">
     <input type="hidden" asp-for="UserId" />
-    
     <input type="hidden" id="preSelectedServices" value="@Model.PreSelectedServiceIds" />
 
     <div class="subscription-container">
@@ -42,12 +41,16 @@
     </div>
 
     <input type="hidden" name="selectedServices" id="selectedServices" />
+    <input type="hidden" asp-for="ServicePrices" id="servicePrices" />
 
     <div class="text-center mt-4">
         <button type="submit" class="btn-action">Save Selection</button>
         <a href="@Url.Action("Cancel", "User")" class="btn-action">Cancel</a>
     </div>
 </form>
+
+<script src="~/js/manageStreamingService.js"></script>
+
 
 <script src="~/js/manageStreamingService.js"></script>
 

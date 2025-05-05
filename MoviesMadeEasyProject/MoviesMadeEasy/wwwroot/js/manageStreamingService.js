@@ -5,56 +5,67 @@ function manageStreamingService() {
     const preselectedServices = new Set();
     const preSelectedInput = document.getElementById('preSelectedServices');
     const selectedServicesInput = document.getElementById('selectedServices');
+    const servicePricesInput = document.getElementById('servicePrices');
 
     if (preSelectedInput && preSelectedInput.value.trim() !== "") {
         preSelectedInput.value.split(',').forEach(id => {
-            const trimmedId = id.trim();
-            preselectedServices.add(trimmedId);
-            selectedServices.add(trimmedId);
+            const t = id.trim();
+            preselectedServices.add(t);
+            selectedServices.add(t);
         });
         originalSelection = preSelectedInput.value.trim();
-    } else {
-        originalSelection = "";
     }
 
     function updateSelectedServicesInput() {
-        if (selectedServicesInput) {
-            selectedServicesInput.value = Array.from(selectedServices).join(',');
-        }
+        selectedServicesInput.value = Array.from(selectedServices).join(',');
+        updateServicePricesInput();
+    }
+
+    function updateServicePricesInput() {
+        if (!servicePricesInput) return;
+        const prices = {};
+        selectedServices.forEach(id => {
+            const card = document.querySelector(`.subscription-container .card[data-id="${id}"]`);
+            if (!card) return;
+            const v = card.querySelector('.price-input').value;
+            prices[id] = parseFloat(v) || 0;
+        });
+        servicePricesInput.value = JSON.stringify(prices);
     }
 
     function updateCardAppearance(card) {
-        const serviceId = card.getAttribute('data-id');
-        let stateText = "";
-        if (preselectedServices.has(serviceId)) {
-            if (!selectedServices.has(serviceId)) {
+        const id = card.getAttribute('data-id');
+        let txt = "";
+
+        if (preselectedServices.has(id)) {
+            if (!selectedServices.has(id)) {
                 card.classList.add('marked-for-deletion');
-                stateText = "Marked for deletion";
+                txt = "Marked for deletion";
             } else {
                 card.classList.remove('marked-for-deletion');
-                stateText = "Preselected";
+                txt = "Preselected";
             }
         } else {
-            if (selectedServices.has(serviceId)) {
+            if (selectedServices.has(id)) {
                 card.classList.add('marked-for-addition');
-                stateText = "Marked for addition";
+                txt = "Marked for addition";
             } else {
                 card.classList.remove('marked-for-addition');
-                stateText = "Not selected";
+                txt = "Not selected";
             }
         }
-        const baseLabelEl = card.querySelector('.card-text');
-        const baseLabel = baseLabelEl ? baseLabelEl.innerText : "";
-        card.setAttribute('aria-label', `${baseLabel}, ${stateText}`);
+
+        const base = card.querySelector('.card-text')?.innerText ?? "";
+        card.setAttribute('aria-label', `${base}, ${txt}`);
     }
 
     function toggleSelection(card) {
-        const serviceId = card.getAttribute('data-id');
-        if (selectedServices.has(serviceId)) {
-            selectedServices.delete(serviceId);
+        const id = card.getAttribute('data-id');
+        if (selectedServices.has(id)) {
+            selectedServices.delete(id);
             card.classList.remove('selected');
         } else {
-            selectedServices.add(serviceId);
+            selectedServices.add(id);
             card.classList.add('selected');
         }
         updateCardAppearance(card);
@@ -62,62 +73,49 @@ function manageStreamingService() {
     }
 
     document.querySelectorAll('.subscription-container .card').forEach(card => {
-        // inject optional price input
         card.insertAdjacentHTML('beforeend', `
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            class="price-input"
-            placeholder="Price (optional)"
-          >
+            <input type="number" min="0" step="0.01" class="price-input" placeholder="Price">
         `);
-        const priceInput = card.querySelector('.price-input');
+
+        const pi = card.querySelector('.price-input');
+        pi.addEventListener('input', () => {
+            updateServicePricesInput();
+        });
+
         ['click', 'keydown', 'keypress'].forEach(evt =>
-            priceInput.addEventListener(evt, e => e.stopPropagation())
+            pi.addEventListener(evt, e => e.stopPropagation())
         );
 
         card.setAttribute('tabindex', '0');
-        const serviceId = card.getAttribute('data-id');
-
-        if (selectedServices.has(serviceId)) {
+        if (selectedServices.has(card.getAttribute('data-id'))) {
             card.classList.add('selected');
         }
-        card.addEventListener("click", function () {
-            toggleSelection(this);
-        });
 
-        card.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                toggleSelection(this);
+        card.addEventListener('click', () => toggleSelection(card));
+        card.addEventListener('keydown', e => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleSelection(card);
             }
         });
-
-        card.addEventListener("focus", function () {
-            updateCardAppearance(this);
-        });
-
+        card.addEventListener('focus', () => updateCardAppearance(card));
         updateCardAppearance(card);
     });
 
     updateSelectedServicesInput();
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     manageStreamingService();
     const form = document.getElementById('subscriptionForm');
-    if (form) {
-        form.addEventListener('submit', function (event) {
-            const currentSelection = document.getElementById('selectedServices').value;
-            if (currentSelection === originalSelection) {
-                alert("No changes were made");
-                event.preventDefault();
-            }
-        });
-    }
+    form?.addEventListener('submit', e => {
+        if (document.getElementById('selectedServices').value === originalSelection) {
+            alert("No changes were made");
+            e.preventDefault();
+        }
+    });
 });
 
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+if (typeof module !== 'undefined' && module.exports) {
     module.exports = { manageStreamingService };
 }
