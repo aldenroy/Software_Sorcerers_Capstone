@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Add user's message
                 const userMessage = document.createElement("div");
                 userMessage.classList.add("text-end", "my-2");
-                userMessage.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message}</span>`;
+                userMessage.innerHTML = `<span class="chat-bubble user-message border">${message}</span>`;
                 messagesDiv.appendChild(userMessage);
                 inputField.value = "";
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Add server's response
                     const botMessage = document.createElement("div");
                     botMessage.classList.add("text-start", "my-2");
-                    botMessage.innerHTML = `<span class="bg-light border p-2 rounded">${data}</span>`;
+                    botMessage.innerHTML = `<span class="chat-bubble bot-message border">${data}</span>`;
                     messagesDiv.appendChild(botMessage);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 } catch (error) {

@@ -1,0 +1,78 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <!-- Preferences Section -->
+            <div class="profile-card card mb-4">
+                <div class="card-header">Preferences</div>
+                <div class="card-body">
+                    <p><strong>Color Mode:</strong> @Model.ColorMode</p>
+                    <p><strong>Font Size:</strong> @Model.FontSize</p>
+                    <p><strong>Font Type:</strong> @Model.FontType</p>
+
+                    <div class="text-center">
+                        <a asp-page="/Account/Preferences" class="btn btn-primary mt-2">Update Preferences</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <div class="profile-card card mb-4">
+                <div class="card-header">Change Password</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="ChangePassword">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label for="OldPassword" class="form-label">Old Password</label>
+                            <input asp-for="PasswordInput.OldPassword" id="OldPassword" class="form-control" autocomplete="current-password" />
+                            <span asp-validation-for="PasswordInput.OldPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="NewPassword" class="form-label">New Password</label>
+                            <input asp-for="PasswordInput.NewPassword" id="NewPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="PasswordInput.NewPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ConfirmPassword" class="form-label">Confirm Password</label>
+                            <input asp-for="PasswordInput.ConfirmPassword" id="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="PasswordInput.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Personal Data Section -->
+            <div class="profile-card card mb-4">
+                <div class="card-header">Personal Data</div>
+                <div class="card-body">
+                    <p>Your account contains personal data that you have given us. You can delete it here.</p>
+                    <p><strong>Deleting this data will permanently remove your account.</strong></p>
+                    <div class="text-center">
+                        <a asp-page="DeletePersonalData" class="btn btn-primary">Delete Account</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

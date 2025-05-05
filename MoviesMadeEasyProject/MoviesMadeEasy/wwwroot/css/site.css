@@ -332,7 +332,6 @@ body {
 
 /* Toggle bar (always visible) */
 .chatbox-toggle {
-  background-color: #0d6efd;
   padding: 10px;
   border-radius: 10px 10px 0 0;
   cursor: pointer;
@@ -343,7 +342,6 @@ body {
   display: none;
   flex-direction: column;
   height: 400px;
-  background: #fff;
   border: 1px solid #ddd;
   border-top: none;
   border-radius: 0 0 10px 10px;
