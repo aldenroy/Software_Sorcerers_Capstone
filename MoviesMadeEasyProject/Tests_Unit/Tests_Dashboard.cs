@@ -113,7 +113,6 @@ namespace MME_Tests
         public void UpdateUserSubscriptions_AddsNewSubscriptions_WhenNoneExist()
         {
             int userId = 1;
-            // start from empty list for this scenario
             _userStreamingServices.Clear();
 
             var prices = new Dictionary<int, decimal>
@@ -128,7 +127,6 @@ namespace MME_Tests
             Assert.AreEqual(2, subscriptions.Count);
             Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 1));
             Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 3));
-            // verify that the MonthlyCost was set
             Assert.AreEqual(0m, subscriptions.Single(us => us.StreamingServiceId == 1).MonthlyCost);
             Assert.AreEqual(0m, subscriptions.Single(us => us.StreamingServiceId == 3).MonthlyCost);
         }
@@ -156,11 +154,9 @@ namespace MME_Tests
         public void UpdateUserSubscriptions_RemovesUnselectedSubscriptions()
         {
             int userId = 1;
-            // seed two subscriptions
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 2 });
 
-            // only keep ID=2
             var selectedIds = new[] { 2 };
             var prices = selectedIds.ToDictionary(id => id, id => 0m);
 
@@ -175,7 +171,6 @@ namespace MME_Tests
         public void UpdateUserSubscriptions_NonExistentUser_DoesNotThrowException()
         {
             int userId = 99;
-            // passing any dummy dict should not throw
             var prices = new Dictionary<int, decimal> { { 1, 0m } };
             Assert.DoesNotThrow(() => _repository.UpdateUserSubscriptions(userId, prices));
         }
@@ -200,19 +195,35 @@ namespace MME_Tests
             _subscriptionServiceMock = new Mock<ISubscriptionRepository>();
             _titleRepositoryMock = new Mock<ITitleRepository>();
 
-            _titleRepositoryMock.Setup(x => x.GetRecentlyViewedByUser(It.IsAny<int>(), It.IsAny<int>()))
-             .Returns(new List<Title>());
+            _titleRepositoryMock
+                .Setup(x => x.GetRecentlyViewedByUser(It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(new List<Title>());
+
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptionRecords(It.IsAny<int>()))
+                .Returns(new List<UserStreamingService>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetAllServices())
+                .Returns(new List<StreamingService>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(It.IsAny<int>()))
+                .Returns(new List<StreamingService>());
 
             _controller = new UserController(
                 dummyLogger,
                 null,
                 _userRepositoryMock.Object,
                 _subscriptionServiceMock.Object,
-                _titleRepositoryMock.Object);
+                _titleRepositoryMock.Object
+            );
 
-            _dashboard = new DashboardModelView { UserName = "Test" };
             var httpContext = new DefaultHttpContext();
-            _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            _controller.TempData = new TempDataDictionary(
+                httpContext,
+                Mock.Of<ITempDataProvider>()
+            );
+
+            _dashboard = new DashboardModelView();
         }
 
         [TearDown]
@@ -228,10 +239,10 @@ namespace MME_Tests
             string selectedServices = "1,2";
             string servicePrices = "{}";
             var subscriptions = new List<StreamingService>
-    {
-        new StreamingService { Name = "Netflix" },
-        new StreamingService { Name = "Hulu" }
-    };
+            {
+                new StreamingService { Name = "Netflix" },
+                new StreamingService { Name = "Hulu" }
+            };
             var user = new User { Id = userId, FirstName = "TestUser" };
 
             _subscriptionServiceMock

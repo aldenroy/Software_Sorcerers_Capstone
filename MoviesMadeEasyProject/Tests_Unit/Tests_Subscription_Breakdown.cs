@@ -1,70 +1,140 @@
-﻿using NUnit.Framework;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Moq;
 using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.DAL.Concrete;
-using MoviesMadeEasy.Data;
-using MME_Tests;
 
-namespace Tests_Unit
+namespace MME_Tests
 {
     [TestFixture]
-    internal class Tests_Subscription_Breakdown
+    public class TogglePriceSubscriptionTests
     {
-        private Mock<UserDbContext> _mockContext;
+        private UserDbContext _db;
         private SubscriptionRepository _repo;
-        private IQueryable<StreamingService> _streamingServices;
-        private IQueryable<UserStreamingService> _userStreamingServices;
+        private int _userId = 42;
 
         [SetUp]
         public void Setup()
         {
+            var options = new DbContextOptionsBuilder<UserDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+            _db = new UserDbContext(options);
 
-            _userStreamingServices = new List<UserStreamingService>
+            _db.StreamingServices.AddRange(
+                new StreamingService { Id = 1, Name = "Hulu" },
+                new StreamingService { Id = 2, Name = "Disney+" },
+                new StreamingService { Id = 3, Name = "Netflix" },
+                new StreamingService { Id = 4, Name = "Paramount" }
+            );
+
+            _db.Users.Add(new User
             {
-                new UserStreamingService { UserId = 42, StreamingServiceId = 1 },
-                new UserStreamingService { UserId = 42, StreamingServiceId = 2 }
-            }.AsQueryable();
+                Id = _userId,
+                AspNetUserId = Guid.NewGuid().ToString(),
+                FirstName = "Test",
+                LastName = "User",
+                ColorMode = "Light",
+                FontSize = "Medium",
+                FontType = "Sans-serif"
+            });
 
-            var mockSvcSet = MockHelper.GetMockDbSet(_streamingServices);
-            var mockUsrSet = MockHelper.GetMockDbSet(_userStreamingServices);
+            _db.UserStreamingServices.AddRange(
+                new UserStreamingService { UserId = _userId, StreamingServiceId = 1, MonthlyCost = 10m },
+                new UserStreamingService { UserId = _userId, StreamingServiceId = 2, MonthlyCost = 15m },
+                new UserStreamingService { UserId = _userId, StreamingServiceId = 3, MonthlyCost = 20m }
+            );
 
-            _mockContext = new Mock<UserDbContext>();
-            _mockContext.Setup(c => c.StreamingServices).Returns(mockSvcSet.Object);
-            _mockContext.Setup(c => c.UserStreamingServices).Returns(mockUsrSet.Object);
+            _db.SaveChanges();
 
-            _repo = new SubscriptionRepository(_mockContext.Object);
+            _repo = new SubscriptionRepository(_db);
         }
 
-        [TestCase(null, true)]
-        [TestCase(0.00, true)]
-        [TestCase(1000.00, true)]
-        [TestCase(-0.01, false)]
-        [TestCase(1000.01, false)]
-        public void StreamingService_MonthlyCostValidation(decimal? cost, bool expectedIsValid)
+        [TearDown]
+        public void TearDown()
         {
-            var svc = new StreamingService
-            {
-                Id = 1,
-                Name = "Test",
-                //MonthlyCost = cost
-            };
-
-            var context = new ValidationContext(svc);
-            var results = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(svc, context, results, true);
-
-            Assert.AreEqual(expectedIsValid, isValid);
+            _db.Dispose();
         }
 
         [Test]
-        public void CalculateTotalMonthlyCost_SumsOnlySubscribedCosts()
+        public void UpdateUserSubscriptions_AddsNew_RemovesOld_And_UpdatesPrices()
         {
-           // decimal total = _repo.CalculateTotalMonthlyCost(42);
-            //Assert.AreEqual(9.99m, total);
+            var newPrices = new Dictionary<int, decimal>
+            {
+                [2] = 17.50m,
+                [4] = 25.00m
+            };
+
+            _repo.UpdateUserSubscriptions(_userId, newPrices);
+
+            var subs = _db.UserStreamingServices
+                .Where(us => us.UserId == _userId)
+                .OrderBy(us => us.StreamingServiceId)
+                .ToList();
+
+            Assert.False(subs.Any(us => us.StreamingServiceId == 1));
+            var two = subs.Single(us => us.StreamingServiceId == 2);
+            Assert.AreEqual(17.50m, two.MonthlyCost);
+            Assert.False(subs.Any(us => us.StreamingServiceId == 3));
+            var four = subs.Single(us => us.StreamingServiceId == 4);
+            Assert.AreEqual(25.00m, four.MonthlyCost);
+        }
+
+        [Test]
+        public void UpdateSubscriptionMonthlyCost_ExistingSubscription_UpdatesAndSaves()
+        {
+            _repo.UpdateSubscriptionMonthlyCost(_userId, 3, 11.11m);
+
+            var sub = _db.UserStreamingServices
+                .Single(us => us.UserId == _userId && us.StreamingServiceId == 3);
+
+            Assert.AreEqual(11.11m, sub.MonthlyCost);
+        }
+
+        [Test]
+        public void UpdateSubscriptionMonthlyCost_Nonexistent_DoesNothing()
+        {
+            Assert.DoesNotThrow(() =>
+                _repo.UpdateSubscriptionMonthlyCost(_userId, 99, 5.55m)
+            );
+
+            var count = _db.UserStreamingServices.Count(us => us.UserId == _userId);
+            Assert.AreEqual(3, count);
+        }
+
+        [Test]
+        public void GetUserSubscriptionTotalMonthlyCost_ReturnsSumOfMonthlyCosts()
+        {
+            // 10 + 15 + 20 = 45
+            var total = _repo.GetUserSubscriptionTotalMonthlyCost(_userId);
+            Assert.AreEqual(45m, total);
+        }
+
+        [Test]
+        public void GetUserSubscriptionTotalMonthlyCost_TreatsNullCostAsZero()
+        {
+            _db.UserStreamingServices.Add(new UserStreamingService
+            {
+                UserId = _userId,
+                StreamingServiceId = 4,
+                MonthlyCost = null
+            });
+            _db.SaveChanges();
+
+            // original sum is 45, null should be treated as 0
+            var total = _repo.GetUserSubscriptionTotalMonthlyCost(_userId);
+            Assert.AreEqual(45m, total);
+        }
+
+        [Test]
+        public void GetUserSubscriptionTotalMonthlyCost_NoSubscriptions_ReturnsZero()
+        {
+            const int otherUser = 99;
+            var total = _repo.GetUserSubscriptionTotalMonthlyCost(otherUser);
+            Assert.AreEqual(0m, total);
         }
     }
 }

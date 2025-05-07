@@ -78,7 +78,7 @@ else
             <ul class="d-flex flex-wrap justify-content-center gap-3 list-unstyled" aria-label="Subscription services list">
                 @foreach (var service in Model.SubList)
                 {
-                    <li class="subscription-item d-flex flex-column align-items-center justify-content-center" data-service-id="@service.Id">
+                    <li class="subscription-item d-flex flex-column align-items-center justify-content-start" data-service-id="@service.Id">
                         @if (!string.IsNullOrEmpty(service.LogoUrl))
                         {
                             <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website">

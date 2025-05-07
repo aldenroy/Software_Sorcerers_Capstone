@@ -112,5 +112,13 @@ namespace MoviesMadeEasy.DAL.Concrete
                 _context.SaveChanges();
             }
         }
+
+        public decimal GetUserSubscriptionTotalMonthlyCost(int userId)
+        {
+            return _uss
+                .Where(us => us.UserId == userId)
+                .Select(us => us.MonthlyCost ?? 0m)
+                .Sum();
+        }
     }
 }
