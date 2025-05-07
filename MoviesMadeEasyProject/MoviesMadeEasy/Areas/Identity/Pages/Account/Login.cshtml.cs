@@ -84,11 +84,11 @@ namespace MoviesMadeEasy.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    if (!Url.IsLocalUrl(returnUrl) || returnUrl.Contains("/Logout", StringComparison.OrdinalIgnoreCase))
+                    {
+                        returnUrl = Url.Content("~/User/Dashboard");
+                    }
                     return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)
                 {

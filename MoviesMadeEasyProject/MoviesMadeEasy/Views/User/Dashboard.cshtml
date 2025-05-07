@@ -81,7 +81,7 @@ else
                     <li class="subscription-item d-flex flex-column align-items-center justify-content-start" data-service-id="@service.Id">
                         @if (!string.IsNullOrEmpty(service.LogoUrl))
                         {
-                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website">
+                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website" role="link" tabindex="0">
                                 <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
                             </a>
                         }
@@ -94,7 +94,6 @@ else
                             }
                         </p>
                     </li>
-
                 }
             </ul>
         }
