@@ -89,11 +89,12 @@
 
         document.querySelectorAll('.subscription-container .card').forEach(card => {
             const id = card.getAttribute('data-id');
+            const serviceName = card.querySelector('.card-text').textContent.trim();
             card.setAttribute('role', 'checkbox');
             card.setAttribute('tabindex', '0');
             card.insertAdjacentHTML(
                 'beforeend',
-                `<input type="number" min="0" step="0.01" class="price-input" placeholder="Price" aria-label="Price for service ${id}">`
+                `<input type="number" min="0" step="0.01" class="price-input" placeholder="Price" aria-label="Price for service ${serviceName}">`
             );
             const pi = card.querySelector('.price-input');
             if (initialPrices[id] != null) pi.value = initialPrices[id];

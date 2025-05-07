@@ -6,6 +6,7 @@ using NUnit.Framework;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
 using MoviesMadeEasy.DAL.Concrete;
+using System.ComponentModel.DataAnnotations;
 
 namespace MME_Tests
 {
@@ -57,6 +58,17 @@ namespace MME_Tests
         public void TearDown()
         {
             _db.Dispose();
+        }
+
+        private static IList<ValidationResult> ValidateProperty(object instance, string propName)
+        {
+            var context = new ValidationContext(instance) { MemberName = propName };
+            var results = new List<ValidationResult>();
+            var value = instance.GetType()
+                                .GetProperty(propName)
+                                .GetValue(instance);
+            Validator.TryValidateProperty(value, context, results);
+            return results;
         }
 
         [Test]
@@ -135,6 +147,36 @@ namespace MME_Tests
             const int otherUser = 99;
             var total = _repo.GetUserSubscriptionTotalMonthlyCost(otherUser);
             Assert.AreEqual(0m, total);
+        }
+
+        [TestCase(-0.01)]
+        [TestCase(-50)]
+        [TestCase(1000.01)]
+        [TestCase(1500)]
+        public void MonthlyCost_OutOfRange_FailsValidation(decimal cost)
+        {
+            var svc = new UserStreamingService { MonthlyCost = cost };
+            var errors = ValidateProperty(svc, nameof(svc.MonthlyCost));
+            Assert.IsNotEmpty(errors, $"Expected validation to fail for cost {cost}");
+        }
+
+        [TestCase(0.00)]
+        [TestCase(0.01)]
+        [TestCase(500.00)]
+        [TestCase(1000.00)]
+        public void MonthlyCost_InRange_PassesValidation(decimal cost)
+        {
+            var svc = new UserStreamingService { MonthlyCost = cost };
+            var errors = ValidateProperty(svc, nameof(svc.MonthlyCost));
+            Assert.IsEmpty(errors, $"Expected validation to pass for cost {cost}");
+        }
+
+        [Test]
+        public void MonthlyCost_Null_PassesValidation()
+        {
+            var svc = new UserStreamingService { MonthlyCost = null };
+            var errors = ValidateProperty(svc, nameof(svc.MonthlyCost));
+            Assert.IsEmpty(errors, "Null MonthlyCost should be valid.");
         }
     }
 }

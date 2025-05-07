@@ -45,6 +45,7 @@ namespace MoviesMadeEasy.Controllers
             var rawSubs = _subscriptionService.GetUserSubscriptionRecords(userId);
             var priceLookup = rawSubs
                 .ToDictionary(us => us.StreamingServiceId, us => us.MonthlyCost);
+            var total = _subscriptionService.GetUserSubscriptionTotalMonthlyCost(userId);
             return new DashboardModelView
             {
                 UserId = userId,
@@ -56,7 +57,8 @@ namespace MoviesMadeEasy.Controllers
                                         ? string.Join(",", userSubscriptions.Select(s => s.Id))
                                         : "",
                RecentlyViewedTitles = recentTitles,
-               ServicePrices = priceLookup
+               ServicePrices = priceLookup,
+               TotalMonthlyCost = total
             };
         }
 
