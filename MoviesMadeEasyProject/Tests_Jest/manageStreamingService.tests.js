@@ -23,9 +23,15 @@ function setupDOM(preSelectedVal) {
         <button type="submit">Submit</button>
       </form>
       <div class="subscription-container">
-        <div class="card" data-id="1"></div>
-        <div class="card" data-id="2"></div>
-        <div class="card" data-id="3"></div>
+        <div class="card" data-id="1">
+          <div class="card-text">Service 1</div>
+        </div>
+        <div class="card" data-id="2">
+          <div class="card-text">Service 2</div>
+        </div>
+        <div class="card" data-id="3">
+          <div class="card-text">Service 3</div>
+        </div>
       </div>
     `;
 }
