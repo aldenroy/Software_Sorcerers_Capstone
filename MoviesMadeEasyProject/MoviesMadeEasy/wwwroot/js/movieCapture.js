@@ -1,38 +1,58 @@
 ﻿; (function () {
     const CAPTURE_URL = '/Home/CaptureMovie';
+    let stash = null;
 
-    document.addEventListener('click', async e => {
-        if (!e.target.matches('.btn-view-details')) return;
-
+    document.body.addEventListener('click', e => {
+        if (!e.target.classList.contains('btn-primary')) return;
         const btn = e.target;
         const card = btn.closest('.movie-card');
         if (!card) return;
-
-        const payload = {
-            TitleName: card.querySelector('h5').childNodes[0].textContent.trim(),
-            Year: parseInt(card.querySelector('.movie-year').textContent.replace(/[()]/g, ''), 10),
-            PosterUrl: card.dataset.posterUrl || card.querySelector('img')?.src || null,
-            Genres: card.dataset.genres,        
-            Rating: card.querySelector('.movie-rating').textContent.replace('Rating: ', '') || null,
-            Overview: card.dataset.overview,
-            StreamingServices: card.dataset.streaming     
-        };
-
-        try {
-            btn.disabled = true;
-            await fetch(CAPTURE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            btn.textContent = 'Saved!';
-        } catch {
-            btn.textContent = 'Error';
-        } finally {
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.textContent = 'View Details';
-            }, 1500);
-        }
+        stash = { btn, originalText: btn.textContent };
+        btn.disabled = true;
+        const titleEl = document.getElementById('modalTitle');
+        const observer = new MutationObserver(() => {
+            const txt = titleEl.textContent.trim();
+            if (txt && txt !== 'Loading...' && stash) {
+                observer.disconnect();
+                doCapture(txt);
+            }
+        });
+        observer.observe(titleEl, { childList: true, characterData: true, subtree: true });
     });
+
+    function doCapture(titleText) {
+        const { btn, originalText } = stash;
+        const m = titleText.match(/(.+?)\s*\((\d{4})\)/) || [];
+        const realTitle = m[1] || titleText;
+        const realYear = m[2] ? parseInt(m[2], 10) : null;
+        const posterEl = document.getElementById('modalPoster');
+        const realPosterUrl = posterEl?.src || '';
+        const genres = document.getElementById('modalGenres')?.textContent.replace('Genres: ', '') || '';
+        const rating = document.getElementById('modalRating')?.textContent.replace('Rating: ', '') || '';
+        const overview = document.getElementById('modalOverview')?.textContent.replace('Overview: ', '') || '';
+        const services = Array.from(document.querySelectorAll('#modalStreaming .streaming-icon'))
+            .map(i => i.alt).join(', ');
+        fetch(CAPTURE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                TitleName: realTitle,
+                Year: realYear,
+                PosterUrl: realPosterUrl,
+                Genres: genres,
+                Rating: rating,
+                Overview: overview,
+                StreamingServices: services
+            })
+        })
+            .then(() => btn.textContent = 'Saved!')
+            .catch(() => btn.textContent = 'Error')
+            .finally(() => {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                    stash = null;
+                }, 1500);
+            });
+    }
 })();
