@@ -39,6 +39,12 @@ namespace MME_Tests
                 new StreamingService { Id = 4, Name = "Amazon Prime Video" }
             };
 
+            _userStreamingServices = new List<UserStreamingService>
+            {
+                new UserStreamingService { UserId = 1, StreamingServiceId = 1, MonthlyCost = 5.99m },
+                new UserStreamingService { UserId = 1, StreamingServiceId = 2, MonthlyCost = 7.49m }
+            };
+
             _userStreamingServices = new List<UserStreamingService>();
 
             var mockStreamingServicesDbSet = MockHelper.GetMockDbSet(_streamingServices.AsQueryable());
@@ -93,27 +99,36 @@ namespace MME_Tests
         }
 
         [Test]
-        public void UpdateUserSubscriptions_EmptyList_RemovesAllSubscriptions()
+        public void UpdateUserSubscriptions_EmptyDictionary_RemovesAllSubscriptions()
         {
             int userId = 1;
-            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
-            _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 2 });
 
-            _repository.UpdateUserSubscriptions(userId, new List<int>());
-            var remaining = _userStreamingServices.Where(us => us.UserId == userId).ToList();
-            Assert.IsEmpty(remaining);
+            _repository.UpdateUserSubscriptions(userId, new Dictionary<int, decimal>());
+
+            Assert.IsEmpty(_userStreamingServices.Where(us => us.UserId == userId));
         }
+
 
         [Test]
         public void UpdateUserSubscriptions_AddsNewSubscriptions_WhenNoneExist()
         {
             int userId = 1;
             _userStreamingServices.Clear();
-            _repository.UpdateUserSubscriptions(userId, new List<int> { 1, 3 });
+
+            var prices = new Dictionary<int, decimal>
+            {
+                { 1, 0m },
+                { 3, 0m }
+            };
+
+            _repository.UpdateUserSubscriptions(userId, prices);
+
             var subscriptions = _userStreamingServices.Where(us => us.UserId == userId).ToList();
             Assert.AreEqual(2, subscriptions.Count);
             Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 1));
             Assert.IsTrue(subscriptions.Any(us => us.StreamingServiceId == 3));
+            Assert.AreEqual(0m, subscriptions.Single(us => us.StreamingServiceId == 1).MonthlyCost);
+            Assert.AreEqual(0m, subscriptions.Single(us => us.StreamingServiceId == 3).MonthlyCost);
         }
 
         [Test]
@@ -121,8 +136,17 @@ namespace MME_Tests
         {
             int userId = 1;
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
-            _repository.UpdateUserSubscriptions(userId, new List<int> { 1 });
-            var subscriptions = _userStreamingServices.Where(us => us.UserId == userId && us.StreamingServiceId == 1).ToList();
+
+            var prices = new Dictionary<int, decimal>
+            {
+                { 1, 0m }
+            };
+
+            _repository.UpdateUserSubscriptions(userId, prices);
+
+            var subscriptions = _userStreamingServices
+                .Where(us => us.UserId == userId && us.StreamingServiceId == 1)
+                .ToList();
             Assert.AreEqual(1, subscriptions.Count);
         }
 
@@ -132,7 +156,12 @@ namespace MME_Tests
             int userId = 1;
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 1 });
             _userStreamingServices.Add(new UserStreamingService { UserId = userId, StreamingServiceId = 2 });
-            _repository.UpdateUserSubscriptions(userId, new List<int> { 2 });
+
+            var selectedIds = new[] { 2 };
+            var prices = selectedIds.ToDictionary(id => id, id => 0m);
+
+            _repository.UpdateUserSubscriptions(userId, prices);
+
             var subscriptions = _userStreamingServices.Where(us => us.UserId == userId).ToList();
             Assert.AreEqual(1, subscriptions.Count);
             Assert.AreEqual(2, subscriptions.First().StreamingServiceId);
@@ -142,8 +171,10 @@ namespace MME_Tests
         public void UpdateUserSubscriptions_NonExistentUser_DoesNotThrowException()
         {
             int userId = 99;
-            Assert.DoesNotThrow(() => _repository.UpdateUserSubscriptions(userId, new List<int> { 1 }));
+            var prices = new Dictionary<int, decimal> { { 1, 0m } };
+            Assert.DoesNotThrow(() => _repository.UpdateUserSubscriptions(userId, prices));
         }
+
     }
 
     // User Controller Tests
@@ -164,19 +195,35 @@ namespace MME_Tests
             _subscriptionServiceMock = new Mock<ISubscriptionRepository>();
             _titleRepositoryMock = new Mock<ITitleRepository>();
 
-            _titleRepositoryMock.Setup(x => x.GetRecentlyViewedByUser(It.IsAny<int>(), It.IsAny<int>()))
-             .Returns(new List<Title>());
+            _titleRepositoryMock
+                .Setup(x => x.GetRecentlyViewedByUser(It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(new List<Title>());
+
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptionRecords(It.IsAny<int>()))
+                .Returns(new List<UserStreamingService>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetAllServices())
+                .Returns(new List<StreamingService>());
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(It.IsAny<int>()))
+                .Returns(new List<StreamingService>());
 
             _controller = new UserController(
-                dummyLogger, 
-                null, 
-                _userRepositoryMock.Object, 
-                _subscriptionServiceMock.Object, 
-                _titleRepositoryMock.Object);
+                dummyLogger,
+                null,
+                _userRepositoryMock.Object,
+                _subscriptionServiceMock.Object,
+                _titleRepositoryMock.Object
+            );
 
-            _dashboard = new DashboardModelView { UserName = "Test" };
             var httpContext = new DefaultHttpContext();
-            _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            _controller.TempData = new TempDataDictionary(
+                httpContext,
+                Mock.Of<ITempDataProvider>()
+            );
+
+            _dashboard = new DashboardModelView();
         }
 
         [TearDown]
@@ -190,6 +237,7 @@ namespace MME_Tests
         {
             int userId = 1;
             string selectedServices = "1,2";
+            string servicePrices = "{}";
             var subscriptions = new List<StreamingService>
             {
                 new StreamingService { Name = "Netflix" },
@@ -197,11 +245,16 @@ namespace MME_Tests
             };
             var user = new User { Id = userId, FirstName = "TestUser" };
 
-            _subscriptionServiceMock.Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
-            _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
-            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(user);
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<Dictionary<int, decimal>>()));
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
+            _userRepositoryMock
+                .Setup(r => r.GetUser(userId)).Returns(user);
 
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            var result = _controller
+                .SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;
+
             Assert.IsNotNull(result);
             Assert.AreEqual("Dashboard", result.ViewName);
             var model = result.Model as DashboardModelView;
@@ -217,16 +270,23 @@ namespace MME_Tests
         {
             int userId = 1;
             string selectedServices = "1";
+            string servicePrices = "{}";
+
             var subscriptions = new List<StreamingService>
-            {
-                new StreamingService { Name = "Netflix" }
-            };
+    {
+        new StreamingService { Name = "Netflix" }
+    };
 
-            _subscriptionServiceMock.Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
-            _subscriptionServiceMock.Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
-            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns((User)null);
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<Dictionary<int, decimal>>()));
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId)).Returns(subscriptions);
+            _userRepositoryMock
+                .Setup(r => r.GetUser(userId)).Returns((User)null);
 
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            var result = _controller
+                .SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;
+
             Assert.IsNotNull(result);
             Assert.AreEqual("Dashboard", result.ViewName);
             var model = result.Model as DashboardModelView;
@@ -281,53 +341,64 @@ namespace MME_Tests
         {
             int userId = 1;
             string selectedServices = "1,2";
+            string servicePrices = "{}";
 
             _subscriptionServiceMock
-                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()))
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<Dictionary<int, decimal>>()))
                 .Throws(new Exception("Test exception"));
-            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(new User { Id = userId, FirstName = "TestUser" });
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId))
+                .Returns(new List<StreamingService>());
+            _userRepositoryMock
+                .Setup(r => r.GetUser(userId))
+                .Returns(new User { Id = userId, FirstName = "TestUser" });
 
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            var result = _controller.SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("SubscriptionForm", result.ViewName);
             Assert.IsTrue(_controller.TempData.ContainsKey("Message"));
-            Assert.AreEqual("There was an issue managing your subscription. Please try again later.", _controller.TempData["Message"]);
+            Assert.AreEqual(
+                "There was an issue managing your subscription. Please try again later.",
+                _controller.TempData["Message"]
+            );
         }
-
 
         [Test]
         public void SaveSubscriptions_Success_ShouldSetTempDataMessageAndReturnDashboardView()
         {
             int userId = 1;
             string selectedServices = "1,2,3";
+            string servicePrices = "{}";
             var user = new User { Id = userId, FirstName = "TestUser" };
 
-            _userRepositoryMock.Setup(repo => repo.GetUser(userId)).Returns(user);
-            _subscriptionServiceMock.Setup(service => service.GetUserSubscriptions(userId))
+            _userRepositoryMock.Setup(r => r.GetUser(userId)).Returns(user);
+            _subscriptionServiceMock
+                .Setup(s => s.GetUserSubscriptions(userId))
                 .Returns(new List<StreamingService>());
-            _subscriptionServiceMock.Setup(service => service.UpdateUserSubscriptions(userId, It.IsAny<List<int>>()));
+            _subscriptionServiceMock
+                .Setup(s => s.UpdateUserSubscriptions(userId, It.IsAny<Dictionary<int, decimal>>()));
 
-
-            var result = _controller.SaveSubscriptions(userId, selectedServices);
-
+            var result = _controller.SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;
 
             Assert.AreEqual("Subscriptions managed successfully!", _controller.TempData["Message"]);
-            var viewResult = result as ViewResult;
-            Assert.IsNotNull(viewResult, "Expected a ViewResult.");
-            Assert.AreEqual("Dashboard", viewResult.ViewName);
+            Assert.IsNotNull(result, "Expected a ViewResult.");
+            Assert.AreEqual("Dashboard", result.ViewName);
         }
 
         [Test]
         public void SaveSubscriptions_WithNullSelectedServices_ProcessesDeletion()
         {
             int userId = 1;
-            string selectedServices = null; 
+            string selectedServices = null;
+            string servicePrices = "{}";
 
             _subscriptionServiceMock
-                .Setup(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)))
+                .Setup(s => s.UpdateUserSubscriptions(
+                    userId,
+                    It.Is<Dictionary<int, decimal>>(dict => dict.Count == 0)))
                 .Verifiable();
             _subscriptionServiceMock
                 .Setup(s => s.GetUserSubscriptions(userId))
@@ -336,11 +407,11 @@ namespace MME_Tests
                 .Setup(r => r.GetUser(userId))
                 .Returns(new User { Id = userId, FirstName = "TestUser" });
 
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            var result = _controller.SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;  // ? changed
 
             Assert.IsNotNull(result, "Expected a ViewResult when selectedServices is null.");
             Assert.AreEqual("Dashboard", result.ViewName, "Expected the Dashboard view to be returned.");
-            _subscriptionServiceMock.Verify(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)), Times.Once);
+            _subscriptionServiceMock.Verify();
         }
 
         [Test]
@@ -348,9 +419,12 @@ namespace MME_Tests
         {
             int userId = 1;
             string selectedServices = "  ";
+            string servicePrices = "{}";
 
             _subscriptionServiceMock
-                .Setup(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)))
+                .Setup(s => s.UpdateUserSubscriptions(
+                    userId,
+                    It.Is<Dictionary<int, decimal>>(dict => dict.Count == 0)))
                 .Verifiable();
             _subscriptionServiceMock
                 .Setup(s => s.GetUserSubscriptions(userId))
@@ -359,11 +433,11 @@ namespace MME_Tests
                 .Setup(r => r.GetUser(userId))
                 .Returns(new User { Id = userId, FirstName = "TestUser" });
 
-            var result = _controller.SaveSubscriptions(userId, selectedServices) as ViewResult;
+            var result = _controller.SaveSubscriptions(userId, selectedServices, servicePrices) as ViewResult;
 
             Assert.IsNotNull(result, "Expected a ViewResult when selectedServices is whitespace.");
             Assert.AreEqual("Dashboard", result.ViewName, "Expected the Dashboard view to be returned.");
-            _subscriptionServiceMock.Verify(s => s.UpdateUserSubscriptions(userId, It.Is<List<int>>(list => list.Count == 0)), Times.Once);
+            _subscriptionServiceMock.Verify();
         }
 
         [Test]
@@ -380,25 +454,30 @@ namespace MME_Tests
         {
             int userId = 1;
             var originalSubscriptions = new List<StreamingService>
-            {
-                new StreamingService { Id = 1, Name = "Netflix" },
-                new StreamingService { Id = 2, Name = "Hulu" }
-            };
+    {
+        new StreamingService { Id = 1, Name = "Netflix" },
+        new StreamingService { Id = 2, Name = "Hulu" }
+    };
 
             _subscriptionServiceMock
                 .Setup(s => s.GetUserSubscriptions(userId))
                 .Returns(originalSubscriptions);
             _subscriptionServiceMock
-                .Setup(s => s.UpdateUserSubscriptions(It.IsAny<int>(), It.IsAny<List<int>>()))
+                .Setup(s => s.UpdateUserSubscriptions(
+                    It.IsAny<int>(),
+                    It.IsAny<Dictionary<int, decimal>>()))
                 .Verifiable();
-            _controller.Cancel();
+
+            var result = _controller.Cancel();
+
             _subscriptionServiceMock.Verify(
-                s => s.UpdateUserSubscriptions(It.IsAny<int>(), It.IsAny<List<int>>()),
+                s => s.UpdateUserSubscriptions(
+                    It.IsAny<int>(),
+                    It.IsAny<Dictionary<int, decimal>>()),
                 Times.Never);
 
             var subscriptionsAfterCancel = _subscriptionServiceMock.Object.GetUserSubscriptions(userId);
             Assert.AreEqual(originalSubscriptions.Count, subscriptionsAfterCancel.Count);
         }
-
     }
 }

@@ -7,6 +7,7 @@
     --card-bg: #f0f0f0;
     --border-color: #dee2e6;
     --navbar-text: #212529;
+    --settings-navbar-text: #ffffff;
     --navbar-bg: #ffffff;
     --footer-bg: #f8f9fa;
     --input-bg: #ffffff;
@@ -16,6 +17,11 @@
     --select-arrow-color: #333;
     --button-primary-bg: var(--link-color);
     --button-primary-text: #ffffff;
+
+    /* Profile card styling */
+    --profile-card-bg: #f8f9fa;
+    --profile-card-header-bg: #e4e4e4;
+    --password-label-color: #0069d9;
 
     /* Movie card styling */
     --movie-card-bg: #ffffff;
@@ -32,6 +38,20 @@
     --modal-title-color: #212529;
     --modal-text-color: #212529;
     --modal-close-color: #000000;
+
+    /* Chatbox styling */
+    --bubble-color: #f1f0f0; 
+    --bubble-user-color: #007bff;
+    --bubble-bot-text: #212529;
+    --bubble-user-text: #ffffff;
+
+    /* Filter styling */
+    --offcanvas-bg: #ffffff;
+    --offcanvas-text: #212529;
+    --offcanvas-header-bg: #f8f9fa;
+    --offcanvas-dropdown-bg: #f8f9fa;
+    --offcanvas-dropdown-hover: #e4e4e4;
+    --offcanvas-dropdown-hover-text: #212529;
 }
 
 /* Dark Theme */
@@ -44,6 +64,7 @@ html[data-theme="dark"] {
     --card-bg: #2d2d2d;
     --border-color: #444444;
     --navbar-text: #e0e0e0;
+    --settings-navbar-text: #000000;
     --navbar-bg: #1e1e1e;
     --footer-bg: #1e1e1e;
     --input-bg: #3a3a3a; 
@@ -53,6 +74,11 @@ html[data-theme="dark"] {
     --select-arrow-color: #ffffff;
     --button-primary-bg: var(--link-color);
     --button-primary-text: #ffffff;
+
+    /* Profile card styling */
+    --profile-card-bg: #2d2d2d;
+    --profile-card-header-bg: #1e1e1e;
+    --password-label-color: #ffffff;
 
     /* Movie card styling */
     --movie-card-bg: #2d2d2d;
@@ -69,6 +95,21 @@ html[data-theme="dark"] {
     --modal-title-color: #ffffff;
     --modal-text-color: #e0e0e0;
     --modal-close-color: #ffffff;
+
+    /* Chatbox styling */
+    --bubble-color: #90caf9;
+    --bubble-text: #000000;
+    --bubble-user-color: #2c2c2c;
+    --bubble-bot-text: #000000;
+    --bubble-user-text: #ffffff;
+
+    /* Filter styling */
+    --offcanvas-bg: #2d2d2d;
+    --offcanvas-text: #ffffff;
+    --offcanvas-header-bg: #121212;
+    --offcanvas-dropdown-bg: #444444;
+    --offcanvas-dropdown-hover: #121212;
+    --offcanvas-dropdown-hover-text: #ffffff;
 }
 
 /* High Contrast (Black and Yellow) Theme */
@@ -81,6 +122,7 @@ html[data-theme="high-contrast"] {
     --card-bg: #000000;
     --border-color: #ffff00;
     --navbar-text: #ffff00;
+    --settings-navbar-text: #000000;
     --navbar-bg: #000000;
     --footer-bg: #000000;
     --input-bg: #000000;
@@ -89,7 +131,11 @@ html[data-theme="high-contrast"] {
     --placeholder-color: #cccc00;
     --select-arrow-color: #ffff00;
     --button-primary-bg: var(--link-color);
-    --button-primary-text: #000000;;
+    --button-primary-text: #000000;
+
+    /* Profile card styling */
+    --profile-card-bg: #1b1b1b;
+    --profile-card-header-bg: #000000;
 
     /* Movie card styling */
     --movie-card-bg: #000000;
@@ -106,6 +152,21 @@ html[data-theme="high-contrast"] {
     --modal-title-color: #ffff00;
     --modal-text-color: #ffff00;
     --modal-close-color: #ffff00;
+
+    /* Chatbox styling */
+    --bubble-color: #ffff00;
+    --bubble-text: #000000;
+    --bubble-user-color: #000000;
+    --bubble-bot-text: #000000;
+    --bubble-user-text: #ffff00;
+
+    /* Filter styling */
+    --offcanvas-bg: #111111;
+    --offcanvas-text: #ffff00;
+    --offcanvas-header-bg: #000000;
+    --offcanvas-dropdown-bg: #000000;
+    --offcanvas-dropdown-hover: #ffff00;
+    --offcanvas-dropdown-hover-text: #1b1b1b;
 }
 
 
@@ -128,6 +189,23 @@ a {
 }
 
 
+/* Profile Card Styling */
+.card-body {
+    background-color: var(--profile-card-bg);
+    color: var(--movie-title-color);
+}
+
+.card-header {
+    background-color: var(--profile-card-header-bg);
+    color: var(--movie-title-color);
+}
+
+.form-floating .form-control:focus ~ label,
+.form-floating .form-control:not(:placeholder-shown) ~ label {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    font-weight: 600;
+}
 
 /* Movie Card Styling */
 .movie-card {
@@ -267,6 +345,7 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
+.chatbox-body,
 textarea {
     background-color: var(--input-bg);
     color: var(--input-text);
@@ -385,6 +464,10 @@ html[data-theme="high-contrast"] .nav-link.active {
     color: var(--navbar-bg) !important;
 }
 
+.settings-nav .nav-link.active {
+    color: var(--settings-navbar-text) !important;
+}
+
 
 
 /* Footer styling */
@@ -433,6 +516,7 @@ html[data-theme="high-contrast"] footer {
     border-color: var(--border-color);
 }
 
+.btn-primary,
 button[type="submit"],
 .search-btn {
     background-color: var(--button-primary-bg) !important;
@@ -445,6 +529,30 @@ html[data-theme="high-contrast"] .btn-primary {
     background-color: var(--link-color);
     border-color: var(--link-color);
     color: #000000;
+}
+
+/* Light theme buttons */
+.btn-primary, .btn-danger, .chatbox-toggle {
+    background-color: var(--button-primary-bg) !important;
+    color: var(--button-primary-text) !important;
+}
+
+/* Dark theme buttons */
+.dark-theme .btn-primary,
+html[data-theme="dark"] .btn-primary,
+.dark-theme .btn-danger,
+html[data-theme="dark"] .btn-danger {
+    background-color: var(--button-primary-bg) !important;
+    color: #000000 !important; /* Black text in dark mode */
+}
+
+/* High contrast theme buttons */
+.high-contrast-theme .btn-primary,
+html[data-theme="high-contrast"] .btn-primary,
+.high-contrast-theme .btn-danger,
+html[data-theme="high-contrast"] .btn-danger {
+    background-color: var(--button-primary-bg) !important;
+    color: var(--button-primary-text) !important;
 }
 
 
@@ -501,4 +609,82 @@ html[data-theme="dark"] select {
 .high-contrast-theme {
     background-color: var(--background-color);
     color: var(--text-color);
+}
+
+
+/* Chatbox Styling */
+.chat-bubble.bot-message {
+    background-color: var(--bubble-color) !important;
+    color: var(--bubble-bot-text) !important;
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
+.chat-bubble.user-message {
+    background-color: var(--bubble-user-color) !important;
+    color: var(--bubble-user-text) !important;
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    text-align: left;
+}
+
+.chatbox-text {
+    background-color: var(--bubble-color) !important;
+    color: var(--bubble-text) !important;
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
+.chatbox-title,
+.chatbox-dropdown {
+    color: var(--bubble-text) !important;
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
+
+/* Filter Styling */
+.offcanvas.offcanvas-start {
+    background-color: var(--offcanvas-bg);
+    color: var(--offcanvas-text);
+}
+
+.offcanvas.offcanvas-start .offcanvas-header {
+    background-color: var(--offcanvas-header-bg);
+    border-bottom: 1px solid var(--offcanvas-border);
+}
+
+.offcanvas.offcanvas-start .btn,
+.offcanvas.offcanvas-start .form-control {
+    background-color: var(--link-color);
+    color: var(--offcanvas-text);
+}
+
+.offcanvas.offcanvas-start .dropdown-item,
+.offcanvas.offcanvas-start .dropdown-menu,
+.offcanvas.offcanvas-start .dropdown-toggle {
+    background-color: var(--offcanvas-dropdown-bg);
+    color: var(--offcanvas-text);
+}
+
+.offcanvas.offcanvas-start .dropdown-item:hover,
+.offcanvas.offcanvas-start .dropdown-item:focus {
+    background-color: var(--offcanvas-dropdown-hover);
+    color: var(--offcanvas-dropdown-hover-text);
 }

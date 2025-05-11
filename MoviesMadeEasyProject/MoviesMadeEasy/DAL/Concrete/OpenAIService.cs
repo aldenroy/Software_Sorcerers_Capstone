@@ -107,6 +107,26 @@ public class OpenAIService : IOpenAIService
         }
     }
 
+   public async Task<string> GetChatResponse(string query)
+    {
+        try
+        {
+
+            var response = await GetChatCompletionAsync(query);
+
+            // Clean the response by removing the code block delimiters
+            var cleanedResponse = response.Replace("```json\n", "").Replace("\n```", "");
+
+            // Parse the cleaned JSON response
+            return cleanedResponse;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting similar movies for {Query}", query);
+            throw; // Or return empty list if you prefer graceful degradation
+        }
+    }
+
     private record OpenAICompletionResponse(
         List<Choice> Choices);
     

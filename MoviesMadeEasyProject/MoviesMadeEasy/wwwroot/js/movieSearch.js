@@ -119,7 +119,61 @@ function updateMinYearLabel() {
     const box    = document.getElementById("maxYearTextBox");
     if (slider && box) box.value = slider.value;
   }
+
+  function updateMinYearFromTextBox() {
+    const slider = document.getElementById("minYear");
+    const box    = document.getElementById("minYearTextBox");
+    if (!slider || !box) return;
   
+    let val = parseInt(box.value, 10);
+    const min = parseInt(slider.min, 10);
+    const max = parseInt(slider.max, 10);
+  
+    if (isNaN(val)) {
+      box.value = slider.value;
+      return;
+    }
+    if (val < min) val = min;
+    if (val > max) val = max;
+  
+    slider.value = val;
+    box.value    = val;
+  
+    if (!searchExecuted) {
+      // if no search yet, show your “please search first” alert
+      handleFilterInteraction({ target: slider, preventDefault: () => {} });
+    } else {
+      // otherwise re-run with the new year filter
+      searchMovies();
+    }
+  }
+  
+  function updateMaxYearFromTextBox() {
+    const slider = document.getElementById("maxYear");
+    const box    = document.getElementById("maxYearTextBox");
+    if (!slider || !box) return;
+  
+    let val = parseInt(box.value, 10);
+    const min = parseInt(slider.min, 10);
+    const max = parseInt(slider.max, 10);
+  
+    if (isNaN(val)) {
+      box.value = slider.value;
+      return;
+    }
+    if (val < min) val = min;
+    if (val > max) val = max;
+  
+    slider.value = val;
+    box.value    = val;
+  
+    if (!searchExecuted) {
+      handleFilterInteraction({ target: slider, preventDefault: () => {} });
+    } else {
+      searchMovies();
+    }
+  }
+
 function setupGenreFilter(availableGenres) {
     const filterContainer = document.getElementById("genre-filters");
     const contentList = document.getElementById("results");
@@ -192,19 +246,26 @@ document.addEventListener("DOMContentLoaded", () => {
     setupGenreFilter(allGenres);
     updateMinYearLabel();
     updateMaxYearLabel();
-    ["minYear", "maxYear"].forEach(id => {
-        const el = document.getElementById(id);
-        el.addEventListener("change", (e) => {
-          if (!searchExecuted) {
-            // if they haven't searched yet, show your existing alert
-            handleFilterInteraction(e);
-          } else {
-            // otherwise, fire off a new filtered search
-            searchMovies();
-          }
-        });
-      });
+["minYear", "maxYear"].forEach(id => {
+  const slider = document.getElementById(id);
+  if (!slider) return;
+
+  // keep the text‐box in sync as you drag
+  slider.addEventListener("input",
+    id === "minYear" ? updateMinYearLabel : updateMaxYearLabel
+  );
+
+  // on “change” (mouse up), fire your filter/search as before
+  slider.addEventListener("change", e => {
+    if (!searchExecuted) {
+      handleFilterInteraction(e);
+    } else {
+      searchMovies();
+    }
+  });
 });
+});
+
 function enableFilters() {
     searchExecuted = true;
     document.getElementById("sortBy").disabled = false;
@@ -221,25 +282,37 @@ function handleFilterInteraction(event) {
 
 
 function updateClearFiltersVisibility() {
-    // Use the value from "sortBy" if it exists; otherwise, default to "default"
-    let sortOption = document.getElementById("sortBy")?.value || "default";
-    let minYear = document.getElementById("minYear")?.value?.trim() || "";
-    let maxYear = document.getElementById("maxYear")?.value?.trim() || "";
-    let clearButton = document.getElementById("clearFilters");
-
-    const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
-    const isGenreFilterApplied = Array.from(genreCheckboxes).some(cb => cb.checked);
-
-    const streamingCheckboxes = document.querySelectorAll("#streaming-filters input[type='checkbox']");
-    const isStreamingFilterApplied = Array.from(streamingCheckboxes).some(cb => cb.checked);
-
-    // Show the Clear Filters button if any filter is applied
-    if (sortOption !== "default" || minYear !== "" || maxYear !== "" || isGenreFilterApplied || isStreamingFilterApplied) {
-        clearButton.style.display = "inline-block";
+    const clearButton = document.getElementById("clearFilters");
+    const sortOption  = document.getElementById("sortBy")?.value || "default";
+  
+    // Only treat Year as “applied” if the sliders are no longer at their default positions:
+    const minSlider = document.getElementById("minYear");
+    const maxSlider = document.getElementById("maxYear");
+    const isYearFilterApplied =
+      minSlider.value !== minSlider.min ||
+      maxSlider.value !== maxSlider.max;
+  
+    // Genre & Streaming
+    const isGenreFilterApplied = Array.from(
+      document.querySelectorAll("#genre-filters input[type='checkbox']")
+    ).some(cb => cb.checked);
+  
+    const isStreamingFilterApplied = Array.from(
+      document.querySelectorAll("#streaming-filters input[type='checkbox']")
+    ).some(cb => cb.checked);
+  
+    // Show clear button if *any* filter is active
+    if (
+      sortOption !== "default" ||
+      isYearFilterApplied ||
+      isGenreFilterApplied ||
+      isStreamingFilterApplied
+    ) {
+      clearButton.style.display = "inline-block";
     } else {
-        clearButton.style.display = "none";
+      clearButton.style.display = "none";
     }
-}
+  }
 
 function filterContentByStreaming() {
     const selectedServices = Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
@@ -349,8 +422,15 @@ function clearFilters() {
     document.getElementById("clearFilters").style.display = "none";
     localStorage.removeItem("selectedGenres");
     
-    // Re-trigger the search to rebuild the unfiltered content list.
-    searchMovies();
+       // Re-trigger the search, then force every card to be shown
+       searchMovies().then(() => {
+         document.querySelectorAll('.movie-card').forEach(card => {
+           // clear any inline display:none or block from prior filters
+          card.style.display = '';
+        });
+         // update the Clear Filters button visibility one last time
+         updateClearFiltersVisibility();
+       });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -403,4 +483,26 @@ document.querySelectorAll(".sort-option").forEach(item => {
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { searchMovies };
+}
+
+const minBox = document.getElementById("minYearTextBox");
+if (minBox) {
+  minBox.addEventListener("change", updateMinYearFromTextBox);
+  minBox.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      updateMinYearFromTextBox();
+    }
+  });
+}
+
+const maxBox = document.getElementById("maxYearTextBox");
+if (maxBox) {
+  maxBox.addEventListener("change", updateMaxYearFromTextBox);
+  maxBox.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      updateMaxYearFromTextBox();
+    }
+  });
 }
