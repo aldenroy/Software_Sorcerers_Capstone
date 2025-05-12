@@ -298,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
 function enableFilters() {
   searchExecuted = true;
   document.getElementById("sortBy").disabled = false;
@@ -428,7 +427,6 @@ function updateStreamingFilters() {
     const wrapper = document.createElement("div");
     wrapper.appendChild(checkbox);
     wrapper.appendChild(label);
-
     container.appendChild(wrapper);
   });
 
