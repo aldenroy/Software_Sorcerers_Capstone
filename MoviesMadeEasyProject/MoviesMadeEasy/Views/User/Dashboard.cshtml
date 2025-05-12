@@ -1,3 +1,4 @@
+@using MoviesMadeEasy.Models
 @using MoviesMadeEasy.Models.ModelView
 @model DashboardModelView
 
@@ -18,7 +19,10 @@
 @if (total > 0)
 {
     <div id="results">
-        <div id="recentlyViewedCarousel" class="carousel slide" data-bs-ride="carousel" aria-labelledby="recently-viewed-title">
+        <div id="recentlyViewedCarousel"
+             class="carousel slide"
+             data-bs-ride="carousel"
+             aria-labelledby="recently-viewed-title">
             <div class="carousel-inner">
                 @for (int i = 0; i < total; i += itemsPerSlide)
                 {
@@ -39,18 +43,30 @@
                     </div>
                 }
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#recentlyViewedCarousel" data-bs-slide="prev" aria-label="Previous slide">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <button class="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#recentlyViewedCarousel"
+                    data-bs-slide="prev"
+                    aria-label="Previous slide">
+                <span class="carousel-control-prev-icon"
+                      aria-hidden="true"></span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#recentlyViewedCarousel" data-bs-slide="next" aria-label="Next slide">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <button class="carousel-control-next"
+                    type="button"
+                    data-bs-target="#recentlyViewedCarousel"
+                    data-bs-slide="next"
+                    aria-label="Next slide">
+                <span class="carousel-control-next-icon"
+                      aria-hidden="true"></span>
             </button>
         </div>
     </div>
 }
 else
 {
-    <p id="no-recent-titles" role="status">You haven't viewed any titles yet.</p>
+    <p id="no-recent-titles" role="status">
+        You haven't viewed any titles yet.
+    </p>
 }
 
 <h2 id="subscription-title" class="dashtitles">Current Subscriptions</h2>
@@ -81,7 +97,7 @@ else
                     <li class="subscription-item d-flex flex-column align-items-center justify-content-start" data-service-id="@service.Id">
                         @if (!string.IsNullOrEmpty(service.LogoUrl))
                         {
-                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website" role="link" tabindex="0">
+                            <a href="@service.BaseUrl" target="_blank" class="subscription-link" rel="noopener noreferrer" aria-label="Visit @service.Name website">
                                 <img src="@service.LogoUrl" alt="@service.Name logo" class="service-logo" />
                             </a>
                         }
