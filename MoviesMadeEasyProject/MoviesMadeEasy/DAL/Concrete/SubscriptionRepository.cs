@@ -26,13 +26,20 @@ namespace MoviesMadeEasy.DAL.Concrete
         public List<StreamingService> GetUserSubscriptions(int userId)
         {
             return _uss
-                .Include(us => us.StreamingService)  
-                .Where(us => us.UserId == userId)    
-                .Select(us => us.StreamingService)   
+                .Include(us => us.StreamingService)
+                .Where(us => us.UserId == userId)
+                .Select(us => us.StreamingService)
                 .ToList();
         }
 
-        private List<UserStreamingService> GetUserSubscriptionRecords(int userId)
+        public List<UserStreamingService> GetUserSubscriptionsWithCost(int userId)
+        {
+            return _uss
+                .Where(us => us.UserId == userId)
+                .ToList();
+        }
+
+        public List<UserStreamingService> GetUserSubscriptionRecords(int userId)
         {
             return _context.UserStreamingServices
                 .Where(us => us.UserId == userId)
@@ -52,34 +59,66 @@ namespace MoviesMadeEasy.DAL.Concrete
             }
         }
 
-        private void AddNewSubscriptions(int userId, List<int> selectedServiceIds)
+        private void AddNewSubscriptions(int userId,
+                                         Dictionary<int, decimal> servicePrices)
         {
-            var currentSubscriptions = GetUserSubscriptionRecords(userId);
-            var currentSubscriptionIds = currentSubscriptions
+            var existing = GetUserSubscriptionRecords(userId)
                 .Select(us => us.StreamingServiceId)
                 .ToHashSet();
 
-            var subscriptionsToAdd = selectedServiceIds
-                .Where(id => !currentSubscriptionIds.Contains(id))
+            var toAdd = servicePrices.Keys
+                .Where(id => !existing.Contains(id))
                 .Select(id => new UserStreamingService
                 {
                     UserId = userId,
-                    StreamingServiceId = id
-                })
-                .ToList();
+                    StreamingServiceId = id,
+                    MonthlyCost = servicePrices[id]
+                });
 
-            if (subscriptionsToAdd.Any())
-            {
-                _uss.AddRange(subscriptionsToAdd);
-            }
+            _uss.AddRange(toAdd);
         }
 
-        public void UpdateUserSubscriptions(int userId, List<int> selectedServiceIds)
+
+        public void UpdateUserSubscriptions(int userId, Dictionary<int, decimal> servicePrices)
         {
-            RemoveUnselectedSubscriptions(userId, selectedServiceIds);
-            AddNewSubscriptions(userId, selectedServiceIds);
+            var selectedIds = servicePrices.Keys.ToList();
+
+            RemoveUnselectedSubscriptions(userId, selectedIds);
+            AddNewSubscriptions(userId, servicePrices);
+            UpdateSubscriptionPrices(userId, servicePrices);
+
             _context.SaveChanges();
         }
 
+        private void UpdateSubscriptionPrices(int userId, Dictionary<int, decimal> servicePrices)
+        {
+            var current = GetUserSubscriptionRecords(userId)
+                .Where(us => servicePrices.ContainsKey(us.StreamingServiceId));
+
+            foreach (var sub in current)
+            {
+                sub.MonthlyCost = servicePrices[sub.StreamingServiceId];
+            }
+        }
+
+        public void UpdateSubscriptionMonthlyCost(int userId, int streamingServiceId, decimal monthlyCost)
+        {
+            var subscription = _uss
+                .FirstOrDefault(us => us.UserId == userId && us.StreamingServiceId == streamingServiceId);
+
+            if (subscription != null)
+            {
+                subscription.MonthlyCost = monthlyCost;
+                _context.SaveChanges();
+            }
+        }
+
+        public decimal GetUserSubscriptionTotalMonthlyCost(int userId)
+        {
+            return _uss
+                .Where(us => us.UserId == userId)
+                .Select(us => us.MonthlyCost ?? 0m)
+                .Sum();
+        }
     }
 }

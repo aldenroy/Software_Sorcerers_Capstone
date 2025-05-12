@@ -1,4 +1,7 @@
-﻿INSERT INTO StreamingService (name, region, base_url, logo_url)
+﻿USE [MoviesMadeEasyDB];
+GO
+
+INSERT INTO [dbo].[StreamingService] ([name], [region], [base_url], [logo_url])
 VALUES 
     ('Netflix', 'US', 'https://www.netflix.com/login', '/images/Netflix_Symbol_RGB.png'),
     ('Hulu', 'US', 'https://auth.hulu.com/web/login', '/images/hulu-Green-digital.png'),

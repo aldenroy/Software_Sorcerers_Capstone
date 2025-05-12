@@ -82,6 +82,33 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetChatResponse(string query)
+        {
+            try
+            {
+                var recommendations = await _openAIService.GetChatResponse(query);
+                
+                return Ok(recommendations);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                _logger.LogWarning("OpenAI rate limit exceeded for {Query}", query);
+                return StatusCode(429, new { 
+                    error = "rate_limit_exceeded",
+                    message = "We're getting too many requests. Please try again later." 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting similar movies for {Title}", query);
+                return StatusCode(500, new {
+                    error = "server_error",
+                    message = "Something went wrong. Please try again later."
+                });
+            }
+        }
+
+        [HttpGet]
         public async Task<JsonResult> SearchMovies(string query, string sortBy, int? minYear, int? maxYear)
         {
             try

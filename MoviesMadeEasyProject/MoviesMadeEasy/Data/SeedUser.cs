@@ -76,6 +76,13 @@ namespace MoviesMadeEasy.Data
             if (seedMovies)
             {
                 var defaultServices = new[] { "Hulu", "Disney+", "Netflix" };
+                var defaultPrices = new Dictionary<string, decimal>
+                {
+                    ["Hulu"] = 7.99m,
+                    ["Disney+"] = 6.99m,
+                    ["Netflix"] = 9.99m
+                };
+
                 var services = await dbContext.StreamingServices
                     .Where(s => defaultServices.Contains(s.Name))
                     .ToListAsync();
@@ -92,7 +99,10 @@ namespace MoviesMadeEasy.Data
                         dbContext.UserStreamingServices.Add(new UserStreamingService
                         {
                             UserId = customUser.Id,
-                            StreamingServiceId = svc.Id
+                            StreamingServiceId = svc.Id,
+                            MonthlyCost = defaultPrices.TryGetValue(svc.Name, out var cost)
+                                ? cost
+                                : 0m
                         });
                     }
                 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 namespace MoviesMadeEasy.Models;
+using System.ComponentModel.DataAnnotations;
 
 public partial class StreamingService
 {

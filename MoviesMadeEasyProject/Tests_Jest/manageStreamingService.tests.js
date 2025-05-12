@@ -16,17 +16,24 @@ let preSelectedValue = "";
 function setupDOM(preSelectedVal) {
     preSelectedValue = preSelectedVal;
     document.body.innerHTML = `
-    <form id="subscriptionForm">
-      <input type="hidden" id="selectedServices" value="" />
-      <button type="submit">Submit</button>
-    </form>
-    <div class="subscription-container">
-      <div class="card" data-id="1"></div>
-      <div class="card" data-id="2"></div>
-      <div class="card" data-id="3"></div>
-    </div>
-    <input type="hidden" id="preSelectedServices" value="${preSelectedValue}" />
-  `;
+      <form id="subscriptionForm">
+        <input type="hidden" id="preSelectedServices" value="${preSelectedValue}" />
+        <input type="hidden" id="selectedServices" value="" />
+        <input type="hidden" id="servicePrices" value="{}" />
+        <button type="submit">Submit</button>
+      </form>
+      <div class="subscription-container">
+        <div class="card" data-id="1">
+          <div class="card-text">Service 1</div>
+        </div>
+        <div class="card" data-id="2">
+          <div class="card-text">Service 2</div>
+        </div>
+        <div class="card" data-id="3">
+          <div class="card-text">Service 3</div>
+        </div>
+      </div>
+    `;
 }
 
 describe('Subscription Selection Functionality', () => {
@@ -254,16 +261,49 @@ describe('Subscription Selection Functionality', () => {
         expect(submitEvent.preventDefault).not.toHaveBeenCalled();
     });
 
-    test('should alert "No changes were made" when submitted without changes', () => {
-        setupDOM("1,2");
-        initializeModule();
-
+    it('should alert "No changes were made" when submitted without changes', () => {
         window.alert = jest.fn();
-        const form = document.getElementById('subscriptionForm');
-        const submitEvent = new Event('submit', { cancelable: true });
-
+    
+        const form = document.getElementById("subscriptionForm");
+        const submitEvent = new Event("submit", { bubbles: true });
         submitEvent.preventDefault = jest.fn();
+    
         form.dispatchEvent(submitEvent);
+    
         expect(window.alert).toHaveBeenCalledWith("No changes were made");
-    });
+      });
 });
+
+    describe('Pricing input integration', () => {
+        let card, priceInput;
+      
+        beforeEach(() => {
+          setupDOM("");
+          initializeModule();
+      
+          card = document.querySelector('.subscription-container .card[data-id="1"]');
+          priceInput = card.querySelector('.price-input');
+        });
+      
+        test('each card gets a number input with placeholder "Price"', () => {
+          expect(priceInput).not.toBeNull();
+          expect(priceInput).toHaveAttribute('type', 'number');
+          expect(priceInput).toHaveAttribute('placeholder', 'Price');
+        });
+      
+        test('clicking inside the price input does NOT toggle the card selection', () => {
+          expect(card).not.toHaveClass('selected');
+          priceInput.click();
+          expect(card).not.toHaveClass('selected');
+        });
+      
+        test('clicking the card (outside the input) still toggles selection', () => {
+          expect(card).not.toHaveClass('selected');
+          card.click();
+          expect(card).toHaveClass('selected');
+        });
+      
+        test('the price input is associated with the correct service card', () => {
+          expect(priceInput.closest('.card').dataset.id).toBe('1');
+        });
+    });

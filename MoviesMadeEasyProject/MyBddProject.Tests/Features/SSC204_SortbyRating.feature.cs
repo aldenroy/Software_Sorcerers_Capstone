@@ -20,20 +20,18 @@ namespace MyBddProject.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Dynamic Preferences")]
+    [NUnit.Framework.DescriptionAttribute("Filter and sort items by rating range")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    [NUnit.Framework.CategoryAttribute("kira")]
-    public partial class DynamicPreferencesFeature
+    public partial class FilterAndSortItemsByRatingRangeFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
-        private static string[] featureTags = new string[] {
-                "kira"};
+        private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Dynamic Preferences", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Filter and sort items by rating range", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "SSC156_DynamicPreferences.feature"
+#line 1 "SSC204_SortbyRating.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -86,22 +84,28 @@ namespace MyBddProject.Tests.Features
         
         public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
         {
+#line 3
+  #line hidden
 #line 4
-   #line hidden
+    await testRunner.GivenAsync("I am on the \"Movie Search\" page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
 #line 5
-      await testRunner.GivenAsync("a user with the email \"test@test.com\" exists in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.AndAsync("a list of items with ratings out of 100 is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 6
+    await testRunner.AndAsync("the rating-range inputs and \"Apply\" button are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User updates theme to Dark Mode")]
-        public async System.Threading.Tasks.Task UserUpdatesThemeToDarkMode()
+        [NUnit.Framework.DescriptionAttribute("Filter items within a valid rating range")]
+        public async System.Threading.Tasks.Task FilterItemsWithinAValidRatingRange()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates theme to Dark Mode", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 7
-   this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Filter items within a valid rating range", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 8
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -110,34 +114,34 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-   await this.FeatureBackgroundAsync();
-#line hidden
-#line 8
-      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 3
+  await this.FeatureBackgroundAsync();
 #line hidden
 #line 9
-      await testRunner.WhenAsync("the user selects \"Dark\" from the Theme dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("the minimum rating is set to 30", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 10
-      await testRunner.ThenAsync("the page should immediately switch to dark mode", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the maximum rating is set to 85", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 11
-      await testRunner.AndAsync("the \"team_logo_dark.png\" logo should appear", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 12
+    await testRunner.ThenAsync("I should see only items with ratings ≥ 30 and ≤ 85", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User updates font size to large")]
-        public async System.Threading.Tasks.Task UserUpdatesFontSizeToLarge()
+        [NUnit.Framework.DescriptionAttribute("Show validation error for an invalid rating range")]
+        public async System.Threading.Tasks.Task ShowValidationErrorForAnInvalidRatingRange()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates font size to large", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 13
-   this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Show validation error for an invalid rating range", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 14
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -146,31 +150,35 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-   await this.FeatureBackgroundAsync();
-#line hidden
-#line 14
-      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 3
+  await this.FeatureBackgroundAsync();
 #line hidden
 #line 15
-      await testRunner.WhenAsync("the user selects \"Large\" from the font size dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("the minimum rating is set to 90", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 16
-      await testRunner.ThenAsync("the font size should immediately switch to large", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the maximum rating is set to 50", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 17
+    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 18
+    await testRunner.ThenAsync("I should see an inline validation error \"The rating range is invalid: Min Rating " +
+                        "must be ≤ Max Rating.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User updates font type to open dyslexic")]
-        public async System.Threading.Tasks.Task UserUpdatesFontTypeToOpenDyslexic()
+        [NUnit.Framework.DescriptionAttribute("Show message when no items match the range")]
+        public async System.Threading.Tasks.Task ShowMessageWhenNoItemsMatchTheRange()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User updates font type to open dyslexic", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 18
-   this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Show message when no items match the range", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 20
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -179,17 +187,23 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-   await this.FeatureBackgroundAsync();
-#line hidden
-#line 19
-      await testRunner.GivenAsync("the user is logged in and on the Preferences page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 20
-      await testRunner.WhenAsync("the user selects \"Open Dyslexic\" from the font type dropdown", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 3
+  await this.FeatureBackgroundAsync();
 #line hidden
 #line 21
-      await testRunner.ThenAsync("the font type should immediately switch to open dyslexic", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.GivenAsync("the minimum rating is set to 95", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 22
+    await testRunner.AndAsync("the maximum rating is set to 100", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 23
+    await testRunner.AndAsync("no items have ratings between 95 and 100", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 24
+    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 25
+    await testRunner.ThenAsync("I should see \"No movies found for that rating range.\" in the results container", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
