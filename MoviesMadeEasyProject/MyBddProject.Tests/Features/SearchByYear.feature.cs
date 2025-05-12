@@ -31,8 +31,8 @@ namespace MyBddProject.Tests.Features
         private static string[] featureTags = new string[] {
                 "YearFilter"};
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Filtering items by year", "  In order to find items from a particular year\n  As a user\n  I want the list to " +
-                "update automatically when I select or enter a year", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Filtering items by year", "  In order to find items from a particular year\r\n  As a user\r\n  I want the list t" +
+                "o update automatically when I select or enter a year", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
 #line 1 "SearchByYear.feature"
 #line hidden
