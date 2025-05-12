@@ -346,7 +346,6 @@ function updateClearFiltersVisibility() {
   }
 }
 
-
 function filterContentByStreaming() {
   const selectedServices = Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
     .map(cb => cb.value);
