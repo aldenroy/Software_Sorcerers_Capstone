@@ -1,5 +1,5 @@
 let searchExecuted = true;
-const NO_ITEMS_HTML = "<div class='no-results' role='alert'>No items found.</div>";
+const NO_ITEMS_HTML = "<div class='no-results' role='alert'>>No results found.</div>";
 const NO_MOVIES_RANGE_HTML = "<div class='no-results' role='alert'>No movies found for that rating range.</div>";
 async function searchMovies() {
   let searchInput = document.getElementById("searchInput");
@@ -321,36 +321,32 @@ function updateClearFiltersVisibility() {
   const sortDefault = document.getElementById("sortBy").value === "default";
 
   // 2) year default?
-  const minYear = document.getElementById("minYear"),
-    maxYear = document.getElementById("maxYear");
+  const minYearElem = document.getElementById("minYear");
+  const maxYearElem = document.getElementById("maxYear");
   const yearDefault =
-    minYear.value === minYear.min &&
-    maxYear.value === maxYear.max;
+    minYearElem && maxYearElem
+      ? minYearElem.value === minYearElem.min && maxYearElem.value === maxYearElem.max
+      : true;
 
-  // 3) rating default?
-  const minRating = document.getElementById("minRating"),
-    maxRating = document.getElementById("maxRating");
+  // 3) rating default? (guard missing elements)
+  const minRatingElem = document.getElementById("minRating");
+  const maxRatingElem = document.getElementById("maxRating");
   const ratingDefault =
-    minRating.value === minRating.min &&
-    maxRating.value === maxRating.max;
+    minRatingElem && maxRatingElem
+      ? minRatingElem.value === minRatingElem.min && maxRatingElem.value === maxRatingElem.max
+      : true;
 
   // 4) any genres or streaming checked?
-  const genresChecked = !!document.querySelector("#genre-filters input:checked"),
-    streamingChecked = !!document.querySelector("#streaming-filters input:checked");
+  const genresChecked = !!document.querySelector("#genre-filters input:checked");
+  const streamingChecked = !!document.querySelector("#streaming-filters input:checked");
 
-  // Show clearBtn if *any* filter is non-default
-  if (
-    !sortDefault ||
-    !yearDefault ||
-    !ratingDefault ||
-    genresChecked ||
-    streamingChecked
-  ) {
+  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked) {
     clearBtn.style.display = "inline-block";
   } else {
     clearBtn.style.display = "none";
   }
 }
+
 
 function filterContentByStreaming() {
   const selectedServices = Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
