@@ -28,6 +28,10 @@
                             @foreach (var t in slide)
                             {
                                 <div class="col-6 col-sm-4 col-md-3 col-lg-2 movie-card" data-overview="@t.Overview" data-streaming="@(t.StreamingServices ?? "")">
+                                    <button type="button" class="btn btn-primary" hidden>View Details</button>
+                                    <h5 hidden>@t.TitleName</h5>
+                                    <p class="movie-genres" hidden>Genres: @t.Genres</p>
+                                    <p class="movie-rating" hidden>Rating: @t.Rating</p>
                                     <button type="button" class="btn-close remove-rvt" aria-label="Remove from recently viewed" data-title-id="@t.Id"></button>
                                     <a href="javascript:void(0)" aria-label="@t.TitleName, view details">
                                         <img src="@t.PosterUrl" alt="" class="img-fluid mb-2" />
@@ -90,7 +94,7 @@ else
                            && Model.ServicePrices.TryGetValue(service.Id, out var cost)
                            && cost > 0)
                             {
-                                @string.Format("{0:C}", cost)
+                                @($"${cost:0.00}")
                             }
                         </p>
                     </li>
@@ -107,7 +111,7 @@ else
 </div>
 
 <div id="subscription-total" class="subscription-total text-center mb-3 d-none">
-    Total Monthly Cost: @Model.TotalMonthlyCost.ToString("C")
+    Total Monthly Cost: @($"${Model.TotalMonthlyCost:0.00}")
 </div>
 
 @await Html.PartialAsync("_MovieModalPartial")
