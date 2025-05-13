@@ -137,6 +137,25 @@ namespace MoviesMadeEasy.Controllers
             return Ok();                                           
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> TrackSubscriptionClick([FromBody] TrackClickDto dto)
+        {
+            var identityUser = await _userManager.GetUserAsync(User);
+            if (identityUser == null) return Unauthorized();
+
+            var user = _userRepository.GetUser(identityUser.Id);
+            await _subscriptionService.IncrementClickCountAsync(user.Id, dto.StreamingServiceId);
+
+            return Ok();
+        }
+
+        public class TrackClickDto
+        {
+            public int StreamingServiceId { get; set; }
+        }
+
         public IActionResult Cancel()
         {
             return RedirectToAction("Dashboard");
