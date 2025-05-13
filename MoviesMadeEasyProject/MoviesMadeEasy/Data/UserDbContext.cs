@@ -37,6 +37,11 @@ namespace MoviesMadeEasy.Data
                 entity.Property(us => us.MonthlyCost)
                       .HasColumnName("MonthlyCost")
                       .HasColumnType("decimal(18,2)");
+
+                entity.Property(us => us.ClickCount)
+                      .HasColumnName("ClickCount")
+                      .HasColumnType("int")
+                      .HasDefaultValue(0);
             });
 
 

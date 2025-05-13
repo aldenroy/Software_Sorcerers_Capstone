@@ -78,6 +78,11 @@ ALTER TABLE [dbo].[UserStreamingServices]
     ADD [MonthlyCost] DECIMAL(18,2) NULL;
 GO
 
+ALTER TABLE [dbo].[UserStreamingServices]
+    ADD [ClickCount] INT NOT NULL
+        CONSTRAINT DF_UserStreamingServices_ClickCount DEFAULT(0);
+GO
+
 ----------------------------------------------------------
 -- 5. Create RecentlyViewedTitles Table
 ----------------------------------------------------------
