@@ -48,6 +48,11 @@ namespace MoviesMadeEasy.Controllers
             return View();
         }
 
+        public IActionResult ChatboxRedirect()
+        {
+            return View();
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetSimilarMovies(string title)
         {

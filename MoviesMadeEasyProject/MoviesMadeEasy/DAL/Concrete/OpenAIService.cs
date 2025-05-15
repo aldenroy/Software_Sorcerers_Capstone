@@ -63,7 +63,7 @@ public class OpenAIService : IOpenAIService
         const int maxRetries = 3;
         const int initialDelayMs = 1000; // Start with 1 second delay
         int attempt = 0;
-        prompt += " return any movies in this prompt with quotations on both sides.";
+        prompt += " return any movies in this prompt with ^ on both sides not quotations or any other characters!";
 
         while (true)
         {
@@ -139,7 +139,7 @@ private string ConvertResponseToHtml(string response)
             // Process each line to convert quoted movies to links
             return System.Text.RegularExpressions.Regex.Replace(
                 line,
-                @"""([^""]+)""", // Match text between quotes
+                @"\^([^\^]+)\^", // Match text between quotes
                 match => 
                 {
                     var movieTitle = match.Groups[1].Value;
