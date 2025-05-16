@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Movie Search";
 }
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,10 +25,10 @@
                     <div class="d-flex justify-content-center">
                         <div class="search-container d-flex align-items-center" style="max-width: 800px; width: 100%;">
                             <label for="searchInput" class="visually-hidden">Search for a movie</label>
-                            <input type="text" id="searchInput" class="form-control me-2" placeholder="Enter movie title..."
-                                 aria-label="Search for a movie" />
+                            <input type="text" id="searchInput" class="form-control me-2"
+                                placeholder="Enter movie title..." aria-label="Search for a movie" />
                             <input type="hidden" id="sortBy" value="default" />
-                            <button class="btn btn-primary me-2" type="button" data-bs-toggle="offcanvas" 
+                            <button class="btn btn-primary me-2" type="button" data-bs-toggle="offcanvas"
                                 data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
                                 <i class="bi bi-funnel"></i> Filters
                             </button>
@@ -79,10 +80,12 @@
                             <a class="dropdown-item sort-option" href="#" data-sort="titleDesc">Title (Z-A)</a>
                         </li>
                         <li>
-                            <a class="dropdown-item sort-option" href="#" data-sort="ratingHighLow">Rating: High to Low</a>
+                            <a class="dropdown-item sort-option" href="#" data-sort="ratingHighLow">Rating: High to
+                                Low</a>
                         </li>
                         <li>
-                            <a class="dropdown-item sort-option" href="#" data-sort="ratingLowHigh">Rating: Low to High</a>
+                            <a class="dropdown-item sort-option" href="#" data-sort="ratingLowHigh">Rating: Low to
+                                High</a>
                         </li>
                     </ul>
                 </div>
@@ -107,27 +110,51 @@
                 <div class="mb-2">
                     <label for="minYear" class="form-label">Minimum Year:</label>
                     <div class="d-flex align-items-center">
-                        <input type="range" id="minYear" class="form-range me-2" min="1600" max="2100" value="1600" 
+                        <input type="range" id="minYear" class="form-range me-2" min="1600" max="2100" value="1600"
                             oninput="updateMinYearLabel()" />
-                        <input type="text" id="minYearTextBox" class="form-control w-auto" value="1600"/>
+                        <input type="text" id="minYearTextBox" class="form-control w-auto" value="1600" />
                     </div>
                 </div>
                 <div>
                     <label for="maxYear" class="form-label">Maximum Year:</label>
                     <div class="d-flex align-items-center">
-                        <input type="range" id="maxYear" class="form-range me-2" min="1600" max="2100" value="2100" 
+                        <input type="range" id="maxYear" class="form-range me-2" min="1600" max="2100" value="2100"
                             oninput="updateMaxYearLabel()" />
-                        <input type="text" id="maxYearTextBox" class="form-control w-auto" value="2100"/>
+                        <input type="text" id="maxYearTextBox" class="form-control w-auto" value="2100" />
                     </div>
                 </div>
             </div>
 
-            <div>
-                <button id="clearFilters" class="btn btn-warning w-100 mb-2" aria-label="Clear Filters">Clear
-                    Filters</button>
-                <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas" onclick="applyFilters()">Apply Filters</button>
-            </div>
+            <!-- Rating Filters -->
+            <div class="mb-3">
+                <h5>Rating</h5>
+
+                <div class="mb-2">
+                    <label for="minRating" class="form-label">Minimum Rating:</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" id="minRating" class="form-range me-2" min="0" max="100" step="1" value="0"
+                            oninput="updateMinRatingLabel()" />
+                        <input type="text" id="minRatingTextBox" class="form-control w-auto" value="0"/>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="maxRating" class="form-label">Maximum Rating:</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" id="maxRating" class="form-range me-2" min="0" max="100" step="1"
+                            value="100" oninput="updateMaxRatingLabel()" />
+                        <input type="text" id="maxRatingTextBox" class="form-control w-auto" value="100"/>
+                    </div>
+                </div>
         </div>
+        
+        <div>
+            <button id="clearFilters" class="btn btn-warning w-100 mb-2" aria-label="Clear Filters">Clear
+                Filters</button>
+            <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas"
+                onclick="searchMovies()">Apply Filters</button>
+        </div>
+    </div>
     </div>
     <!-- Movie Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
@@ -145,7 +172,7 @@
                         <p id="modalOverview"></p> <!-- Overview will be displayed here -->
                         <p>Available on:</p>
                         <div id="modalStreaming" class="d-flex flex-wrap gap-2 streaming-icons-container">
-                        
+
                         </div>
                     </div>
                 </div>
@@ -156,15 +183,15 @@
     <div id="chatbox" class="chatbox-container">
         <!-- Toggle bar (always visible) -->
         <div id="chatbox-toggle" class="chatbox-toggle d-flex justify-content-between align-items-center">
-            <span class="chatbox-title ms-2">Chat Support</span>
-            <i id="chatbox-chevron" class="chatbox-dropdown bi bi-chevron-up me-2"></i>
+            <span class="text-white ms-2">Chat Support</span>
+            <i id="chatbox-chevron" class="bi bi-chevron-up text-white me-2"></i>
         </div>
 
         <!-- hidden initially -->
         <div id="chatbox-body" class="chatbox-body">
 
             <div class="chatbox-messages px-3 py-2" style="overflow-y: auto; flex-grow: 1;">
-                <div class="chatbox-text">Welcome! How can we help you?</div>
+                <div class="text-muted">Welcome! How can we help you?</div>
             </div>
 
             <div class="chatbox-input d-flex px-2 py-2 border-top">
@@ -188,4 +215,3 @@
 {
     <script src="~/js/movieCapture.js"></script>
 }
-

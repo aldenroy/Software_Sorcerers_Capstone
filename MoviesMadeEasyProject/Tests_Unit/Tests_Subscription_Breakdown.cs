@@ -46,6 +46,7 @@ namespace MME_Tests
                 FontSize = "Medium",
                 FontType = "Sans-serif"
             });
+
             _db.UserStreamingServices.AddRange(
                 new UserStreamingService { UserId = UserWithMultiple, StreamingServiceId = 1, MonthlyCost = 10m },
                 new UserStreamingService { UserId = UserWithMultiple, StreamingServiceId = 2, MonthlyCost = 15m },
