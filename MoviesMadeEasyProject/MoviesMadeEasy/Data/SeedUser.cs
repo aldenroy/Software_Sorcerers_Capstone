@@ -101,8 +101,9 @@ namespace MoviesMadeEasy.Data
                             UserId = customUser.Id,
                             StreamingServiceId = svc.Id,
                             MonthlyCost = defaultPrices.TryGetValue(svc.Name, out var cost)
-                                ? cost
-                                : 0m
+                                                     ? cost
+                                                     : 0m,
+                            ClickCount = 0
                         });
                     }
                 }

@@ -1,21 +1,47 @@
-﻿; (function () {
-    const CAPTURE_URL = '/Home/CaptureMovie';
+﻿;(function(){
+  const CAPTURE_URL = '/Home/CaptureMovie';
+  const modalEl     = document.getElementById('movieModal');
+  let lastBtn, lastText;
 
-    document.addEventListener('click', async e => {
-        if (!e.target.matches('.btn-view-details')) return;
+  document.body.addEventListener('click', e => {
+    const btn = e.target.closest('button.btn-primary');
+    if (!btn || !btn.textContent.includes('View Details')) return;
+    lastBtn  = btn;
+    lastText = btn.textContent;
+    btn.disabled = true;
+    modalEl.addEventListener('shown.bs.modal', onShown, { once: true });
+  });
 
-        const btn = e.target;
-        const card = btn.closest('.movie-card');
-        if (!card) return;
+  function onShown() {
+    const posterEl  = document.getElementById('modalPoster');
+    const initial   = posterEl.getAttribute('src');
+    if (initial) {
+      capture();
+    } else {
+      const obs = new MutationObserver((_, o) => {
+        if (posterEl.getAttribute('src')) {
+          o.disconnect();
+          capture();
+        }
+      });
+      obs.observe(posterEl, { attributes: true, attributeFilter: ['src'] });
+    }
+  }
 
+    async function capture() {
+        const btn = lastBtn;
+        const txt = document.getElementById('modalTitle').textContent.trim();
+        const m = txt.match(/(.+?)\s*\((\d{4})\)/) || [];
         const payload = {
-            TitleName: card.querySelector('h5').childNodes[0].textContent.trim(),
-            Year: parseInt(card.querySelector('.movie-year').textContent.replace(/[()]/g, ''), 10),
-            PosterUrl: card.dataset.posterUrl || card.querySelector('img')?.src || null,
-            Genres: card.dataset.genres,        
-            Rating: card.querySelector('.movie-rating').textContent.replace('Rating: ', '') || null,
-            Overview: card.dataset.overview,
-            StreamingServices: card.dataset.streaming     
+            TitleName: m[1] || txt,
+            Year: m[2] ? parseInt(m[2], 10) : null,
+            PosterUrl: document.getElementById('modalPoster').getAttribute('src') || '',
+            Genres: document.getElementById('modalGenres').textContent.replace('Genres: ', '') || '',
+            Rating: document.getElementById('modalRating').textContent.replace('Rating: ', '') || '',
+            Overview: document.getElementById('modalOverview').textContent.replace('Overview: ', '') || '',
+            StreamingServices: Array.from(
+                document.querySelectorAll('#modalStreaming .streaming-icon')
+            ).map(img => img.alt).join(', ')
         };
 
         try {
@@ -31,8 +57,8 @@
         } finally {
             setTimeout(() => {
                 btn.disabled = false;
-                btn.textContent = 'View Details';
+                btn.textContent = lastText;
             }, 1500);
         }
-    });
+    }
 })();
