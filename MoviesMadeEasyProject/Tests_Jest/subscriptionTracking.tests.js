@@ -72,7 +72,6 @@ describe('Subscription Click Tracker', () => {
     const validLink = document.querySelector('.subscription-item .subscription-link');
     validLink.click();
 
-    // wait one macrotask for the .then() handler
     await new Promise(res => setTimeout(res, 0));
 
     expect(console.error).toHaveBeenCalledWith(
@@ -88,8 +87,7 @@ describe('Subscription Click Tracker', () => {
     document.dispatchEvent(new Event('DOMContentLoaded'));
     const validLink = document.querySelector('.subscription-item .subscription-link');
     validLink.click();
-
-    // wait one macrotask for the .catch() handler
+    
     await new Promise(res => setTimeout(res, 0));
 
     expect(console.error).toHaveBeenCalledWith(
