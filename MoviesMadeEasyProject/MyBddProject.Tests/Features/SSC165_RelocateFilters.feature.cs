@@ -29,8 +29,8 @@ namespace MyBddProject.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Off-Canvas Movie Filters", "  In order to find movies that match my criteria\r\n  As a user\r\n  I want to use an" +
-                " off-canvas filter panel to refine the content list", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Off-Canvas Movie Filters", "  In order to find movies that match my criteria\n  As a user\n  I want to use an o" +
+                "ff-canvas filter panel to refine the content list", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
 #line 1 "SSC165_RelocateFilters.feature"
 #line hidden
