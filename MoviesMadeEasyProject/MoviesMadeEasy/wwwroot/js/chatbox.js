@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const userMessage = document.createElement("div");
                 userMessage.classList.add("text-end", "my-2");
-                userMessage.innerHTML = `<span class="chat-bubble user-message border">${message}</span>`;
+                userMessage.innerHTML = `<span class="bg-primary text-white p-2 rounded">${message}</span>`;
                 messagesDiv.appendChild(userMessage);
                 inputField.value = "";
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;

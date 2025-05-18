@@ -1,4 +1,5 @@
-﻿@{
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@{
     string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
     string fontSize = ViewData["FontSize"]?.ToString()?.ToLower()?? "medium";
     string fontType = ViewData["FontType"]?.ToString()?.ToLower()?? "standard";
@@ -15,6 +16,7 @@
     <link rel="stylesheet" href="~/MoviesMadeEasy.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/colorPreferences.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/fontPreferences.css" asp-append-version="true" />
+    <meta name="RequestVerificationToken" content="@Xsrf.GetAndStoreTokens(ViewContext.HttpContext).RequestToken" />
 </head>
 <body data-theme="@colorMode" data-font-size="@fontSize" data-font-type="@fontType" class="@colorMode-theme">
     <header role="banner">
@@ -77,6 +79,10 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        window.trackSubscriptionClickUrl = '@Url.Action("TrackSubscriptionClick", "User")';
+    </script>
+    <script src="~/js/subscriptionTracking.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
