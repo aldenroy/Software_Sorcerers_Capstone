@@ -3,15 +3,15 @@
 }
 
 <div class="recommendations-page">
-    
+
     <div id="loadingSpinner" class="spinner-container" style="display: none;">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-    
+
     <div id="recommendationsContainer" class="recommendations-container"></div>
-    
+
     <div class="back-to-search">
         <a href="/" class="btn btn-primary">Back to Search</a>
     </div>
@@ -43,4 +43,8 @@
 @section Scripts {
     <script src="~/js/moreLikeThis.js"></script>
     <script src="~/js/modal.js"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/js/movieCapture.js"></script>
+    }
 }

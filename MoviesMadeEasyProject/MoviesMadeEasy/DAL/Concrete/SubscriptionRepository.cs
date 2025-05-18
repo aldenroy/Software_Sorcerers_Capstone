@@ -120,5 +120,17 @@ namespace MoviesMadeEasy.DAL.Concrete
                 .Select(us => us.MonthlyCost ?? 0m)
                 .Sum();
         }
+
+        public async Task IncrementClickCountAsync(int userId, int streamingServiceId)
+        {
+            var sub = await _uss
+                .FirstOrDefaultAsync(us => us.UserId == userId && us.StreamingServiceId == streamingServiceId);
+
+            if (sub != null)
+            {
+                sub.ClickCount++;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
