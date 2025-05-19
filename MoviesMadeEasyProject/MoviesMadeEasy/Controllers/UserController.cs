@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using MoviesMadeEasy.DAL.Abstract;
 using MoviesMadeEasy.Models.ModelView;
+using Newtonsoft.Json;
 
 namespace MoviesMadeEasy.Controllers
 {
@@ -41,7 +42,10 @@ namespace MoviesMadeEasy.Controllers
                       .OrderByDescending(tv => tv.LastUpdated)
                       .Take(10)
                       .ToList();
-
+            var rawSubs = _subscriptionService.GetUserSubscriptionRecords(userId);
+            var priceLookup = rawSubs
+                .ToDictionary(us => us.StreamingServiceId, us => us.MonthlyCost);
+            var total = _subscriptionService.GetUserSubscriptionTotalMonthlyCost(userId);
             return new DashboardModelView
             {
                 UserId = userId,
@@ -52,7 +56,9 @@ namespace MoviesMadeEasy.Controllers
                 PreSelectedServiceIds = userSubscriptions != null
                                         ? string.Join(",", userSubscriptions.Select(s => s.Id))
                                         : "",
-               RecentlyViewedTitles = recentTitles
+               RecentlyViewedTitles = recentTitles,
+               ServicePrices = priceLookup,
+               TotalMonthlyCost = total
             };
         }
 
@@ -85,30 +91,34 @@ namespace MoviesMadeEasy.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveSubscriptions(int userId, string selectedServices)
+        public IActionResult SaveSubscriptions(int userId, string selectedServices, string servicePrices)
         {
             selectedServices = selectedServices ?? "";
+            servicePrices = servicePrices ?? "{}";
+
+            var selectedIds = String.IsNullOrWhiteSpace(selectedServices)
+              ? new List<int>()
+              : selectedServices
+                  .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                  .Select(s => int.Parse(s.Trim()))
+                  .ToList();
+
+            Dictionary<int, decimal> priceDict =
+                JsonConvert.DeserializeObject<Dictionary<int, decimal>>(servicePrices)
+                ?? new Dictionary<int, decimal>();
 
             try
             {
-                List<int> selectedServiceIds =
-                    string.IsNullOrWhiteSpace(selectedServices)
-                        ? new List<int>()
-                        : selectedServices.Split(',').Select(int.Parse).ToList();
-
-                _subscriptionService.UpdateUserSubscriptions(userId, selectedServiceIds);
+                _subscriptionService.UpdateUserSubscriptions(userId, priceDict);
 
                 TempData["Message"] = "Subscriptions managed successfully!";
-
                 var dto = BuildDashboardModelView(userId);
                 return View("Dashboard", dto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving subscriptions for userId: {userId}", userId);
-
                 TempData["Message"] = "There was an issue managing your subscription. Please try again later.";
-
                 var dto = BuildDashboardModelView(userId);
                 return View("SubscriptionForm", dto);
             }
@@ -125,6 +135,25 @@ namespace MoviesMadeEasy.Controllers
             _titleRepository.Delete(titleId, user.Id);
 
             return Ok();                                           
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> TrackSubscriptionClick([FromBody] TrackClickDto dto)
+        {
+            var identityUser = await _userManager.GetUserAsync(User);
+            if (identityUser == null) return Unauthorized();
+
+            var user = _userRepository.GetUser(identityUser.Id);
+            await _subscriptionService.IncrementClickCountAsync(user.Id, dto.StreamingServiceId);
+
+            return Ok();
+        }
+
+        public class TrackClickDto
+        {
+            public int StreamingServiceId { get; set; }
         }
 
         public IActionResult Cancel()

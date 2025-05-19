@@ -41,7 +41,7 @@ namespace MyBddProject.Tests.Steps
 
                 // Build Chrome options
                 var options = new ChromeOptions();
-                options.AddArguments("--headless", "--disable-gpu");
+                options.AddArguments("--headless", "--disable-gpu", "--window-size=1920,1080");
 
                 // If running on Linux or macOS, isolate a user-data-dir to avoid profile lock errors
                 if (!OperatingSystem.IsWindows())
@@ -76,6 +76,7 @@ namespace MyBddProject.Tests.Steps
                 else if (OperatingSystem.IsWindows())
                 {
                     _driver = new ChromeDriver(options);
+                    _driver.Manage().Window.Maximize();
                 }
                 else
                 {
