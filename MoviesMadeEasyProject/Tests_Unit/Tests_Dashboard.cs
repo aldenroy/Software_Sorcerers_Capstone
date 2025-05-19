@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using MoviesMadeEasy.Controllers;
 using MoviesMadeEasy.Models.ModelView;
+using MoviesMadeEasy.Models.DTO;
 
 namespace MME_Tests
 {
@@ -208,6 +209,13 @@ namespace MME_Tests
             _subscriptionServiceMock
                 .Setup(s => s.GetUserSubscriptions(It.IsAny<int>()))
                 .Returns(new List<StreamingService>());
+            _subscriptionServiceMock
+                .Setup(s => s.MonthlySubscriptionClicks(It.IsAny<int>()))
+                .Returns(new List<SubscriptionClickSummary>());
+            _subscriptionServiceMock
+                .Setup(s => s.LifetimeSubscriptionClicks(It.IsAny<int>()))
+                .Returns(new List<SubscriptionClickSummary>());
+
 
             _controller = new UserController(
                 dummyLogger,
