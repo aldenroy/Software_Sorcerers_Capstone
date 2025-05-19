@@ -46,6 +46,23 @@ namespace MoviesMadeEasy.Controllers
             var priceLookup = rawSubs
                 .ToDictionary(us => us.StreamingServiceId, us => us.MonthlyCost);
             var total = _subscriptionService.GetUserSubscriptionTotalMonthlyCost(userId);
+            var monthClicks = _subscriptionService.MonthlySubscriptionClicks(userId);
+            var lifetimeClicks = _subscriptionService.LifetimeSubscriptionClicks(userId);
+
+            var usageSummaries = monthClicks
+                .GroupJoin(
+                    lifetimeClicks,
+                    m => m.StreamingServiceId,
+                    l => l.StreamingServiceId,
+                    (m, lGroup) => new SubscriptionUsageModelView
+                    {
+                        StreamingServiceId = m.StreamingServiceId,
+                        ServiceName = m.ServiceName,
+                        MonthlyClicks = m.ClickCount,
+                        LifetimeClicks = lGroup.Select(l => l.ClickCount).FirstOrDefault()
+                    })
+                .ToList();
+
             return new DashboardModelView
             {
                 UserId = userId,
@@ -58,7 +75,8 @@ namespace MoviesMadeEasy.Controllers
                                         : "",
                RecentlyViewedTitles = recentTitles,
                ServicePrices = priceLookup,
-               TotalMonthlyCost = total
+               TotalMonthlyCost = total,
+               UsageSummaries = usageSummaries
             };
         }
 
