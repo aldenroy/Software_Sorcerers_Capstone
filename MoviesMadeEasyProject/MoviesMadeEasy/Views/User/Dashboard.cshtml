@@ -73,7 +73,7 @@ else
 </button>
 
 @if (showPriceToggle){
-<button id="toggle-prices-btn" class="btn btn-secondary mb-3 d-block mx-auto" type="button">Show Prices</button>
+    <button id="toggle-analysis-btn" class="btn btn-secondary mb-3 d-block mx-auto" type="button">Streaming Service Analysis</button>
 }
 
 <div id="circle-center" class="container text-center">
@@ -115,44 +115,45 @@ else
     Total Monthly Cost: @($"${Model.TotalMonthlyCost:0.00}")
 </div>
 
-<h2 class="dashtitles">Usage Summary</h2>
+<div id="analysis-section" class="d-none">
+    <h2 class="dashtitles">Usage Summary</h2>
 
-@if (Model.UsageSummaries.Any())
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Service</th>
-                <th>Last 30 Days</th>
-                <th>Lifetime</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in Model.UsageSummaries)
-            {
+    @if (Model.UsageSummaries.Any())
+    {
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>@u.ServiceName</td>
-                    <td>@u.MonthlyClicks</td>
-                    <td>@u.LifetimeClicks</td>
+                    <th>Service</th>
+                    <th>Last 30 Days</th>
+                    <th>Lifetime</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.UsageSummaries)
+                {
+                    <tr>
+                        <td>@u.ServiceName</td>
+                        <td>@u.MonthlyClicks</td>
+                        <td>@u.LifetimeClicks</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-    <div class="row">
-        <div class="chart col-md-6">
-            <canvas id="monthlyChart"></canvas>
+        <div class="row">
+            <div class="chart col-md-6">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+            <div class="chart col-md-6">
+                <canvas id="lifetimeChart"></canvas>
+            </div>
         </div>
-        <div class="chart col-md-6">
-            <canvas id="lifetimeChart"></canvas>
-        </div>
-    </div>
-}
-else
-{
-    <p>No usage data to display.</p>
-}
-
+    }
+    else
+    {
+        <p>No usage data to display.</p>
+    }
+</div>
 
 @await Html.PartialAsync("_MovieModalPartial")
 
