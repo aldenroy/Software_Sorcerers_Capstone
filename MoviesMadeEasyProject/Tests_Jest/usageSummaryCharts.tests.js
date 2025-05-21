@@ -8,6 +8,12 @@ let ChartMock
 beforeAll(() => {
   ChartMock = jest.fn()
   ChartMock.register = jest.fn()
+  ChartMock.defaults = {
+    plugins: {
+      title: {},
+      legend: { labels: {} }
+    }
+  }
   global.Chart = ChartMock
   loadScript()
 })
