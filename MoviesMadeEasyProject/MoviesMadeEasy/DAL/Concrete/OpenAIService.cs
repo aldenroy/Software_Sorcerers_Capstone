@@ -63,6 +63,7 @@ public class OpenAIService : IOpenAIService
         const int maxRetries = 3;
         const int initialDelayMs = 1000; // Start with 1 second delay
         int attempt = 0;
+        prompt += " return any movies in this prompt with ^ on both sides not quotations or any other characters!";
 
         while (true)
         {
@@ -156,6 +157,34 @@ public class OpenAIService : IOpenAIService
             }
         }
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error getting similar movies for {Query}", query);
+        return "Sorry, I couldn't process your request. Please try again.";
+    }
+}
+
+private string ConvertResponseToHtml(string response)
+{
+    // Split into lines and process each one
+    var lines = response.Split('\n')
+        .Where(line => !string.IsNullOrWhiteSpace(line))
+        .Select(line => 
+        {
+            // Process each line to convert quoted movies to links
+            return System.Text.RegularExpressions.Regex.Replace(
+                line,
+                @"\^([^\^]+)\^", // Match text between quotes
+                match => 
+                {
+                    var movieTitle = match.Groups[1].Value;
+                    return $"<a href=\"#\" class=\"quoted-link\" data-movie=\"{movieTitle}\">\"{movieTitle}\"</a>";
+                });
+        });
+
+    // Join lines with <br> tags
+    return string.Join("<br>", lines);
+}
 
 public async Task<string> GetChatResponse(string query)
 {
