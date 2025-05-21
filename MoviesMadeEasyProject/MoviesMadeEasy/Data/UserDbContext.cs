@@ -15,7 +15,6 @@ namespace MoviesMadeEasy.Data
         public virtual DbSet<UserStreamingService> UserStreamingServices { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<RecentlyViewedTitle> RecentlyViewedTitles { get; set; }
-        public virtual DbSet<ClickEvent> ClickEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -45,74 +44,76 @@ namespace MoviesMadeEasy.Data
                       .HasDefaultValue(0);
             });
 
+
             builder.Entity<StreamingService>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.ToTable("StreamingService");
 
                 entity.Property(e => e.Id)
-                      .ValueGeneratedOnAdd()
-                      .HasColumnName("id");
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
 
                 entity.Property(e => e.Name)
-                      .HasMaxLength(255)
-                      .HasColumnName("name");
+                    .HasMaxLength(255)
+                    .HasColumnName("name");
 
                 entity.Property(e => e.Region)
-                      .HasMaxLength(50)
-                      .HasColumnName("region");
+                    .HasMaxLength(50)
+                    .HasColumnName("region");
 
                 entity.Property(e => e.BaseUrl)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("base_url");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("base_url");
 
                 entity.Property(e => e.LogoUrl)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("logo_url");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("logo_url");
             });
 
             builder.Entity<Title>(entity =>
             {
                 entity.HasKey(e => e.Id);
+
                 entity.ToTable("Title");
 
                 entity.Property(e => e.Id)
-                      .ValueGeneratedNever()
-                      .HasColumnName("id")
-                      .UseIdentityColumn()
-                      .ValueGeneratedOnAdd();
+                    .ValueGeneratedNever()
+                    .HasColumnName("id")
+                    .UseIdentityColumn()   
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.TitleName)
-                      .HasMaxLength(255)
-                      .HasColumnName("title_name");
+                    .HasMaxLength(255)
+                    .HasColumnName("title_name");
 
                 entity.Property(e => e.Year)
-                      .HasColumnName("year");
+                    .HasColumnName("year");
 
                 entity.Property(e => e.PosterUrl)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("poster_url");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("poster_url");
 
                 entity.Property(e => e.Genres)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("genres");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("genres");
 
                 entity.Property(e => e.Rating)
-                      .HasMaxLength(50)
-                      .HasColumnName("rating");
+                    .HasMaxLength(50)
+                    .HasColumnName("rating");
 
                 entity.Property(e => e.Overview)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("overview");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("overview");
 
                 entity.Property(e => e.StreamingServices)
-                      .HasColumnType("nvarchar(max)")
-                      .HasColumnName("streaming_services");
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("streaming_services");
 
                 entity.Property(e => e.LastUpdated)
-                      .HasDefaultValueSql("(getdate())")
-                      .HasColumnType("datetime")
-                      .HasColumnName("last_updated");
+                    .HasDefaultValueSql("(getdate())")
+                    .HasColumnType("datetime")
+                    .HasColumnName("last_updated");
 
                 entity.HasMany(t => t.RecentlyViewedTitles)
                       .WithOne(rv => rv.Title)
@@ -127,32 +128,33 @@ namespace MoviesMadeEasy.Data
 
                 entity.Property(e => e.Id)
                       .HasColumnName("Id")
-                      .UseIdentityColumn()
+                      .UseIdentityColumn()   
                       .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.UserId)
-                      .HasColumnName("UserId");
+                    .HasColumnName("UserId");
 
                 entity.Property(e => e.TitleId)
-                      .HasColumnName("TitleId");
+                    .HasColumnName("TitleId");
 
                 entity.Property(e => e.ViewedAt)
-                      .HasDefaultValueSql("(getdate())")
-                      .HasColumnName("ViewedAt");
+                    .HasDefaultValueSql("(getdate())")
+                    .HasColumnName("ViewedAt");
 
                 entity.HasOne(e => e.User)
-                      .WithMany(u => u.RecentlyViewedTitles)
-                      .HasForeignKey(e => e.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(u => u.RecentlyViewedTitles)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Title)
-                      .WithMany(t => t.RecentlyViewedTitles)
-                      .HasForeignKey(e => e.TitleId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(t => t.RecentlyViewedTitles)
+                    .HasForeignKey(e => e.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(e => new { e.UserId, e.TitleId })
-                      .IsUnique();
+                    .IsUnique();
             });
+
 
             builder.Entity<User>(entity =>
             {
@@ -197,44 +199,9 @@ namespace MoviesMadeEasy.Data
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(u => u.UserStreamingServices)
-                      .WithOne(us => us.User)
-                      .HasForeignKey(us => us.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            builder.Entity<ClickEvent>(entity =>
-            {
-                entity.ToTable("ClickEvent");
-                entity.HasKey(e => e.Id);
-
-                entity.Property(e => e.Id)
-                      .HasColumnName("Id")
-                      .UseIdentityColumn()
-                      .ValueGeneratedOnAdd();
-
-                entity.Property(e => e.UserId)
-                      .HasColumnName("UserId");
-
-                entity.Property(e => e.StreamingServiceId)
-                      .HasColumnName("StreamingServiceId");
-
-                entity.Property(e => e.ClickedAt)
-                      .HasColumnName("ClickedAt")
-                      .HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(e => e.User)
-                      .WithMany(u => u.ClickEvents)
-                      .HasForeignKey(e => e.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(e => e.StreamingService)
-                      .WithMany(s => s.ClickEvents)
-                      .HasForeignKey(e => e.StreamingServiceId)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne<UserStreamingService>()
-                      .WithMany()
-                      .HasForeignKey(e => new { e.UserId, e.StreamingServiceId });
+                        .WithOne(us => us.User)
+                        .HasForeignKey(us => us.UserId)
+                        .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

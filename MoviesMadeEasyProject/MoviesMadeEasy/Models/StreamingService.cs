@@ -16,11 +16,8 @@ public partial class StreamingService
 
     public string? LogoUrl { get; set; }
 
-    public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; } 
-        = new List<UserStreamingService>();
+    public virtual ICollection<UserStreamingService> UserStreamingServices { get; set; } = new List<UserStreamingService>();
 
-    public virtual ICollection<ClickEvent> ClickEvents { get; set; }
-        = new List<ClickEvent>();
 }
 
 

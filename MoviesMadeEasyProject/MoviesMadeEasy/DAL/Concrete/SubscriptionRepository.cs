@@ -2,7 +2,6 @@
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
 using Microsoft.EntityFrameworkCore;
-using MoviesMadeEasy.Models.DTO;
 
 namespace MoviesMadeEasy.DAL.Concrete
 {
@@ -10,14 +9,12 @@ namespace MoviesMadeEasy.DAL.Concrete
     {
         private readonly DbSet<UserStreamingService> _uss;
         private readonly DbSet<StreamingService> _streamingServices;
-        private readonly DbSet<ClickEvent> _clickEvents;
         private readonly UserDbContext _context;
 
         public SubscriptionRepository(UserDbContext context) : base(context)
         {
             _uss = context.UserStreamingServices;
             _streamingServices = context.StreamingServices;
-            _clickEvents = context.ClickEvents;
             _context = context;
         }
 
@@ -132,73 +129,8 @@ namespace MoviesMadeEasy.DAL.Concrete
             if (sub != null)
             {
                 sub.ClickCount++;
+                await _context.SaveChangesAsync();
             }
-
-            _context.ClickEvents.Add(new ClickEvent
-            {
-                UserId = userId,
-                StreamingServiceId = streamingServiceId
-            });
-
-            await _context.SaveChangesAsync();
-        }
-
-        public List<SubscriptionClickSummary> MonthlySubscriptionClicks(int userId)
-        {
-            var since = DateTime.Now.AddDays(-30);
-
-            var windowed = _context.ClickEvents
-                .Where(c => c.UserId == userId && c.ClickedAt >= since)
-                .GroupBy(c => c.StreamingServiceId)
-                .Select(g => new
-                {
-                    ServiceId = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
-
-            return _context.UserStreamingServices
-                .Where(us => us.UserId == userId)
-                .AsEnumerable()
-                .Select(us =>
-                {
-                    var grp = windowed.FirstOrDefault(w => w.ServiceId == us.StreamingServiceId);
-                    return new SubscriptionClickSummary
-                    {
-                        StreamingServiceId = us.StreamingServiceId,
-                        ServiceName = us.StreamingService.Name,
-                        ClickCount = grp?.Count ?? 0
-                    };
-                })
-                .ToList();
-        }
-
-        public List<SubscriptionClickSummary> LifetimeSubscriptionClicks(int userId)
-        {
-            var lifetime = _context.ClickEvents
-                .Where(c => c.UserId == userId)
-                .GroupBy(c => c.StreamingServiceId)
-                .Select(g => new
-                {
-                    ServiceId = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
-
-            return _context.UserStreamingServices
-                .Where(us => us.UserId == userId)
-                .AsEnumerable()
-                .Select(us =>
-                {
-                    var grp = lifetime.FirstOrDefault(w => w.ServiceId == us.StreamingServiceId);
-                    return new SubscriptionClickSummary
-                    {
-                        StreamingServiceId = us.StreamingServiceId,
-                        ServiceName = us.StreamingService.Name,
-                        ClickCount = grp?.Count ?? 0
-                    };
-                })
-                .ToList();
         }
     }
 }

@@ -71,23 +71,6 @@ namespace MME_Tests
             _repo = new SubscriptionRepository(_db);
         }
 
-        private void SeedClickEvents(int userId, int serviceId, params (int DaysAgo, int Count)[] offsets)
-        {
-            var now = DateTime.Now;
-            var events = offsets
-                .SelectMany(o => Enumerable.Range(1, o.Count)
-                    .Select(_ => new ClickEvent
-                    {
-                        UserId = userId,
-                        StreamingServiceId = serviceId,
-                        ClickedAt = now.AddDays(-o.DaysAgo)
-                    }))
-                .ToList();
-
-            _db.ClickEvents.AddRange(events);
-            _db.SaveChanges();
-        }
-
         [TearDown]
         public void TearDown() => _db.Dispose();
 
@@ -243,58 +226,5 @@ namespace MME_Tests
             var after = _repo.GetUserSubscriptionRecords(UserWithOne).Sum(x => x.ClickCount);
             Assert.AreEqual(before, after);
         }
-
-        [Test]
-        public void MonthlySubscriptionClicks_NoClicks_ReturnsZeroForAllSubscriptions()
-        {
-            var results = _repo.MonthlySubscriptionClicks(UserWithMultiple);
-            Assert.AreEqual(3, results.Count);
-            foreach (var summary in results)
-            {
-                Assert.AreEqual(0, summary.ClickCount);
-                var expectedName = _db.StreamingServices.Find(summary.StreamingServiceId).Name;
-                Assert.AreEqual(expectedName, summary.ServiceName);
-            }
-        }
-
-        [Test]
-        public void MonthlySubscriptionClicks_OnlyCountsClicksInLast30Days_WithHelper()
-        {
-            SeedClickEvents(UserWithMultiple, 1, (10, 2));
-            SeedClickEvents(UserWithMultiple, 2, (31, 3));
-            SeedClickEvents(UserWithMultiple, 3, (5, 1), (40, 4));
-            var monthly = _repo.MonthlySubscriptionClicks(UserWithMultiple)
-                               .OrderBy(x => x.StreamingServiceId)
-                               .ToList();
-            Assert.AreEqual(2, monthly.Single(x => x.StreamingServiceId == 1).ClickCount);
-            Assert.AreEqual(0, monthly.Single(x => x.StreamingServiceId == 2).ClickCount);
-            Assert.AreEqual(1, monthly.Single(x => x.StreamingServiceId == 3).ClickCount);
-        }
-
-        [Test]
-        public void LifetimeSubscriptionClicks_SumsAllClicksRegardlessOfDate()
-        {
-            SeedClickEvents(UserWithMultiple, 1, (100, 2));
-            SeedClickEvents(UserWithMultiple, 2, (200, 3));
-            SeedClickEvents(UserWithMultiple, 3, (300, 5));
-            var lifetime = _repo.LifetimeSubscriptionClicks(UserWithMultiple)
-                                .OrderBy(x => x.StreamingServiceId)
-                                .ToList();
-            Assert.AreEqual(2, lifetime.Single(x => x.StreamingServiceId == 1).ClickCount);
-            Assert.AreEqual(3, lifetime.Single(x => x.StreamingServiceId == 2).ClickCount);
-            Assert.AreEqual(5, lifetime.Single(x => x.StreamingServiceId == 3).ClickCount);
-        }
-
-        [Test]
-        public void ClickSummary_IncludesAllSubscribedServices()
-        {
-            var monthly = _repo.MonthlySubscriptionClicks(UserWithOne);
-            var lifetime = _repo.LifetimeSubscriptionClicks(UserWithOne);
-            Assert.That(monthly.Select(x => x.StreamingServiceId), Is.EquivalentTo(new[] { 1 }));
-            Assert.That(monthly[0].ClickCount, Is.Zero);
-            Assert.That(lifetime.Select(x => x.StreamingServiceId), Is.EquivalentTo(new[] { 1 }));
-            Assert.That(lifetime[0].ClickCount, Is.Zero);
-        }
-
     }
 }

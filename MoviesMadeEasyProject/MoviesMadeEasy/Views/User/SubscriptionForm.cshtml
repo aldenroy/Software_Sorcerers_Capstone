@@ -28,7 +28,6 @@
     <input type="hidden" asp-for="UserId" />
     <input type="hidden" id="preSelectedServices" value="@Model.PreSelectedServiceIds" />
     <input type="hidden" name="servicePrices" id="servicePrices" value='@JsonConvert.SerializeObject(Model.ServicePrices)' />
-    <span asp-validation-for="ServicePrices" class="text-danger"></span>
 
     <div class="subscription-container">
         @foreach (var service in Model.AllServicesList)
@@ -51,8 +50,5 @@
 </form>
 
 <script src="~/js/manageStreamingService.js"></script>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
 
 <!-- Credit: Bootstrap Cards - https://getbootstrap.com/docs/4.0/components/card/ -->

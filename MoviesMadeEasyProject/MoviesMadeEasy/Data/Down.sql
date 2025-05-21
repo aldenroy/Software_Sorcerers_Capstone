@@ -30,10 +30,3 @@ BEGIN
     DROP TABLE [dbo].[Title];
 END
 GO
-
-
-IF OBJECT_ID('dbo.ClickEvent', 'U') IS NOT NULL
-BEGIN
-    DROP TABLE [dbo].[ClickEvent];
-END
-GO

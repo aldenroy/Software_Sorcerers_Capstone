@@ -13,8 +13,6 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using MoviesMadeEasy.Controllers;
 using MoviesMadeEasy.Models.ModelView;
-using MoviesMadeEasy.Models.DTO;
-using Newtonsoft.Json;
 
 namespace MME_Tests
 {
@@ -210,13 +208,6 @@ namespace MME_Tests
             _subscriptionServiceMock
                 .Setup(s => s.GetUserSubscriptions(It.IsAny<int>()))
                 .Returns(new List<StreamingService>());
-            _subscriptionServiceMock
-                .Setup(s => s.MonthlySubscriptionClicks(It.IsAny<int>()))
-                .Returns(new List<SubscriptionClickSummary>());
-            _subscriptionServiceMock
-                .Setup(s => s.LifetimeSubscriptionClicks(It.IsAny<int>()))
-                .Returns(new List<SubscriptionClickSummary>());
-
 
             _controller = new UserController(
                 dummyLogger,
@@ -488,47 +479,5 @@ namespace MME_Tests
             var subscriptionsAfterCancel = _subscriptionServiceMock.Object.GetUserSubscriptions(userId);
             Assert.AreEqual(originalSubscriptions.Count, subscriptionsAfterCancel.Count);
         }
-
-        [Test]
-        public void SaveSubscriptions_CostOverMax1000_ReturnsFormWithError()
-        {
-            const int uid = 1;
-            const string sel = "1";
-            var bad = JsonConvert.SerializeObject(new Dictionary<int, decimal> { { 1, 1500m } });
-            _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-            var result = _controller.SaveSubscriptions(uid, sel, bad) as ViewResult;
-
-            Assert.Multiple(() =>
-            {
-                Assert.IsNotNull(result);
-                Assert.AreEqual("SubscriptionForm", result.ViewName);
-                Assert.IsFalse(_controller.ModelState.IsValid);
-                Assert.IsTrue(_controller.ModelState.ContainsKey(nameof(DashboardModelView.ServicePrices)));
-            });
-        }
-
-        [Test]
-        public void SaveSubscriptions_ValidCost_CallsRepoAndReturnsDashboard()
-        {
-            const int uid = 1;
-            const string sel = "1";
-            var good = JsonConvert.SerializeObject(new Dictionary<int, decimal> { { 1, 1000m } });
-
-            var result = _controller.SaveSubscriptions(uid, sel, good) as ViewResult;
-
-            _subscriptionServiceMock.Verify(s =>
-                s.UpdateUserSubscriptions(uid,
-                    It.Is<Dictionary<int, decimal>>(d => d.Count == 1 && d[1] == 1000m)
-                ), Times.Once);
-
-            Assert.Multiple(() =>
-            {
-                Assert.IsNotNull(result);
-                Assert.AreEqual("Dashboard", result.ViewName);
-                Assert.IsTrue(_controller.ModelState.IsValid);
-            });
-        }
-
     }
 }

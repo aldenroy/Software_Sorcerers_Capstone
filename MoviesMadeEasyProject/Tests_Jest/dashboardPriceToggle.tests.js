@@ -8,59 +8,52 @@ require('@testing-library/jest-dom');
 describe('dashboardPriceToggle.js', () => {
 
   describe('when there are prices, a total, and a button', () => {
-    let btn, prices, total, analysis;
+    let btn, prices, total;
 
     beforeEach(() => {
       jest.resetModules();
       document.body.innerHTML = `
-        <button id="toggle-analysis-btn"
+        <button id="toggle-prices-btn"
                 class="btn btn-secondary mb-3 d-block mx-auto">
-          Streaming Service Analysis
+          Show Prices
         </button>
 
+        <!-- You *must* render this, otherwise the script returns early -->
         <div id="subscription-total" class="d-none">
           $12.00
         </div>
 
         <div class="subscription-price d-none">$5.00</div>
         <div class="subscription-price d-none">$7.00</div>
-
-        <div id="analysis-section" class="d-none">
-          Usage Summary Content
-        </div>
       `;
 
       // load and run the IIFE
       require('../MoviesMadeEasy/wwwroot/js/dashboardPriceToggle.js');
 
-      btn    = document.getElementById('toggle-analysis-btn');
+      btn    = document.getElementById('toggle-prices-btn');
       total  = document.getElementById('subscription-total');
       prices = Array.from(document.querySelectorAll('.subscription-price'));
-      analysis = document.getElementById('analysis-section');
     });
 
-    test('initial state: prices, total & analysis hidden; button shows "Streaming Service Analysis"', () => {
-      expect(btn.textContent.trim()).toBe('Streaming Service Analysis');
+    test('initial state: prices & total hidden, button shows "Show Prices"', () => {
+      expect(btn.textContent.trim()).toBe('Show Prices');
       expect(total).toHaveClass('d-none');
       prices.forEach(div => expect(div).toHaveClass('d-none'));
-      expect(analysis).toHaveClass('d-none');
     });
 
-    test('click once: prices, total & analysis visible; button text becomes "Hide Analysis"', () => {
+    test('click once: prices & total visible & button text becomes "Hide Prices"', () => {
       btn.click();
-      expect(btn.textContent.trim()).toBe('Hide Analysis');
+      expect(btn.textContent.trim()).toBe('Hide Prices');
       expect(total).not.toHaveClass('d-none');
       prices.forEach(div => expect(div).not.toHaveClass('d-none'));
-      expect(analysis).not.toHaveClass('d-none');
     });
 
-    test('click twice: everything hidden again; button text returns to default', () => {
+    test('click twice: prices & total hidden again & button text returns to "Show Prices"', () => {
       btn.click();
       btn.click();
-      expect(btn.textContent.trim()).toBe('Streaming Service Analysis');
+      expect(btn.textContent.trim()).toBe('Show Prices');
       expect(total).toHaveClass('d-none');
       prices.forEach(div => expect(div).toHaveClass('d-none'));
-      expect(analysis).toHaveClass('d-none');
     });
   });
 
@@ -71,21 +64,18 @@ describe('dashboardPriceToggle.js', () => {
         <div class="subscription-price d-none">$0.00</div>
         <div class="subscription-price d-none">$0.00</div>
       `;
+      // no button, no #subscription-total
       require('../MoviesMadeEasy/wwwroot/js/dashboardPriceToggle.js');
     });
 
     test('script does not throw and button remains absent', () => {
-      expect(document.getElementById('toggle-analysis-btn')).toBeNull();
+      expect(document.getElementById('toggle-prices-btn')).toBeNull();
     });
 
     test('existing price divs stay hidden', () => {
       document.querySelectorAll('.subscription-price').forEach(div => {
         expect(div).toHaveClass('d-none');
       });
-    });
-
-    test('analysis section remains absent', () => {
-      expect(document.getElementById('analysis-section')).toBeNull();
     });
   });
 
