@@ -15,8 +15,5 @@
 
         public virtual ICollection<RecentlyViewedTitle> RecentlyViewedTitles { get; set; }
             = new List<RecentlyViewedTitle>();
-
-        public virtual ICollection<ClickEvent> ClickEvents { get; set; }
-            = new List<ClickEvent>();
     }
 }

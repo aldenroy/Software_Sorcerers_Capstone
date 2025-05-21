@@ -23,9 +23,9 @@ namespace MyBddProject.Tests.PageObjects
             _wait.Until(d => d.Url.Contains("SubscriptionForm"));
         }
 
-        public void ClickToggleAnalysisButton()
+        public void ClickTogglePricesButton()
         {
-            var toggleButton = _wait.Until(d => d.FindElement(By.Id("toggle-analysis-btn")));
+            var toggleButton = _wait.Until(d => d.FindElement(By.Id("toggle-prices-btn")));
             toggleButton.Click();
         }
 

@@ -51,7 +51,7 @@ namespace MyBddProject.Tests.Steps
         [Then(@"I see ""(.*)"" displayed next to ""(.*)""")]
         public void ThenISeeDisplayedNextToService(string expectedPrice, string serviceName)
         {
-            _pricesPage.ClickToggleAnalysisButton();
+            _pricesPage.ClickTogglePricesButton();
 
             var serviceItem = _driver.FindElement(By.XPath($"//img[contains(@alt,'{serviceName}')]/ancestor::li[contains(@class,'subscription-item')]"));
             var priceElement = serviceItem.FindElement(By.CssSelector(".subscription-price"));
@@ -131,8 +131,8 @@ namespace MyBddProject.Tests.Steps
                 }
 
                 var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-                wait.Until(d => d.FindElements(By.Id("toggle-analysis-btn")).Count > 0);
-                Assert.IsTrue(_driver.FindElements(By.Id("toggle-analysis-btn")).Any());
+                wait.Until(d => d.FindElements(By.Id("toggle-prices-btn")).Count > 0);
+                Assert.IsTrue(_driver.FindElements(By.Id("toggle-prices-btn")).Any());
             }
             catch (Exception ex)
             {
@@ -206,10 +206,9 @@ namespace MyBddProject.Tests.Steps
 
             try
             {
-                var toggleButton = wait.Until(d => d.FindElement(By.Id("toggle-analysis-btn")));
+                var toggleButton = wait.Until(d => d.FindElement(By.Id("toggle-prices-btn")));
 
-                ((IJavaScriptExecutor)_driver)
-                    .ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", toggleButton);
+                ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", toggleButton);
 
                 Thread.Sleep(300);
 
@@ -219,28 +218,26 @@ namespace MyBddProject.Tests.Steps
                 }
                 catch (Exception)
                 {
-                    ((IJavaScriptExecutor)_driver)
-                        .ExecuteScript("arguments[0].click();", toggleButton);
+                    ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", toggleButton);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error toggling analysis: {ex.Message}");
+                Console.WriteLine($"Error toggling prices: {ex.Message}");
 
                 ((IJavaScriptExecutor)_driver).ExecuteScript(@"
-            var btn = document.getElementById('toggle-analysis-btn');
-            if (btn) {
-                var evt = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                btn.dispatchEvent(evt);
-            }
-        ");
+                    var btn = document.getElementById('toggle-prices-btn');
+                    if (btn) {
+                        var evt = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        btn.dispatchEvent(evt);
+                    }
+                ");
             }
         }
-
 
         [Then(@"the summary announces ""(.*)""")]
         public void ThenTheSummaryAnnounces(string expectedSummary)

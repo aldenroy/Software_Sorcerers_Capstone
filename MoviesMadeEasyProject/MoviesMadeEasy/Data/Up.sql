@@ -97,31 +97,3 @@ CREATE TABLE [dbo].[RecentlyViewedTitles] (
     CONSTRAINT [UQ_User_Title] UNIQUE (UserId, TitleId)
 );
 GO
-
-----------------------------------------------------------
--- 6. Create ClickEvent Table
-----------------------------------------------------------
-CREATE TABLE [dbo].[ClickEvent] (
-    [Id]                  INT IDENTITY(1,1) NOT NULL,
-    [UserId]              INT             NOT NULL,
-    [StreamingServiceId]  INT             NOT NULL,
-    [ClickedAt]           DATETIME        NOT NULL CONSTRAINT [DF_ClickEvent_ClickedAt] DEFAULT (GETDATE()),
-    CONSTRAINT [PK_ClickEvent] PRIMARY KEY CLUSTERED ([Id] ASC)
-);
-GO
-
-ALTER TABLE [dbo].[ClickEvent]
-    WITH CHECK ADD CONSTRAINT [FK_ClickEvent_User_UserId]
-    FOREIGN KEY ([UserId]) REFERENCES [dbo].[User]([Id]) ON DELETE CASCADE;
-GO
-
-ALTER TABLE [dbo].[ClickEvent]
-    WITH CHECK ADD CONSTRAINT [FK_ClickEvent_StreamingService_StreamingServiceId]
-    FOREIGN KEY ([StreamingServiceId]) REFERENCES [dbo].[StreamingService]([id]) ON DELETE CASCADE;
-GO
-
-ALTER TABLE [dbo].[ClickEvent]
-    WITH CHECK ADD CONSTRAINT [FK_ClickEvent_UserStreamingServices]
-    FOREIGN KEY ([UserId], [StreamingServiceId])
-    REFERENCES [dbo].[UserStreamingServices]([UserId], [StreamingServiceId]);
-GO

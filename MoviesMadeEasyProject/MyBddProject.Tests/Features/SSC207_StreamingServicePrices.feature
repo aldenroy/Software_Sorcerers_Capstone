@@ -21,5 +21,5 @@ Scenario: Monthly Price inputs and spend summary are announced by screen readers
   Then a screen reader announces "Monthly Price input for Netflix"
   When I type "9.99" into that input
   Then the screen reader confirms "9.99"
-  When I toggle "Streaming Service Analysis"
+  When I toggle "Show Prices"
   Then the summary announces "Total Monthly Cost"

@@ -94,7 +94,7 @@
             card.setAttribute('tabindex', '0');
             card.insertAdjacentHTML(
                 'beforeend',
-                `<input type="number" min="0" max="1000" step="0.01" class="price-input" placeholder="Price" aria-label="Price for service ${serviceName}">`
+                `<input type="number" min="0" step="0.01" class="price-input" placeholder="Price" aria-label="Price for service ${serviceName}">`
             );
             const pi = card.querySelector('.price-input');
             if (initialPrices[id] != null) pi.value = initialPrices[id];
