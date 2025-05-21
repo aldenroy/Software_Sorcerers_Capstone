@@ -134,6 +134,19 @@ namespace MoviesMadeEasy.Controllers
                 JsonConvert.DeserializeObject<Dictionary<int, decimal>>(servicePrices)
                 ?? new Dictionary<int, decimal>();
 
+            var invalid = priceDict
+                .Where(kv => kv.Value < 0m || kv.Value > 1000m)
+                .ToList();
+            if (invalid.Any())
+            {
+                ModelState.AddModelError(
+                    nameof(DashboardModelView.ServicePrices),
+                    "Monthly cost must be between $0.00 and $1,000.00."
+                );
+                var dto = BuildDashboardModelView(userId);
+                return View("SubscriptionForm", dto);
+            }
+
             try
             {
                 _subscriptionService.UpdateUserSubscriptions(userId, priceDict);
