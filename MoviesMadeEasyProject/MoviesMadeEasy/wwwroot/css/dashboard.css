@@ -273,3 +273,80 @@ ul.d-flex.flex-wrap.justify-content-center.gap-3.list-unstyled {
   background: #dc3545 !important;
 }
 
+#analysis-section {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 50px;
+  margin: 24px 0;
+}
+
+#analysis-section table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#analysis-section table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+#analysis-section table thead th:last-child {
+  border-top-right-radius: 8px;
+}
+#analysis-section table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+#analysis-section table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+#analysis-section .chart {
+  position: relative;
+  height: 400px; 
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+#subscription-total {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+#usageTitle {
+    padding: 20px 20px 50px 20px;
+}
+
+/* style the shared legend */
+#chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  margin-bottom: 24px;
+  list-style: none;
+   font-size: 1.1rem;
+}
+#chart-legend .legend-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+#chart-legend .legend-box {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+#chart-legend .legend-item:hover {
+  opacity: 0.8;
+}
+
+.chart canvas {
+  transition: filter 0.2s ease;
+}
+
+

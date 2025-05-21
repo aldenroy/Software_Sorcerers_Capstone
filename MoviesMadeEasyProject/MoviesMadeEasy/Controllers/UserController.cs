@@ -54,12 +54,21 @@ namespace MoviesMadeEasy.Controllers
                     lifetimeClicks,
                     m => m.StreamingServiceId,
                     l => l.StreamingServiceId,
-                    (m, lGroup) => new SubscriptionUsageModelView
-                    {
-                        StreamingServiceId = m.StreamingServiceId,
-                        ServiceName = m.ServiceName,
-                        MonthlyClicks = m.ClickCount,
-                        LifetimeClicks = lGroup.Select(l => l.ClickCount).FirstOrDefault()
+                    (m, lGroup) => {
+                        var price = priceLookup.GetValueOrDefault(m.StreamingServiceId);
+                        var costPerClick = (m.ClickCount > 0 && price.HasValue)
+                                            ? price.Value / m.ClickCount
+                                            : (decimal?)null;
+
+                        return new SubscriptionUsageModelView
+                        {
+                            StreamingServiceId = m.StreamingServiceId,
+                            ServiceName = m.ServiceName,
+                            MonthlyClicks = m.ClickCount,
+                            LifetimeClicks = lGroup.Select(l => l.ClickCount).FirstOrDefault(),
+                            MonthlyCost = price,
+                            CostPerClick = costPerClick
+                        };
                     })
                 .ToList();
 
