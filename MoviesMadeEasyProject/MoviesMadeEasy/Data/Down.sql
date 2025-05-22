@@ -1,6 +1,12 @@
 USE [MoviesMadeEasyDB];
 GO
 
+IF OBJECT_ID('dbo.ClickEvent', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE [dbo].[ClickEvent];
+END
+GO
+
 IF OBJECT_ID('dbo.RecentlyViewedTitles', 'U') IS NOT NULL
 BEGIN
     DROP TABLE [dbo].[RecentlyViewedTitles];
@@ -32,8 +38,3 @@ END
 GO
 
 
-IF OBJECT_ID('dbo.ClickEvent', 'U') IS NOT NULL
-BEGIN
-    DROP TABLE [dbo].[ClickEvent];
-END
-GO

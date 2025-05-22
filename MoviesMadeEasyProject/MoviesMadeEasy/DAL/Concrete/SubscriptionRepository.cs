@@ -58,6 +58,11 @@ namespace MoviesMadeEasy.DAL.Concrete
 
             if (subscriptionsToRemove.Any())
             {
+                var svcIds = subscriptionsToRemove.Select(us => us.StreamingServiceId).ToList();
+                var clicks = _clickEvents
+                   .Where(c => c.UserId == userId && svcIds.Contains(c.StreamingServiceId));
+                _clickEvents.RemoveRange(clicks);
+
                 _uss.RemoveRange(subscriptionsToRemove);
             }
         }
@@ -187,6 +192,7 @@ namespace MoviesMadeEasy.DAL.Concrete
 
             return _context.UserStreamingServices
                 .Where(us => us.UserId == userId)
+                .Include(us => us.StreamingService)
                 .AsEnumerable()
                 .Select(us =>
                 {
@@ -200,5 +206,6 @@ namespace MoviesMadeEasy.DAL.Concrete
                 })
                 .ToList();
         }
+
     }
 }

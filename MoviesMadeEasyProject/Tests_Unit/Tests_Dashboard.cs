@@ -3,9 +3,6 @@ using Moq;
 using MoviesMadeEasy.DAL.Concrete;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
-using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using MoviesMadeEasy.DAL.Abstract;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +23,7 @@ namespace MME_Tests
         private SubscriptionRepository _repository;
         private List<StreamingService> _streamingServices;
         private List<UserStreamingService> _userStreamingServices;
+        private List<ClickEvent> _clickEventsList;
 
         [SetUp]
         public void Setup()
@@ -72,6 +70,17 @@ namespace MME_Tests
             _mockContext.Setup(c => c.StreamingServices).Returns(mockStreamingServicesDbSet.Object);
             _mockContext.Setup(c => c.UserStreamingServices).Returns(mockUserStreamingServicesDbSet.Object);
             _mockContext.Setup(c => c.SaveChanges()).Returns(1);
+
+            _clickEventsList = new List<ClickEvent>();
+            var mockClickEventsDbSet = MockHelper.GetMockDbSet(_clickEventsList.AsQueryable());
+            mockClickEventsDbSet
+                .Setup(x => x.RemoveRange(It.IsAny<IEnumerable<ClickEvent>>()))
+                .Callback<IEnumerable<ClickEvent>>(items =>
+                {
+                    foreach (var item in items)
+                        _clickEventsList.Remove(item);
+                });
+            _mockContext.Setup(c => c.ClickEvents).Returns(mockClickEventsDbSet.Object);
 
             _repository = new SubscriptionRepository(_mockContext.Object);
         }
@@ -177,6 +186,48 @@ namespace MME_Tests
             Assert.DoesNotThrow(() => _repository.UpdateUserSubscriptions(userId, prices));
         }
 
+        [Test]
+        public void LifetimeSubscriptionClicks_ReturnsCorrectClickCountAndServiceName()
+        {
+            int userId = 1;
+            _userStreamingServices.Clear();
+            _userStreamingServices.Add(new UserStreamingService
+            {
+                UserId = userId,
+                StreamingServiceId = 1,
+                StreamingService = new StreamingService { Id = 1, Name = "Netflix" }
+            });
+
+            _clickEventsList.Clear();
+            _clickEventsList.AddRange(new[]
+            {
+        new ClickEvent { UserId = userId, StreamingServiceId = 1 },
+        new ClickEvent { UserId = userId, StreamingServiceId = 1 },
+        new ClickEvent { UserId = userId, StreamingServiceId = 2 }
+    });
+
+            var result = _repository.LifetimeSubscriptionClicks(userId);
+
+            Assert.AreEqual(1, result.Count);
+            var summary = result.First();
+            Assert.AreEqual(1, summary.StreamingServiceId);
+            Assert.AreEqual("Netflix", summary.ServiceName);
+            Assert.AreEqual(2, summary.ClickCount);
+        }
+
+        [Test]
+        public void LifetimeSubscriptionClicks_IgnoresClickEventsForUnsubscribedServices()
+        {
+            int userId = 1;
+            _userStreamingServices.Clear();
+
+            _clickEventsList.Clear();
+            _clickEventsList.Add(new ClickEvent { UserId = userId, StreamingServiceId = 3 });
+
+            var result = _repository.LifetimeSubscriptionClicks(userId);
+
+            Assert.IsEmpty(result);
+        }
     }
 
     // User Controller Tests
