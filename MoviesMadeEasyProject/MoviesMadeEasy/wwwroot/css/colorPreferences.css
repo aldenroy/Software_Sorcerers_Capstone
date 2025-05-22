@@ -688,3 +688,80 @@ html[data-theme="dark"] select {
     background-color: var(--offcanvas-dropdown-hover);
     color: var(--offcanvas-dropdown-hover-text);
 }
+
+/* Chart text colors */
+:root {
+  --chart-title-color: var(--text-color);
+  --chart-label-color: var(--text-color);
+}
+.dark-theme,
+html[data-theme="dark"],
+.high-contrast-theme,
+html[data-theme="high-contrast"] {
+  --chart-title-color: var(--text-color);
+  --chart-label-color: var(--text-color);
+}
+
+/* Base table reset */
+#analysis-section table.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    /* Light Theme (default) */
+    #analysis-section table.table thead th {
+        background-color: var(--header-bg);
+        color: var(--text-color);
+    }
+
+    #analysis-section table.table tbody tr:nth-child(odd) > * {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    #analysis-section table.table tbody tr:nth-child(even) > * {
+        background-color: var(--header-bg);
+        color: var(--text-color);
+    }
+
+/* Dark Theme */
+.dark-theme #analysis-section table.table thead th,
+html[data-theme="dark"] #analysis-section table.table thead th {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme #analysis-section table.table tbody tr:nth-child(odd) > *,
+html[data-theme="dark"] #analysis-section table.table tbody tr:nth-child(odd) > * {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme #analysis-section table.table tbody tr:nth-child(even) > *,
+html[data-theme="dark"] #analysis-section table.table tbody tr:nth-child(even) > * {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* High-Contrast Theme */
+.high-contrast-theme #analysis-section table.table thead th,
+html[data-theme="high-contrast"] #analysis-section table.table thead th {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.high-contrast-theme #analysis-section table.table tbody tr:nth-child(odd) > *,
+html[data-theme="high-contrast"] #analysis-section table.table tbody tr:nth-child(odd) > * {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.high-contrast-theme #analysis-section table.table tbody tr:nth-child(even) > *,
+html[data-theme="high-contrast"] #analysis-section table.table tbody tr:nth-child(even) > * {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
