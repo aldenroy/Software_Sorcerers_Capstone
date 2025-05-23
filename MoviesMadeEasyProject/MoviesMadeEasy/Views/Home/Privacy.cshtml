@@ -1,10 +1,71 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-@{
-    string colorMode = ViewData["ColorMode"]?.ToString()?.ToLower()?? "light";
-}
 
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+
+<main role="main" aria-labelledby="privacy-policy-heading" class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <section class="privacy-card card mb-4" aria-label="Privacy Policy Section">
+                <header class="card-header">
+                    <div id="privacy-policy-heading">Privacy Policy</div>
+                </header>
+                <div class="card-body" role="region" aria-describedby="privacy-intro">
+                    <p id="privacy-intro">
+                        At Movie Magic, your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our application.
+                    </p>
+
+                    <section aria-labelledby="info-we-collect">
+                        <h2 id="info-we-collect" class="h5">1. Information We Collect</h2>
+                        <ul>
+                            <li>Basic user profile details (First Name, Last Name, etc.)</li>
+                            <li>Preferences such as color mode, font size, and font type</li>
+                            <li>Recently searched shows</li>
+                            <li>Streaming service subscriptions</li>
+                        </ul>
+                    </section>
+
+                    <section aria-labelledby="how-we-use">
+                        <h2 id="how-we-use" class="h5">2. How We Use Your Information</h2>
+                        <p>
+                            We use your data to personalize your experience and improve our application features. Your preferences help us deliver a more accessible and enjoyable user interface.
+                        </p>
+                    </section>
+
+                    <section aria-labelledby="info-sharing">
+                        <h2 id="info-sharing" class="h5">3. Sharing of Information</h2>
+                        <p>
+                            We do not share your personal data with third parties. Your information is securely stored and used solely for improving and operating the Movie Magic platform.
+                        </p>
+                    </section>
+
+                    <section aria-labelledby="security">
+                        <h2 id="security" class="h5">4. Security</h2>
+                        <p>
+                            We implement industry-standard practices to protect your data. However, no method of transmission over the Internet is 100% secure.
+                        </p>
+                    </section>
+
+                    <section aria-labelledby="policy-changes">
+                        <h2 id="policy-changes" class="h5">5. Changes to This Policy</h2>
+                        <p>
+                            We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date.
+                        </p>
+                    </section>
+
+                    <section aria-labelledby="contact-us">
+                        <h2 id="contact-us" class="h5">6. Contact Us</h2>
+                        <p>
+                            If you have any questions about this Privacy Policy, please contact our support team.
+                        </p>
+                    </section>
+
+                    <p class="text-end"><small>Last updated: May 19, 2025</small></p>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+
