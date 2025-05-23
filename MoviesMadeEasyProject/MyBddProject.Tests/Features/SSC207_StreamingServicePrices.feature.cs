@@ -200,7 +200,7 @@ await this.FeatureBackgroundAsync();
   await testRunner.ThenAsync("the screen reader confirms \"9.99\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 24
-  await testRunner.WhenAsync("I toggle \"Show Prices\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+  await testRunner.WhenAsync("I toggle \"Streaming Service Analysis\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 25
   await testRunner.ThenAsync("the summary announces \"Total Monthly Cost\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
