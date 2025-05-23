@@ -38,7 +38,7 @@ public class OpenAIService : IOpenAIService
                 title, year, reason.
                 """;
 
-            var response = await GetChatCompletionAsync(prompt);
+            var response = await GetChatCompletionMoreLikeThisAsync(prompt);
 
             // Clean the response by removing the code block delimiters
             var cleanedResponse = response.Replace("```json\n", "").Replace("\n```", "");
@@ -58,7 +58,7 @@ public class OpenAIService : IOpenAIService
     }
 
 
-    public async Task<string> GetChatCompletionAsync(string prompt)
+    public async Task<string> GetChatCompletionMoreLikeThisAsync(string prompt)
     {
         const int maxRetries = 3;
         const int initialDelayMs = 1000; // Start with 1 second delay
@@ -107,24 +107,97 @@ public class OpenAIService : IOpenAIService
         }
     }
 
-   public async Task<string> GetChatResponse(string query)
+    public async Task<string> GetChatCompletionAsync(string prompt)
+    {
+        const int maxRetries = 3;
+        const int initialDelayMs = 1000; // Start with 1 second delay
+        int attempt = 0;
+        prompt += " return any movies in this prompt with ^ on both sides not quotations or any other characters!";
+
+        while (true)
+        {
+            try
+            {
+                var request = new
+                {
+                    model = _config["OpenAI_Model"],
+                    messages = new[] { new { role = "user", content = prompt } },
+                    temperature = 0.7,
+                    max_tokens = 1000
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("chat/completions", request);
+                
+                // Handle rate limiting specifically
+                if ((int)response.StatusCode == 429)
+                {
+                    var retryAfter = response.Headers.RetryAfter?.Delta?.TotalMilliseconds 
+                        ?? initialDelayMs * Math.Pow(2, attempt);
+                    
+                    _logger.LogWarning("Rate limited. Retrying after {DelayMs}ms...", retryAfter);
+                    await Task.Delay((int)retryAfter);
+                    continue;
+                }
+
+                response.EnsureSuccessStatusCode();
+                
+                var result = await response.Content.ReadFromJsonAsync<OpenAICompletionResponse>();
+                var resultContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation("Raw OpenAI response: {ResponseContent}", resultContent);
+
+                return result?.Choices?.FirstOrDefault()?.Message?.Content ?? string.Empty;
+            }
+            catch (HttpRequestException ex) when (attempt < maxRetries)
+            {
+                attempt++;
+                var delay = initialDelayMs * Math.Pow(2, attempt);
+                _logger.LogWarning(ex, "Attempt {Attempt} failed. Retrying in {DelayMs}ms...", attempt, delay);
+                await Task.Delay((int)delay);
+            }
+        }
+    }
+
+    public async Task<string> GetChatResponse(string query)
     {
         try
         {
-
             var response = await GetChatCompletionAsync(query);
-
+            
             // Clean the response by removing the code block delimiters
             var cleanedResponse = response.Replace("```json\n", "").Replace("\n```", "");
 
-            // Parse the cleaned JSON response
-            return cleanedResponse;
+            // Convert the response to HTML with links for quoted movie titles
+            var htmlResponse = ConvertResponseToHtml(cleanedResponse);
+            
+            return htmlResponse;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting similar movies for {Query}", query);
-            throw; // Or return empty list if you prefer graceful degradation
+            return "Sorry, I couldn't process your request. Please try again.";
         }
+    }
+
+    private string ConvertResponseToHtml(string response)
+    {
+        // Split into lines and process each one
+        var lines = response.Split('\n')
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Select(line => 
+            {
+                // Process each line to convert quoted movies to links
+                return System.Text.RegularExpressions.Regex.Replace(
+                    line,
+                    @"\^([^\^]+)\^", // Match text between quotes
+                    match => 
+                    {
+                        var movieTitle = match.Groups[1].Value;
+                        return $"<a href=\"#\" class=\"quoted-link\" data-movie=\"{movieTitle}\">\"{movieTitle}\"</a>";
+                    });
+            });
+
+        // Join lines with <br> tags
+        return string.Join("<br>", lines);
     }
 
     private record OpenAICompletionResponse(
