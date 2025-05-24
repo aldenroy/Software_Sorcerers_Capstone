@@ -1,13 +1,18 @@
 ﻿(function () {
-    var btn = document.getElementById('toggle-prices-btn');
+    var btn = document.getElementById('toggle-analysis-btn');
     var total = document.getElementById('subscription-total');
-    if (!btn || !total) return;
+    var analysis = document.getElementById('analysis-section');
+    if (!btn || !total || !analysis) return;
+
     btn.addEventListener('click', function () {
-        var showing = btn.textContent.trim() === 'Show Prices';
-        document.querySelectorAll('.subscription-price').forEach(function (div) {
-            div.classList.toggle('d-none', !showing);
+        var showing = btn.textContent.trim() === 'Streaming Service Analysis';
+        document.querySelectorAll('.subscription-price').forEach(function (el) {
+            el.classList.toggle('d-none', !showing);
         });
         total.classList.toggle('d-none', !showing);
-        btn.textContent = showing ? 'Hide Prices' : 'Show Prices';
+        analysis.classList.toggle('d-none', !showing);
+        btn.textContent = showing
+            ? 'Hide Analysis'
+            : 'Streaming Service Analysis';
     });
 })();
