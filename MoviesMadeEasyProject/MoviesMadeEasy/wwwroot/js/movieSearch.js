@@ -115,6 +115,21 @@ async function searchMovies() {
       index = filtered;
     }
 
+    // Apply sorting logic based on the selected option
+    if (sortOption === "yearAsc") {
+      index.sort((a, b) => a.releaseYear - b.releaseYear);
+    } else if (sortOption === "yearDesc") {
+      index.sort((a, b) => b.releaseYear - a.releaseYear);
+    } else if (sortOption === "titleAsc") {
+      index.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortOption === "titleDesc") {
+      index.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortOption === "ratingHighLow") {
+      index.sort((a, b) => b.rating - a.rating);
+    } else if (sortOption === "ratingLowHigh") {
+      index.sort((a, b) => a.rating - b.rating);
+    }
+
     const availableGenresSet = new Set();
     resultsContainer.innerHTML = index.map(item => {
       // Add any genres that exist in the movie
@@ -160,6 +175,7 @@ async function searchMovies() {
     enableFilters();
     updateStreamingFilters();
     updateClearFiltersVisibility();
+    setupLetterFilterDropdown();
   } catch (error) {
     loadingSpinner.style.display = "none";
     resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
@@ -362,8 +378,9 @@ function updateClearFiltersVisibility() {
   // 4) any genres or streaming checked?
   const genresChecked = !!document.querySelector("#genre-filters input:checked");
   const streamingChecked = !!document.querySelector("#streaming-filters input:checked");
+  const letterFilterApplied = document.getElementById("letter-filter-dropdown").value !== "";
 
-  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked) {
+  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked || letterFilterApplied) {
     clearBtn.style.display = "inline-block";
   } else {
     clearBtn.style.display = "none";
@@ -697,3 +714,139 @@ if (maxRatingBox) {
     }
   });
 }
+
+// Dynamically generate letter filter dropdown options based on available movies
+function setupLetterFilterDropdown() {
+    const letterFilterDropdown = document.getElementById("letter-filter-dropdown");
+    if (!letterFilterDropdown) return;
+
+    // Clear existing options
+    letterFilterDropdown.innerHTML = '<option value="" selected>All</option>';
+
+    // Build a Set of available starting letters from the movie titles
+    const availableLetters = new Set();
+    const movieCards = document.querySelectorAll(".movie-card");
+    movieCards.forEach(card => {
+        const title = card.querySelector("h5").textContent.trim();
+        if (title) {
+            availableLetters.add(title[0].toUpperCase());
+        }
+    });
+
+    // Generate options only for available letters
+    Array.from(availableLetters)
+        .sort() // Sort letters alphabetically
+        .forEach(letter => {
+            const option = document.createElement("option");
+            option.value = letter;
+            option.textContent = letter;
+            letterFilterDropdown.appendChild(option);
+        });
+
+    // Add event listener to apply the filter when the dropdown value changes
+    letterFilterDropdown.addEventListener("change", () => {
+        const selectedLetter = letterFilterDropdown.value;
+        if (selectedLetter) {
+            applyLetterFilter(selectedLetter);
+        } else {
+            clearLetterFilter();
+        }
+        updateClearFiltersVisibility();
+    });
+}
+
+// Apply the letter filter
+function applyLetterFilter(letter) {
+    const resultsContainer = document.getElementById("results");
+    const movieCards = resultsContainer.querySelectorAll(".movie-card");
+    let hasMatches = false;
+
+    movieCards.forEach(card => {
+        const title = card.querySelector("h5").textContent.trim();
+        if (title.startsWith(letter)) {
+            card.style.display = "block";
+            hasMatches = true;
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    // Show a message if no movies match the selected letter
+    if (!hasMatches) {
+        resultsContainer.innerHTML = "<div class='error-message' role='alert'>No movies to display</div>";
+    }
+}
+
+// Clear the letter filter
+function clearLetterFilter() {
+    const resultsContainer = document.getElementById("results");
+    const movieCards = resultsContainer.querySelectorAll(".movie-card");
+
+    movieCards.forEach(card => {
+        card.style.display = "block";
+    });
+
+    // Remove any "No movies to display" message
+    const errorMessage = resultsContainer.querySelector(".error-message");
+    if (errorMessage) {
+        errorMessage.remove();
+    }
+
+    // Reset the dropdown to "All"
+    const letterFilterDropdown = document.getElementById("letter-filter-dropdown");
+    if (letterFilterDropdown) {
+        letterFilterDropdown.value = "";
+    }
+}
+
+// Update the visibility of the "Clear Filters" button
+function updateClearFiltersVisibility() {
+  const clearBtn = document.getElementById("clearFilters");
+
+  // Check if any filters are applied
+  const sortDefault = document.getElementById("sortBy").value === "default";
+  const minYearElem = document.getElementById("minYear");
+  const maxYearElem = document.getElementById("maxYear");
+  const yearDefault =
+      minYearElem && maxYearElem
+          ? minYearElem.value === minYearElem.min && maxYearElem.value === maxYearElem.max
+          : true;
+  const minRatingElem = document.getElementById("minRating");
+  const maxRatingElem = document.getElementById("maxRating");
+  const ratingDefault =
+      minRatingElem && maxRatingElem
+          ? minRatingElem.value === minRatingElem.min && maxRatingElem.value === maxRatingElem.max
+          : true;
+  const genresChecked = !!document.querySelector("#genre-filters input:checked");
+  const streamingChecked = !!document.querySelector("#streaming-filters input:checked");
+  const letterFilterApplied = document.getElementById("letter-filter-dropdown").value !== "";
+
+  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked || letterFilterApplied) {
+      clearBtn.style.display = "inline-block";
+  } else {
+      clearBtn.style.display = "none";
+  }
+}
+
+// Initialize the letter filter dropdown on page load
+document.addEventListener("DOMContentLoaded", () => {
+    setupLetterFilterDropdown();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const sortOptions = document.querySelectorAll(".dropdown-item.sort-option");
+    const sortByInput = document.getElementById("sortBy");
+
+    sortOptions.forEach(option => {
+        option.addEventListener("click", (event) => {
+            event.preventDefault();
+            const sortValue = option.getAttribute("data-sort");
+
+            // Update the hidden input value
+            sortByInput.value = sortValue;
+
+            // Trigger the search with the new sorting option
+            searchMovies();
+        });
+    });
+});
