@@ -2,38 +2,40 @@
     ViewData["Title"] = "More Like This";
 }
 
-<div class="recommendations-page">
+<div class="d-flex justify-content-center align-items-center mb-3">
+    <div class="recommendations-page">
 
-    <div id="loadingSpinner" class="spinner-container" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+        <div id="loadingSpinner" class="spinner-container" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div id="recommendationsContainer" class="recommendations-container"></div>
+
+        <div class="back-to-search">
+            <a href="/" class="btn btn-primary">Back to Search</a>
         </div>
     </div>
 
-    <div id="recommendationsContainer" class="recommendations-container"></div>
 
-    <div class="back-to-search">
-        <a href="/" class="btn btn-primary">Back to Search</a>
-    </div>
-</div>
-
-
-<section id="similar-movie" aria-live="polite" role="status"></section>
-<!-- Modal -->
-<div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Movie Title</h3>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body d-flex flex-column flex-md-row align-items-start gap-3">
-                <img id="modalPoster" src="" alt="Movie Poster" class="img-fluid">
-                <div class="modal-text-content">
-                    <p id="modalGenres"></p>
-                    <p id="modalRating"></p>
-                    <p id="modalOverview"></p>
-                    <p id="modalStreaming"></p>
+    <section id="similar-movie" aria-live="polite" role="status"></section>
+    <!-- Modal -->
+    <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">Movie Title</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex flex-column flex-md-row align-items-start gap-3">
+                    <img id="modalPoster" src="" alt="Movie Poster" class="img-fluid">
+                    <div class="modal-text-content">
+                        <p id="modalGenres"></p>
+                        <p id="modalRating"></p>
+                        <p id="modalOverview"></p>
+                        <p id="modalStreaming"></p>
+                    </div>
                 </div>
             </div>
         </div>

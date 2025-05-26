@@ -34,15 +34,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     const response = await fetch(`/Home/GetChatResponse?query=${encodeURIComponent(message)}`);
                     if (!response.ok) throw new Error("Network response was not ok");
                     const data = await response.text();
+                    const trimmedData = data.replace(/,\s*/g, "\n");
 
                     const botMessage = document.createElement("div");
                     botMessage.classList.add("chat-bubble", "bot-message", "border");
+                    botMessage.innerHTML = trimmedData;
 
-                    const messageContent = document.createElement("span");
-                    messageContent.classList.add("chat-bubble", "bot-message", "border");
-                    messageContent.innerHTML = data;
-
-                    messageContent.querySelectorAll('.quoted-link').forEach(link => {
+                    botMessage.querySelectorAll('.quoted-link').forEach(link => {
                         link.addEventListener('click', async (e) => {
                             e.preventDefault();
                             const movieTitle = link.dataset.movie;
@@ -61,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         });
                     });
 
-                    botMessage.appendChild(messageContent);
                     messagesDiv.appendChild(botMessage);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 } catch (error) {

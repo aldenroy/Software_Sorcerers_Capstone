@@ -321,69 +321,7 @@ transform: scale(1.1);
 cursor: pointer;
 }
 
-.chatbox-container {
-position: fixed;
-bottom: 0;
-right: 10px;
-width: 275px;
-z-index: 1050;
-font-family: sans-serif;
-}
 
-/* Toggle bar (always visible) */
-.chatbox-toggle {
-padding: 10px;
-border-radius: 10px 10px 0 0;
-cursor: pointer;
-}
-
-/* Chatbox body (initially hidden) */
-.chatbox-body {
-display: none;
-flex-direction: column;
-height: 400px;
-border: 1px solid #ddd;
-border-top: none;
-border-radius: 0 0 10px 10px;
-animation: slideUp 0.3s ease-out forwards;
-}
-
-/* When open */
-.chatbox-container.open .chatbox-body {
-display: flex;
-}
-
-/* Chevron toggle direction */
-#chatbox-chevron.bi-chevron-up::before {
-content: "\f286";
-}
-
-.chatbox-container.open #chatbox-chevron::before {
-content: "\f282"; 
-}
-
-@keyframes slideUp {
-from {
-    transform: translateY(10%);
-    opacity: 0;
-}
-to {
-    transform: translateY(0);
-    opacity: 1;
-}
-}
-
-.quoted-link {  
-color: #0d6efd;
-text-decoration: underline;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-
-.quoted-link:hover {  
-color: #0a58ca; 
-text-decoration: none;
-}
 
 
 
@@ -455,25 +393,6 @@ text-decoration: none;
   max-width: 600px;
 }
 
-#chatbox {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 400px;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-
-
-
-#chatbox.open {
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-}
 
 
 
