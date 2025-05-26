@@ -93,7 +93,7 @@ namespace MyBddProject.Tests.Features
     await testRunner.AndAsync("a list of items with ratings out of 100 is displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 6
-    await testRunner.AndAsync("the rating-range inputs and \"Apply\" button are visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the rating-range inputs is visible", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
         }
         
@@ -124,9 +124,6 @@ namespace MyBddProject.Tests.Features
     await testRunner.AndAsync("the maximum rating is set to 85", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 11
-    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 12
     await testRunner.ThenAsync("I should see only items with ratings ≥ 30 and ≤ 85", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -140,7 +137,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Show validation error for an invalid rating range", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 14
+#line 13
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -153,16 +150,13 @@ namespace MyBddProject.Tests.Features
 #line 3
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 15
+#line 14
     await testRunner.GivenAsync("the minimum rating is set to 90", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 16
+#line 15
     await testRunner.AndAsync("the maximum rating is set to 50", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 17
-    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 18
+#line 16
     await testRunner.ThenAsync("I should see an inline validation error \"The rating range is invalid: Min Rating " +
                         "must be ≤ Max Rating.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
@@ -177,7 +171,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Show message when no items match the range", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 20
+#line 18
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -190,19 +184,16 @@ namespace MyBddProject.Tests.Features
 #line 3
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 21
+#line 19
     await testRunner.GivenAsync("the minimum rating is set to 95", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 22
+#line 20
     await testRunner.AndAsync("the maximum rating is set to 100", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 23
+#line 21
     await testRunner.AndAsync("no items have ratings between 95 and 100", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 24
-    await testRunner.WhenAsync("I click the \"Apply Filter\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 25
+#line 22
     await testRunner.ThenAsync("I should see \"No movies found for that rating range.\" in the results container", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
