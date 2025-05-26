@@ -25,7 +25,6 @@ Feature: Off-Canvas Movie Filters
     When the user clicks the filter toggle button
     And the user sets the "Min Year" slider to 1990
     And the user sets the "Max Year" slider to 2000
-    And the user clicks the "Apply" button
     Then only movies released between 1990 and 2000 are displayed in the content list
 
   Scenario: Clear Filters functionality is available and functional
