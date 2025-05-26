@@ -239,13 +239,6 @@ namespace MyBddProject.Tests.Steps
             var slider = _driver.FindElement(By.CssSelector(MaxYearCss));
             ((IJavaScriptExecutor)_driver).ExecuteScript($"arguments[0].value = {year}; arguments[0].dispatchEvent(new Event('input'));", slider);
         }
-
-        [When("the user clicks the \"Apply Filters\" button")]
-        public void WhenUserClicksApply()
-        {
-            _driver.FindElement(By.CssSelector(ApplyFiltersCss)).Click();
-            _wait.Until(d => d.FindElements(By.CssSelector(MovieCardCss)).Any());
-        }
         
         [Then("only movies released between (\\d+) and (\\d+) are displayed in the content list")]
         public void ThenMoviesWithinYearRange(int min, int max)

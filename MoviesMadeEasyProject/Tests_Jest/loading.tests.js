@@ -14,18 +14,23 @@ describe("searchMovies function", () => {
 
     //set the index html code
     beforeEach(() => {
-        document.body.innerHTML = `
-            <input type="text" id="searchInput" />
-            <div id="results"></div>
-            <div id="loadingSpinner" style="display: none;"></div>
-            <select id="sortBy">
-                <option value="default">Sort by</option>
-                <option value="yearAsc">Year Ascending</option>
-                <option value="yearDesc">Year Descending</option>
-            </select>
-            <input type="number" id="minYear" />
-            <input type="number" id="maxYear" />
-        `;
+    document.body.innerHTML = `
+        <input type="text" id="searchInput" />
+        <div id="results"></div>
+        <div id="loadingSpinner" style="display: none;"></div>
+        <select id="sortBy">
+            <option value="default">Sort by</option>
+            <option value="yearAsc">Year Ascending</option>
+            <option value="yearDesc">Year Descending</option>
+        </select>
+        <input type="number" id="minYear" />
+        <input type="number" id="maxYear" />
+        
+        <div id="genre-filters">
+            <label><input type="checkbox" value="Action" checked />Action</label>
+            <label><input type="checkbox" value="Drama" />Drama</label>
+        </div>
+    `;
 
         searchInput = document.getElementById("searchInput");
         resultsContainer = document.getElementById("results");
