@@ -57,39 +57,47 @@
         </div>
         <div class="offcanvas-body d-flex flex-column">
             <div style="flex-grow: 1; overflow-y: auto; padding-bottom: 1rem;">
-                <div class="mb-3">
-                    <h5>Sorting Options</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="sortGenreDropdown"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Sort by
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="sortGenreDropdown">
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="default">Sort by: Default</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="yearAsc">Year Ascending</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="yearDesc">Year Descending</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="titleAsc">Title (A-Z)</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="titleDesc">Title (Z-A)</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="ratingHighLow">Rating: High to
-                                    Low</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item sort-option" href="#" data-sort="ratingLowHigh">Rating: Low to
-                                    High</a>
-                            </li>
-                        </ul>
+                    <div class="mb-3">
+                        <h5>Sorting Options</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="sortGenreDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Sort by
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortGenreDropdown">
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="default">Sort by: Default</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="yearAsc">Year Ascending</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="yearDesc">Year Descending</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="titleAsc">Title (A-Z)</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="titleDesc">Title (Z-A)</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="ratingHighLow">Rating: High to
+                                        Low</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item sort-option" href="#" data-sort="ratingLowHigh">Rating: Low to
+                                        High</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
+                <div class="mb-3">
+                    <h5>Filter by Title</h5>
+                    <select id="letter-filter-dropdown" class="form-select" aria-label="Filter by Letter">
+                        <option value="" selected>All</option>
+                        <!-- Options for A-Z will be dynamically generated -->
+                    </select>
                 </div>
 
                 <div class="mb-3">
@@ -147,13 +155,13 @@
                 </div>
             </div>
         
-            <div> 
-                <button id="clearFilters" class="btn btn-warning w-100 mb-2" aria-label="Clear Filters">Clear
-                    Filters</button>
-                <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas"
-                    onclick="searchMovies()">Apply Filters</button>
-            </div>
+        <div>
+            <button id="clearFilters" class="btn btn-warning w-100 mb-2" aria-label="Clear Filters">Clear
+                Filters</button>
+            <!--<button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas"
+                onclick="searchMovies()">Apply Filters</button>-->
         </div>
+    </div>
     </div>
     <!-- Movie Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
