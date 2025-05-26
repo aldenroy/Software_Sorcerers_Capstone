@@ -18,27 +18,27 @@
                     <div class="form-group mb-3">
                         <label for="ColorMode" id="colorModeLabel" class="control-label">Color Theme</label>
                         <select asp-for="Input.ColorMode" class="form-control" id="ColorMode" aria-describedby="colorModeLabel">
-                            <option value="Light" selected="@(Model.Input.ColorMode == "Light")">Light</option>
-                            <option value="Dark" selected="@(Model.Input.ColorMode == "Dark")">Dark</option>
-                            <option value="High Contrast" selected="@(Model.Input.ColorMode == "High Contrast")">High Contrast</option>
+                            <option class="dropdown-item" value="Light" selected="@(Model.Input.ColorMode == "Light")">Light</option>
+                            <option class="dropdown-item" value="Dark" selected="@(Model.Input.ColorMode == "Dark")">Dark</option>
+                            <option class="dropdown-item" value="High Contrast" selected="@(Model.Input.ColorMode == "High Contrast")">High Contrast</option>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="FontSize" id="fontSizeLabel" class="control-label">Text Size</label>
                         <select asp-for="Input.FontSize" class="form-control" id="FontSize" aria-describedby="fontSizeLabel">
-                            <option value="Small" selected="@(Model.Input.FontSize == "Small")">Small</option>
-                            <option value="Medium" selected="@(Model.Input.FontSize == "Medium")">Medium</option>
-                            <option value="Large" selected="@(Model.Input.FontSize == "Large")">Large</option>
-                            <option value="Extra Large" selected="@(Model.Input.FontSize == "Extra Large")">Extra Large</option>
+                            <option class="dropdown-item" value="Small" selected="@(Model.Input.FontSize == "Small")">Small</option>
+                            <option class="dropdown-item" value="Medium" selected="@(Model.Input.FontSize == "Medium")">Medium</option>
+                            <option class="dropdown-item" value="Large" selected="@(Model.Input.FontSize == "Large")">Large</option>
+                            <option class="dropdown-item" value="Extra Large" selected="@(Model.Input.FontSize == "Extra Large")">Extra Large</option>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="FontType" id="fontTypeLabel" class="control-label">Font Type</label>
                         <select asp-for="Input.FontType" class="form-control" id="FontType" aria-describedby="fontTypeLabel">
-                            <option value="Standard" selected="@(Model.Input.FontType == "Standard")">Standard</option>
-                            <option value="Open Dyslexic" selected="@(Model.Input.FontType == "Open Dyslexic")">Open Dyslexic</option>
+                            <option class="dropdown-item" value="Standard" selected="@(Model.Input.FontType == "Standard")">Standard</option>
+                            <option class="dropdown-item" value="Open Dyslexic" selected="@(Model.Input.FontType == "Open Dyslexic")">Open Dyslexic</option>
                         </select>
                     </div>
 

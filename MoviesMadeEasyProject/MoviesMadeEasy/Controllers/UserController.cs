@@ -46,6 +46,32 @@ namespace MoviesMadeEasy.Controllers
             var priceLookup = rawSubs
                 .ToDictionary(us => us.StreamingServiceId, us => us.MonthlyCost);
             var total = _subscriptionService.GetUserSubscriptionTotalMonthlyCost(userId);
+            var monthClicks = _subscriptionService.MonthlySubscriptionClicks(userId);
+            var lifetimeClicks = _subscriptionService.LifetimeSubscriptionClicks(userId);
+
+            var usageSummaries = monthClicks
+                .GroupJoin(
+                    lifetimeClicks,
+                    m => m.StreamingServiceId,
+                    l => l.StreamingServiceId,
+                    (m, lGroup) => {
+                        var price = priceLookup.GetValueOrDefault(m.StreamingServiceId);
+                        var costPerClick = (m.ClickCount > 0 && price.HasValue)
+                                            ? price.Value / m.ClickCount
+                                            : (decimal?)null;
+
+                        return new SubscriptionUsageModelView
+                        {
+                            StreamingServiceId = m.StreamingServiceId,
+                            ServiceName = m.ServiceName,
+                            MonthlyClicks = m.ClickCount,
+                            LifetimeClicks = lGroup.Select(l => l.ClickCount).FirstOrDefault(),
+                            MonthlyCost = price,
+                            CostPerClick = costPerClick
+                        };
+                    })
+                .ToList();
+
             return new DashboardModelView
             {
                 UserId = userId,
@@ -58,7 +84,8 @@ namespace MoviesMadeEasy.Controllers
                                         : "",
                RecentlyViewedTitles = recentTitles,
                ServicePrices = priceLookup,
-               TotalMonthlyCost = total
+               TotalMonthlyCost = total,
+               UsageSummaries = usageSummaries
             };
         }
 
@@ -107,6 +134,19 @@ namespace MoviesMadeEasy.Controllers
                 JsonConvert.DeserializeObject<Dictionary<int, decimal>>(servicePrices)
                 ?? new Dictionary<int, decimal>();
 
+            var invalid = priceDict
+                .Where(kv => kv.Value < 0m || kv.Value > 1000m)
+                .ToList();
+            if (invalid.Any())
+            {
+                ModelState.AddModelError(
+                    nameof(DashboardModelView.ServicePrices),
+                    "Monthly cost must be between $0.00 and $1,000.00."
+                );
+                var dto = BuildDashboardModelView(userId);
+                return View("SubscriptionForm", dto);
+            }
+
             try
             {
                 _subscriptionService.UpdateUserSubscriptions(userId, priceDict);
@@ -135,6 +175,25 @@ namespace MoviesMadeEasy.Controllers
             _titleRepository.Delete(titleId, user.Id);
 
             return Ok();                                           
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> TrackSubscriptionClick([FromBody] TrackClickDto dto)
+        {
+            var identityUser = await _userManager.GetUserAsync(User);
+            if (identityUser == null) return Unauthorized();
+
+            var user = _userRepository.GetUser(identityUser.Id);
+            await _subscriptionService.IncrementClickCountAsync(user.Id, dto.StreamingServiceId);
+
+            return Ok();
+        }
+
+        public class TrackClickDto
+        {
+            public int StreamingServiceId { get; set; }
         }
 
         public IActionResult Cancel()

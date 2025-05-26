@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using Microsoft.Extensions.DependencyInjection;
+using MoviesMadeEasy.DAL.Abstract;
+using MoviesMadeEasy.DAL.Concrete;
 using MoviesMadeEasy.Data;
 using MoviesMadeEasy.Models;
-using MoviesMadeEasy.DAL.Concrete;
-using System.ComponentModel.DataAnnotations;
+using NUnit.Framework;
 
 namespace MME_Tests
 {
     [TestFixture]
-    public class TogglePriceSubscriptionTests
+    public class CostBreakdownTests
     {
         private UserDbContext _db;
         private SubscriptionRepository _repo;
-        private int _userId = 42;
+        private const int UserWithMultiple = 42;
+        private const int UserWithOne = 99;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
             var options = new DbContextOptionsBuilder<UserDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -34,7 +38,7 @@ namespace MME_Tests
 
             _db.Users.Add(new User
             {
-                Id = _userId,
+                Id = UserWithMultiple,
                 AspNetUserId = Guid.NewGuid().ToString(),
                 FirstName = "Test",
                 LastName = "User",
@@ -44,21 +48,48 @@ namespace MME_Tests
             });
 
             _db.UserStreamingServices.AddRange(
-                new UserStreamingService { UserId = _userId, StreamingServiceId = 1, MonthlyCost = 10m },
-                new UserStreamingService { UserId = _userId, StreamingServiceId = 2, MonthlyCost = 15m },
-                new UserStreamingService { UserId = _userId, StreamingServiceId = 3, MonthlyCost = 20m }
+                new UserStreamingService { UserId = UserWithMultiple, StreamingServiceId = 1, MonthlyCost = 10m },
+                new UserStreamingService { UserId = UserWithMultiple, StreamingServiceId = 2, MonthlyCost = 15m },
+                new UserStreamingService { UserId = UserWithMultiple, StreamingServiceId = 3, MonthlyCost = 20m }
+            );
+
+            _db.Users.Add(new User
+            {
+                Id = UserWithOne,
+                AspNetUserId = Guid.NewGuid().ToString(),
+                FirstName = "Click",
+                LastName = "Tester",
+                ColorMode = "Light",
+                FontSize = "Medium",
+                FontType = "Sans-serif"
+            });
+            _db.UserStreamingServices.Add(
+                new UserStreamingService { UserId = UserWithOne, StreamingServiceId = 1, MonthlyCost = 5m }
             );
 
             _db.SaveChanges();
-
             _repo = new SubscriptionRepository(_db);
         }
 
-        [TearDown]
-        public void TearDown()
+        private void SeedClickEvents(int userId, int serviceId, params (int DaysAgo, int Count)[] offsets)
         {
-            _db.Dispose();
+            var now = DateTime.Now;
+            var events = offsets
+                .SelectMany(o => Enumerable.Range(1, o.Count)
+                    .Select(_ => new ClickEvent
+                    {
+                        UserId = userId,
+                        StreamingServiceId = serviceId,
+                        ClickedAt = now.AddDays(-o.DaysAgo)
+                    }))
+                .ToList();
+
+            _db.ClickEvents.AddRange(events);
+            _db.SaveChanges();
         }
+
+        [TearDown]
+        public void TearDown() => _db.Dispose();
 
         private static IList<ValidationResult> ValidateProperty(object instance, string propName)
         {
@@ -71,6 +102,8 @@ namespace MME_Tests
             return results;
         }
 
+        // --- Tests for UpdateUserSubscriptions, UpdateSubscriptionMonthlyCost, GetUserSubscriptionTotalMonthlyCost ---
+
         [Test]
         public void UpdateUserSubscriptions_AddsNew_RemovesOld_And_UpdatesPrices()
         {
@@ -80,10 +113,10 @@ namespace MME_Tests
                 [4] = 25.00m
             };
 
-            _repo.UpdateUserSubscriptions(_userId, newPrices);
+            _repo.UpdateUserSubscriptions(UserWithMultiple, newPrices);
 
             var subs = _db.UserStreamingServices
-                .Where(us => us.UserId == _userId)
+                .Where(us => us.UserId == UserWithMultiple)
                 .OrderBy(us => us.StreamingServiceId)
                 .ToList();
 
@@ -98,10 +131,10 @@ namespace MME_Tests
         [Test]
         public void UpdateSubscriptionMonthlyCost_ExistingSubscription_UpdatesAndSaves()
         {
-            _repo.UpdateSubscriptionMonthlyCost(_userId, 3, 11.11m);
+            _repo.UpdateSubscriptionMonthlyCost(UserWithMultiple, 3, 11.11m);
 
             var sub = _db.UserStreamingServices
-                .Single(us => us.UserId == _userId && us.StreamingServiceId == 3);
+                .Single(us => us.UserId == UserWithMultiple && us.StreamingServiceId == 3);
 
             Assert.AreEqual(11.11m, sub.MonthlyCost);
         }
@@ -110,10 +143,10 @@ namespace MME_Tests
         public void UpdateSubscriptionMonthlyCost_Nonexistent_DoesNothing()
         {
             Assert.DoesNotThrow(() =>
-                _repo.UpdateSubscriptionMonthlyCost(_userId, 99, 5.55m)
+                _repo.UpdateSubscriptionMonthlyCost(UserWithMultiple, 99, 5.55m)
             );
 
-            var count = _db.UserStreamingServices.Count(us => us.UserId == _userId);
+            var count = _db.UserStreamingServices.Count(us => us.UserId == UserWithMultiple);
             Assert.AreEqual(3, count);
         }
 
@@ -121,7 +154,7 @@ namespace MME_Tests
         public void GetUserSubscriptionTotalMonthlyCost_ReturnsSumOfMonthlyCosts()
         {
             // 10 + 15 + 20 = 45
-            var total = _repo.GetUserSubscriptionTotalMonthlyCost(_userId);
+            var total = _repo.GetUserSubscriptionTotalMonthlyCost(UserWithMultiple);
             Assert.AreEqual(45m, total);
         }
 
@@ -130,24 +163,25 @@ namespace MME_Tests
         {
             _db.UserStreamingServices.Add(new UserStreamingService
             {
-                UserId = _userId,
+                UserId = UserWithMultiple,
                 StreamingServiceId = 4,
                 MonthlyCost = null
             });
             _db.SaveChanges();
 
-            // original sum is 45, null should be treated as 0
-            var total = _repo.GetUserSubscriptionTotalMonthlyCost(_userId);
+            var total = _repo.GetUserSubscriptionTotalMonthlyCost(UserWithMultiple);
             Assert.AreEqual(45m, total);
         }
 
         [Test]
         public void GetUserSubscriptionTotalMonthlyCost_NoSubscriptions_ReturnsZero()
         {
-            const int otherUser = 99;
+            const int otherUser = 1234;
             var total = _repo.GetUserSubscriptionTotalMonthlyCost(otherUser);
             Assert.AreEqual(0m, total);
         }
+
+        // --- Validation tests for MonthlyCost ---
 
         [TestCase(-0.01)]
         [TestCase(-50)]
@@ -178,5 +212,89 @@ namespace MME_Tests
             var errors = ValidateProperty(svc, nameof(svc.MonthlyCost));
             Assert.IsEmpty(errors, "Null MonthlyCost should be valid.");
         }
+
+        // --- Click-count tests originally in SubscriptionRepositoryClickCountTests ---
+
+        [Test]
+        public void SeededSubscriptionsStartWithZeroClicks()
+        {
+            var subs = _repo.GetUserSubscriptionRecords(UserWithOne);
+            Assert.That(subs, Is.Not.Empty);
+            Assert.That(subs.Select(x => x.ClickCount), Is.All.EqualTo(0));
+        }
+
+        [Test]
+        public async Task IncrementClickCountAsync_IncrementsProperly()
+        {
+            var svcId = _repo.GetUserSubscriptionRecords(UserWithOne).First().StreamingServiceId;
+            await _repo.IncrementClickCountAsync(UserWithOne, svcId);
+
+            var click = _repo.GetUserSubscriptionRecords(UserWithOne)
+                            .First(x => x.StreamingServiceId == svcId)
+                            .ClickCount;
+            Assert.AreEqual(1, click);
+        }
+
+        [Test]
+        public async Task IncrementClickCountAsync_Nonexistent_DoesNotThrowOrAffect()
+        {
+            var before = _repo.GetUserSubscriptionRecords(UserWithOne).Sum(x => x.ClickCount);
+            await _repo.IncrementClickCountAsync(UserWithOne, 999);
+            var after = _repo.GetUserSubscriptionRecords(UserWithOne).Sum(x => x.ClickCount);
+            Assert.AreEqual(before, after);
+        }
+
+        [Test]
+        public void MonthlySubscriptionClicks_NoClicks_ReturnsZeroForAllSubscriptions()
+        {
+            var results = _repo.MonthlySubscriptionClicks(UserWithMultiple);
+            Assert.AreEqual(3, results.Count);
+            foreach (var summary in results)
+            {
+                Assert.AreEqual(0, summary.ClickCount);
+                var expectedName = _db.StreamingServices.Find(summary.StreamingServiceId).Name;
+                Assert.AreEqual(expectedName, summary.ServiceName);
+            }
+        }
+
+        [Test]
+        public void MonthlySubscriptionClicks_OnlyCountsClicksInLast30Days_WithHelper()
+        {
+            SeedClickEvents(UserWithMultiple, 1, (10, 2));
+            SeedClickEvents(UserWithMultiple, 2, (31, 3));
+            SeedClickEvents(UserWithMultiple, 3, (5, 1), (40, 4));
+            var monthly = _repo.MonthlySubscriptionClicks(UserWithMultiple)
+                               .OrderBy(x => x.StreamingServiceId)
+                               .ToList();
+            Assert.AreEqual(2, monthly.Single(x => x.StreamingServiceId == 1).ClickCount);
+            Assert.AreEqual(0, monthly.Single(x => x.StreamingServiceId == 2).ClickCount);
+            Assert.AreEqual(1, monthly.Single(x => x.StreamingServiceId == 3).ClickCount);
+        }
+
+        [Test]
+        public void LifetimeSubscriptionClicks_SumsAllClicksRegardlessOfDate()
+        {
+            SeedClickEvents(UserWithMultiple, 1, (100, 2));
+            SeedClickEvents(UserWithMultiple, 2, (200, 3));
+            SeedClickEvents(UserWithMultiple, 3, (300, 5));
+            var lifetime = _repo.LifetimeSubscriptionClicks(UserWithMultiple)
+                                .OrderBy(x => x.StreamingServiceId)
+                                .ToList();
+            Assert.AreEqual(2, lifetime.Single(x => x.StreamingServiceId == 1).ClickCount);
+            Assert.AreEqual(3, lifetime.Single(x => x.StreamingServiceId == 2).ClickCount);
+            Assert.AreEqual(5, lifetime.Single(x => x.StreamingServiceId == 3).ClickCount);
+        }
+
+        [Test]
+        public void ClickSummary_IncludesAllSubscribedServices()
+        {
+            var monthly = _repo.MonthlySubscriptionClicks(UserWithOne);
+            var lifetime = _repo.LifetimeSubscriptionClicks(UserWithOne);
+            Assert.That(monthly.Select(x => x.StreamingServiceId), Is.EquivalentTo(new[] { 1 }));
+            Assert.That(monthly[0].ClickCount, Is.Zero);
+            Assert.That(lifetime.Select(x => x.StreamingServiceId), Is.EquivalentTo(new[] { 1 }));
+            Assert.That(lifetime[0].ClickCount, Is.Zero);
+        }
+
     }
 }

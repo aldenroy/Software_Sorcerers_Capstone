@@ -194,9 +194,6 @@ namespace MyBddProject.Tests.Features
     await testRunner.AndAsync("the user sets the \"Max Year\" slider to 2000", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 28
-    await testRunner.AndAsync("the user clicks the \"Apply\" button", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 29
     await testRunner.ThenAsync("only movies released between 1990 and 2000 are displayed in the content list", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -210,7 +207,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Clear Filters functionality is available and functional", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 31
+#line 30
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -220,16 +217,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 32
+#line 31
     await testRunner.GivenAsync("the user is on the content browsing page using a desktop browser", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 33
+#line 32
     await testRunner.AndAsync("the user has one or more filters applied", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 34
+#line 33
     await testRunner.WhenAsync("the user clicks the \"Clear Filters\" button in off-canvas panel", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 35
+#line 34
     await testRunner.ThenAsync("all applied filters are removed and the content list returns to the default view", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -243,7 +240,7 @@ namespace MyBddProject.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Consistent filter layout across supported browsers", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 37
+#line 36
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -253,16 +250,16 @@ namespace MyBddProject.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 38
+#line 37
     await testRunner.GivenAsync("the user accesses the content browsing page on a supported browser", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 39
+#line 38
     await testRunner.WhenAsync("the page loads", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 40
+#line 39
     await testRunner.ThenAsync("the filter toggle button is visible in the header", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 41
+#line 40
     await testRunner.AndAsync("the filter panel is hidden off-canvas", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

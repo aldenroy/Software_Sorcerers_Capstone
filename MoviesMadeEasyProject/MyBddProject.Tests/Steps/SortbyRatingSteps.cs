@@ -43,26 +43,35 @@ namespace YourProject.Tests.Steps
                 .ToList();
         }
 
-        [Given(@"the rating-range inputs and ""([^""]*)"" button are visible")]
-        public void GivenTheRatingRangeInputsAndButtonAreVisible(string buttonText)
+        [Given(@"the rating-range inputs is visible")]
+        public void GivenTheRatingRangeInputsIsVisible()
         {
             // Open the filters offcanvas
             var toggle = _driver.FindElement(By.CssSelector("button[data-bs-target='#filtersOffcanvas']"));
             toggle.Click();
-            _wait.Until(d => d.FindElement(By.Id("filtersOffcanvas")).GetAttribute("class").Contains("show"));
 
-            // Verify sliders
-            var min = _driver.FindElement(By.Id("minRating"));
-            var max = _driver.FindElement(By.Id("maxRating"));
-            Assert.IsTrue(min.Displayed, "Min rating slider should be visible");
-            Assert.IsTrue(max.Displayed, "Max rating slider should be visible");
-
-            // Verify apply button within offcanvas
-            var apply = _driver.FindElement(
-                By.XPath($"//div[@id='filtersOffcanvas']//button[contains(text(),'{buttonText}')]")
+            // Wait until the panel is fully shown
+            var panel = _wait.Until(d =>
+                d.FindElement(By.Id("filtersOffcanvas")).GetAttribute("class").Contains("show")
             );
-            Assert.IsTrue(apply.Displayed, $"'{buttonText}' button should be visible in filters");
+
+            // Wait until both sliders are visible
+            var minSlider = _wait.Until(d =>
+            {
+                var el = d.FindElement(By.Id("minRating"));
+                return el.Displayed ? el : null;
+            });
+
+            var maxSlider = _wait.Until(d =>
+            {
+                var el = d.FindElement(By.Id("maxRating"));
+                return el.Displayed ? el : null;
+            });
+
+            Assert.IsTrue(minSlider.Displayed, "Min rating slider should be visible");
+            Assert.IsTrue(maxSlider.Displayed, "Max rating slider should be visible");
         }
+
 
         [Given(@"the minimum rating is set to (\d+)")]
         public void GivenTheMinimumRatingIsSetTo(int minValue)
@@ -83,36 +92,48 @@ namespace YourProject.Tests.Steps
                 slider, maxValue
             );
         }
-
-[When(@"I click the ""([^""]*)"" button")]
-public void WhenIClickTheButton(string buttonText)
-{
-    var locator = By.XPath($"//div[@id='filtersOffcanvas']//button[contains(text(),'{buttonText}')]");
-    // 1) wait until it’s both visible and enabled
-_wait.Until(d =>
-{
-    var btn = d.FindElement(locator);
-    return btn.Displayed && btn.Enabled;
-});
-var applyBtn = _driver.FindElement(locator);
-((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView(true);", applyBtn);
-applyBtn.Click();
-}
-
         [Then(@"I should see only items with ratings ≥ (\d+) and ≤ (\d+)")]
         public void ThenIShouldSeeOnlyItemsWithRatingsAnd(int minValue, int maxValue)
         {
             var cards = _driver.FindElements(By.CssSelector(".movie-card"));
+            int checkedCount = 0;
+
             foreach (var card in cards)
             {
-                var ratingText = card.FindElement(By.CssSelector(".movie-rating")).Text;
-                var rating = int.Parse(Regex.Match(ratingText, "\\d+").Value);
+                string ratingText = "";
+                try
+                {
+                    ratingText = card.FindElement(By.CssSelector(".movie-rating")).Text.Trim(); // e.g., "Rating: 84.5"
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("Warning: card missing .movie-rating element.");
+                    continue; // skip this card
+                }
+
+                if (string.IsNullOrWhiteSpace(ratingText))
+                {
+                    Console.WriteLine("Warning: card has empty rating text.");
+                    continue;
+                }
+
+                var match = Regex.Match(ratingText, @"\d+(\.\d+)?");
+                if (!match.Success)
+                {
+                    Console.WriteLine($"Warning: Could not parse rating from text: '{ratingText}'");
+                    continue;
+                }
+
+                var rating = float.Parse(match.Value);
                 Assert.That(rating,
                     Is.GreaterThanOrEqualTo(minValue).And.LessThanOrEqualTo(maxValue),
                     $"Rating {rating} was not between {minValue} and {maxValue}");
-            }
-        }
 
+                checkedCount++;
+            }
+
+            Assert.Greater(checkedCount, 0, "No movie ratings were checked.");
+        }
         [Then(@"I should see an inline validation error ""([^""]*)""")]
         public void ThenIShouldSeeAnInlineValidationError(string expected)
         {

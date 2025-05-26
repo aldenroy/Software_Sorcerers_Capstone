@@ -1,3 +1,22 @@
+const allGenres = [
+  "Action","Adult","Adventure","Animation","Biography","Comedy","Crime",
+  "Documentary","Drama","Family","Fantasy","Film Noir","Game Show","History",
+  "Horror","Musical","Music","Mystery","News","Reality-TV","Romance",
+  "Sci-Fi","Short","Sport","Talk-Show","Thriller","War","Western"
+];
+
+const availableStreamingServices = [
+  "Netflix","Hulu","Disney+","Amazon Prime Video","Max \"HBO Max\"",
+  "Apple TV","Peacock","Starz","Tubi","Pluto TV","BritBox","AMC+"
+];
+
+// restore any saved genres, start with no services selected
+let selectedGenres = new Set(
+  Array.isArray(JSON.parse(localStorage.getItem("selectedGenres"))) ? 
+  JSON.parse(localStorage.getItem("selectedGenres")) : []
+);
+
+let selectedServices = [];
 let searchExecuted = true;
 const NO_ITEMS_HTML = "<div class='no-results' role='alert'>>No results found.</div>";
 const NO_MOVIES_RANGE_HTML = "<div class='no-results' role='alert'>No movies found for that rating range.</div>";
@@ -14,6 +33,13 @@ async function searchMovies() {
   const genreFiltersContainer = document.getElementById("genre-filters");
   let minRating = document.getElementById("minRatingTextBox")?.value?.trim();
   let maxRating = document.getElementById("maxRatingTextBox")?.value?.trim();
+
+  selectedGenres = new Set(
+    Array.from(genreFiltersContainer.querySelectorAll("input[type='checkbox']:checked"))
+      .map(cb => cb.value)
+  );
+
+  localStorage.setItem("selectedGenres", JSON.stringify(Array.from(selectedGenres)));
 
   // Clear previous results
   resultsContainer.innerHTML = "";
@@ -89,6 +115,21 @@ async function searchMovies() {
       index = filtered;
     }
 
+    // Apply sorting logic based on the selected option
+    if (sortOption === "yearAsc") {
+      index.sort((a, b) => a.releaseYear - b.releaseYear);
+    } else if (sortOption === "yearDesc") {
+      index.sort((a, b) => b.releaseYear - a.releaseYear);
+    } else if (sortOption === "titleAsc") {
+      index.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortOption === "titleDesc") {
+      index.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortOption === "ratingHighLow") {
+      index.sort((a, b) => b.rating - a.rating);
+    } else if (sortOption === "ratingLowHigh") {
+      index.sort((a, b) => a.rating - b.rating);
+    }
+
     const availableGenresSet = new Set();
     resultsContainer.innerHTML = index.map(item => {
       // Add any genres that exist in the movie
@@ -125,7 +166,7 @@ async function searchMovies() {
       const genreFiltersContainer = document.getElementById("genre-filters");
       genreFiltersContainer.style.display = "block";
       const availableGenres = Array.from(availableGenresSet);
-      setupGenreFilter(availableGenres);
+      setupGenreFilter(allGenres, availableGenres);
     } else {
       document.getElementById("genre-filters").style.display = "none";
     }
@@ -134,6 +175,7 @@ async function searchMovies() {
     enableFilters();
     updateStreamingFilters();
     updateClearFiltersVisibility();
+    setupLetterFilterDropdown();
   } catch (error) {
     loadingSpinner.style.display = "none";
     resultsContainer.innerHTML = "<div class='error-message' role='alert'>An error occurred while fetching data. Please try again later.</div>";
@@ -207,67 +249,65 @@ function updateMaxYearFromTextBox() {
   }
 }
 
-function setupGenreFilter(availableGenres) {
-  const filterContainer = document.getElementById("genre-filters");
-  const contentList = document.getElementById("results");
+function setupGenreFilter(masterGenres, availableGenres) {
+  const container = document.getElementById("genre-filters");
+  container.innerHTML = "";  // Clear previous filters
 
-  // Load saved filter state (if any)
-  const savedFilters = localStorage.getItem("selectedGenres");
-  let selectedGenres = savedFilters ? JSON.parse(savedFilters) : [];
-
-  // Render genre checkboxes
-  filterContainer.innerHTML = "";
-  availableGenres.forEach(genre => {
+  masterGenres.forEach(genre => {
+    const wrapper  = document.createElement("div");
     const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
+    checkbox.type  = "checkbox";
+    checkbox.id    = `genre-${genre}`;
     checkbox.value = genre;
-    checkbox.id = `genre-${genre}`;
-    if (selectedGenres.indexOf(genre) > -1) {
+
+    // Disable and gray-out genres that aren't available in the search results
+    if (!availableGenres.includes(genre)) {
+      checkbox.disabled = true;
+      wrapper.classList.add("text-muted", "opacity-50");
+    }
+
+    // Re-check if the user had it selected before
+    if (selectedGenres.has(genre)) {
       checkbox.checked = true;
     }
 
     const label = document.createElement("label");
-    label.setAttribute("for", checkbox.id);
+    label.htmlFor    = checkbox.id;
     label.textContent = genre;
 
-    const wrapper = document.createElement("div");
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(label);
-    filterContainer.appendChild(wrapper);
+    wrapper.append(checkbox, label);
+    container.appendChild(wrapper);
   });
 
-  function filterContent() {
-    // Get currently selected genres
-    selectedGenres = Array.from(filterContainer.querySelectorAll("input[type='checkbox']:checked"))
-      .map(cb => cb.value);
-    localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
+  // Bind the filter action to update genres selection
+  container.addEventListener("change", filterContent);
+}
 
-    // Filter movie cards: only show movies that include ALL selected genres.
-    Array.from(contentList.children).forEach(item => {
-      const genresAttr = item.getAttribute("data-genres") || "";
-      const itemGenres = genresAttr.split(",").map(s => s.trim()).filter(s => s);
-      if (
-        selectedGenres.length === 0 ||
-        selectedGenres.every(genre => itemGenres.includes(genre))
-      ) {
-        item.style.display = "";
-      } else {
-        item.style.display = "none";
-      }
-    });
 
-    updateClearFiltersVisibility();
-  }
+function filterContent() {
+  // which genres are checked right now?
+  const filterContainer = document.getElementById("genre-filters");
+  selectedGenres = Array.from(
+    filterContainer.querySelectorAll("input[type='checkbox']:checked")
+  ).map(cb => cb.value);
+  localStorage.setItem("selectedGenres", JSON.stringify(Array.from(selectedGenres)));
 
-  // Listen for checkbox changes
-  filterContainer.addEventListener("change", filterContent);
+  // show/hide movie cards based on genre match
+  const resultsContainer = document.getElementById("results");
+  Array.from(resultsContainer.children).forEach(card => {
+    const genresAttr = card.getAttribute("data-genres") || "";
+    const itemGenres = genresAttr.split(",").map(s => s.trim());
+    const keep =
+      selectedGenres.size === 0 ||
+      Array.from(selectedGenres).every(g => itemGenres.includes(g));
+    card.style.display = keep ? "" : "none";
+  });
 
-  // Execute filter to restore previous state on load
-  filterContent();
+  updateClearFiltersVisibility();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Use the full list of genres from your API
+  // Use the full list of genres from the API
   const allGenres = [
     "Action", "Adult", "Adventure", "Animation", "Biography", "Comedy", "Crime",
     "Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game Show", "History",
@@ -275,8 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "Sci-Fi", "Short", "Sport", "Talk-Show", "Thriller", "War", "Western"
   ];
   const availableStreamingServices = ["Netflix", "Hulu", "Disney+", "Amazon Prime Video", "Max \"HBO Max\"", "Apple TV+", "Peacock", "Starz", "Tubi", "Pluto TV", "BritBox", "AMC+"];
+  clearFilters(true); // clear filters on page load
   setupStreamingFilter(availableStreamingServices);
-  setupGenreFilter(allGenres);
+  setupGenreFilter(allGenres, allGenres);
   updateMinYearLabel();
   updateMaxYearLabel();
   ["minYear", "maxYear"].forEach(id => {
@@ -338,13 +379,15 @@ function updateClearFiltersVisibility() {
   // 4) any genres or streaming checked?
   const genresChecked = !!document.querySelector("#genre-filters input:checked");
   const streamingChecked = !!document.querySelector("#streaming-filters input:checked");
+  const letterFilterApplied = document.getElementById("letter-filter-dropdown").value !== "";
 
-  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked) {
+  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked || letterFilterApplied) {
     clearBtn.style.display = "inline-block";
   } else {
     clearBtn.style.display = "none";
   }
 }
+
 
 function filterContentByStreaming() {
   const selectedServices = Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
@@ -387,88 +430,121 @@ function setupStreamingFilter(availableServices) {
 }
 
 function updateStreamingFilters() {
-  // Get all movie cards that are part of the search results.
-  const movieCards = document.querySelectorAll(".movie-card");
-  let streamingServicesSet = new Set();
-
-  movieCards.forEach(card => {
-    const servicesText = card.getAttribute("data-streaming") || "";
-    servicesText.split(",")
+  // build a Set of all services actually in the displayed cards
+  const availableSet = new Set();
+  document.querySelectorAll(".movie-card").forEach(card => {
+    const svcList = (card.getAttribute("data-streaming") || "")
+      .split(",")
       .map(s => s.trim())
-      .filter(s => s)
-      .forEach(service => streamingServicesSet.add(service));
+      .filter(Boolean);
+    svcList.forEach(svc => availableSet.add(svc));
   });
-
-  const streamingServices = Array.from(streamingServicesSet).sort();
-
-  // Preserve already selected streaming services
-  const selectedServices = new Set(Array.from(document.querySelectorAll("#streaming-filters input[type='checkbox']:checked"))
-    .map(cb => cb.value));
 
   const container = document.getElementById("streaming-filters");
   container.innerHTML = "";
 
-  streamingServices.forEach(service => {
+  availableStreamingServices.forEach(service => {
+    const wrapper  = document.createElement("div");
     const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
+    checkbox.type  = "checkbox";
+    checkbox.id    = `streaming-${service}`;
     checkbox.value = service;
-    checkbox.id = `streaming-${service}`;
 
-    // Restore selection if the service is already selected.
-    if (selectedServices.has(service)) {
+    if (!availableSet.has(service)) {
+      checkbox.disabled = true;
+      wrapper.classList.add("text-muted", "opacity-50");
+    }
+    if (selectedServices.includes(service)) {
       checkbox.checked = true;
     }
 
     const label = document.createElement("label");
-    label.setAttribute("for", checkbox.id);
+    label.htmlFor    = checkbox.id;
     label.textContent = service;
 
-    const wrapper = document.createElement("div");
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(label);
+    wrapper.append(checkbox, label);
     container.appendChild(wrapper);
   });
 
-  container.addEventListener("change", filterContentByStreaming);
+  // update selectedServices & re-filter on change
+  container.addEventListener("change", () => {
+    selectedServices = Array.from(
+      container.querySelectorAll("input[type='checkbox']:checked")
+    ).map(cb => cb.value);
+    filterContentByStreaming();
+  });
 }
 
-function clearFilters() {
-  document.getElementById("sortBy").value = "default";
-  const minSlider = document.getElementById("minYear");
-  const maxSlider = document.getElementById("maxYear");
-  minSlider.value = minSlider.min;
-  maxSlider.value = maxSlider.max;
-  updateMinYearLabel();
-  updateMaxYearLabel();
-  const minRating = document.getElementById("minRating");
-  const maxRating = document.getElementById("maxRating");
-  minRating.value = minRating.min;
-  maxRating.value = maxRating.max;
-  updateMinRatingLabel();
-  updateMaxRatingLabel();
-  const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
-  genreCheckboxes.forEach(cb => {
-    cb.checked = false;
-  });
 
-  const streamingCheckboxes = document.querySelectorAll("#streaming-filters input[type='checkbox']");
-  streamingCheckboxes.forEach(cb => {
-    cb.checked = false;
-  });
+function clearFilters(isPageLoad = false) {
+    // Reset all filters
+    document.getElementById("sortBy").value = "default";
+    const minSlider = document.getElementById("minYear");
+    const maxSlider = document.getElementById("maxYear");
+    minSlider.value = minSlider.min;
+    maxSlider.value = maxSlider.max;
+    updateMinYearLabel();
+    updateMaxYearLabel();
 
-  document.getElementById("clearFilters").style.display = "none";
-  localStorage.removeItem("selectedGenres");
+    const minRating = document.getElementById("minRating");
+    const maxRating = document.getElementById("maxRating");
+    minRating.value = minRating.min;
+    maxRating.value = maxRating.max;
+    updateMinRatingLabel();
+    updateMaxRatingLabel();
 
-  // Re-trigger the search, then force every card to be shown
-  searchMovies().then(() => {
-    document.querySelectorAll('.movie-card').forEach(card => {
-      // clear any inline display:none or block from prior filters
-      card.style.display = '';
+    // Uncheck all the genre checkboxes in the off-canvas
+    const genreCheckboxes = document.querySelectorAll("#genre-filters input[type='checkbox']");
+    genreCheckboxes.forEach(cb => {
+        cb.checked = false; // uncheck all genre checkboxes
     });
-    // update the Clear Filters button visibility one last time
-    updateClearFiltersVisibility();
-  });
+
+    // Uncheck all the streaming service checkboxes in the off-canvas
+    const streamingCheckboxes = document.querySelectorAll("#streaming-filters input[type='checkbox']");
+    streamingCheckboxes.forEach(cb => {
+        cb.checked = false; // uncheck all streaming service checkboxes
+    });
+
+    document.getElementById("sortBy").value = "default";
+    const sortDropdownButton = document.getElementById("sortGenreDropdown");
+    sortDropdownButton.textContent = "Sort by";
+
+    // Hide the clear filters button when filters are cleared
+    document.getElementById("clearFilters").style.display = "none";
+
+    // Clear the selectedGenres and selectedServices, then store them again in localStorage
+    selectedGenres = new Set();  // Reinitialize the Set for genres
+    selectedServices = [];       // Clear the selected services
+    localStorage.setItem("selectedGenres", JSON.stringify(Array.from(selectedGenres)));
+    localStorage.setItem("selectedServices", JSON.stringify(selectedServices));  // Store selectedServices
+
+    // Skip searchMovies if this is a page load
+    if (isPageLoad) return;
+
+    // Re-trigger the search and force every card to be shown
+    searchMovies().then(() => {
+        // Once the search is done, update the genres again
+        document.querySelectorAll('.movie-card').forEach(card => {
+            // clear any inline display:none or block from prior filters
+            card.style.display = '';
+        });
+
+        // Get the available genres from the search result (or set to master genres list)
+        const availableGenresSet = new Set();
+        document.querySelectorAll(".movie-card").forEach(card => {
+            const genres = card.getAttribute("data-genres") || "";
+            genres.split(",").forEach(genre => availableGenresSet.add(genre.trim()));
+        });
+
+        // Reset the genre and streaming filters in the off-canvas after clearing
+        setupGenreFilter(allGenres, Array.from(availableGenresSet)); // Pass available genres here
+        updateStreamingFilters();  // Reset the streaming filters
+
+        // Update the Clear Filters button visibility
+        updateClearFiltersVisibility();
+    });
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   let searchInput = document.getElementById("searchInput");
@@ -488,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Horror", "Musical", "Music", "Mystery", "News", "Reality-TV", "Romance",
     "Sci-Fi", "Short", "Sport", "Talk-Show", "Thriller", "War", "Western"
   ];
-  setupGenreFilter(allGenres);
+  setupGenreFilter(allGenres, allGenres);
 
   // When attaching event listeners for "sortBy", check if the element exists
   let sortByElem = document.getElementById("sortBy");
@@ -523,14 +599,16 @@ document.addEventListener("DOMContentLoaded", () => {
     maxRatingSlider.addEventListener("change", updateClearFiltersVisibility);
   }
 
-  document.getElementById("minYear").addEventListener("input", updateClearFiltersVisibility);
-  document.getElementById("maxYear").addEventListener("input", updateClearFiltersVisibility);
-
-  document.getElementById("minYear").addEventListener("focus", handleFilterInteraction);
-  document.getElementById("maxYear").addEventListener("focus", handleFilterInteraction);
+  document.getElementById("genre-filters").addEventListener("change", applyAllFilters);
+  document.getElementById("streaming-filters").addEventListener("change", applyAllFilters);
+  document.getElementById("minYear").addEventListener("change", applyAllFilters);
+  document.getElementById("maxYear").addEventListener("change", applyAllFilters);
+  document.getElementById("minRating").addEventListener("change", applyAllFilters);
+  document.getElementById("maxRating").addEventListener("change", applyAllFilters);
+  document.getElementById("letter-filter-dropdown").addEventListener("change", applyAllFilters);
 
   // Attach event listener for the Clear Filters button
-  document.getElementById("clearFilters").addEventListener("click", clearFilters);
+  document.getElementById("clearFilters").addEventListener("click", () => clearFilters());
 });
 
 
@@ -644,4 +722,169 @@ if (maxRatingBox) {
       updateMaxRatingFromTextBox();
     }
   });
+}
+
+// Dynamically generate letter filter dropdown options based on available movies
+function setupLetterFilterDropdown() {
+    const letterFilterDropdown = document.getElementById("letter-filter-dropdown");
+    if (!letterFilterDropdown) return;
+
+    // Clear existing options
+    letterFilterDropdown.innerHTML = '<option value="" selected>All</option>';
+
+    // Build a Set of available starting letters from the movie titles
+    const availableLetters = new Set();
+    const movieCards = document.querySelectorAll(".movie-card");
+    movieCards.forEach(card => {
+        const title = card.querySelector("h5").textContent.trim();
+        if (title) {
+            availableLetters.add(title[0].toUpperCase());
+        }
+    });
+
+    // Generate options only for available letters
+    Array.from(availableLetters)
+        .sort() // Sort letters alphabetically
+        .forEach(letter => {
+            const option = document.createElement("option");
+            option.value = letter;
+            option.textContent = letter;
+            letterFilterDropdown.appendChild(option);
+        });
+
+    // Add event listener to apply the filter when the dropdown value changes
+    letterFilterDropdown.addEventListener("change", () => {
+        const selectedLetter = letterFilterDropdown.value;
+        if (selectedLetter) {
+            applyLetterFilter(selectedLetter);
+        } else {
+            clearLetterFilter();
+        }
+        updateClearFiltersVisibility();
+    });
+}
+
+// Clear the letter filter
+function clearLetterFilter() {
+    const resultsContainer = document.getElementById("results");
+    const movieCards = resultsContainer.querySelectorAll(".movie-card");
+
+    movieCards.forEach(card => {
+        card.style.display = "block";
+    });
+
+    // Remove any "No movies to display" message
+    const errorMessage = resultsContainer.querySelector(".error-message");
+    if (errorMessage) {
+        errorMessage.remove();
+    }
+
+    // Reset the dropdown to "All"
+    const letterFilterDropdown = document.getElementById("letter-filter-dropdown");
+    if (letterFilterDropdown) {
+        letterFilterDropdown.value = "";
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const sortOptions = document.querySelectorAll(".dropdown-item.sort-option");
+    const sortByInput = document.getElementById("sortBy");
+    const sortDropdownButton = document.getElementById("sortGenreDropdown");
+    setupLetterFilterDropdown();
+    sortOptions.forEach(option => {
+        option.addEventListener("click", (event) => {
+            event.preventDefault();
+            const sortValue = option.getAttribute("data-sort");
+            const sortText = option.textContent;
+
+            // Update the hidden input value
+            sortByInput.value = sortValue;
+
+            // Update the dropdown button text
+            sortDropdownButton.textContent = sortText;
+
+            // Trigger the search with the new sorting option
+            searchMovies();
+        });
+    });
+});
+
+function applyAllFilters() {
+    const resultsContainer = document.getElementById("results");
+    const movieCards = resultsContainer.querySelectorAll(".movie-card");
+
+    // Get active filters
+    const selectedGenres = Array.from(
+        document.querySelectorAll("#genre-filters input[type='checkbox']:checked")
+    ).map(cb => cb.value);
+
+    const selectedServices = Array.from(
+        document.querySelectorAll("#streaming-filters input[type='checkbox']:checked")
+    ).map(cb => cb.value);
+
+    const minYear = parseInt(document.getElementById("minYear").value, 10);
+    const maxYear = parseInt(document.getElementById("maxYear").value, 10);
+
+    const minRating = parseFloat(document.getElementById("minRating").value);
+    const maxRating = parseFloat(document.getElementById("maxRating").value);
+
+    const selectedLetter = document.getElementById("letter-filter-dropdown").value;
+
+    let hasVisibleCards = false;
+
+    // Filter movie cards
+    movieCards.forEach(card => {
+        const genresAttr = card.getAttribute("data-genres") || "";
+        const itemGenres = genresAttr.split(",").map(s => s.trim());
+
+        const servicesAttr = card.getAttribute("data-streaming") || "";
+        const itemServices = servicesAttr.split(",").map(s => s.trim());
+
+        const releaseYear = parseInt(card.querySelector(".movie-year").textContent.replace(/[()]/g, ""), 10);
+        const rating = parseFloat(card.querySelector(".movie-rating").textContent.replace("Rating: ", ""));
+
+        const title = card.querySelector("h5").textContent.trim();
+
+        // Check if the card matches all active filters
+        const matchesGenres = selectedGenres.length === 0 || selectedGenres.every(genre => itemGenres.includes(genre));
+        const matchesServices = selectedServices.length === 0 || selectedServices.every(service => itemServices.includes(service));
+        const matchesYear = (!isNaN(minYear) && !isNaN(maxYear)) ? (releaseYear >= minYear && releaseYear <= maxYear) : true;
+        const matchesRating = (!isNaN(minRating) && !isNaN(maxRating)) ? (rating >= minRating && rating <= maxRating) : true;
+        const matchesLetter = selectedLetter === "" || title.startsWith(selectedLetter);
+
+        // Show or hide the card based on the filters
+        if (matchesGenres && matchesServices && matchesYear && matchesRating && matchesLetter) {
+            card.style.display = "block";
+            hasVisibleCards = true;
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    // Display an error message if no cards are visible
+    const errorMessage = document.getElementById("noResultsMessage");
+    if (!hasVisibleCards) {
+        // Hide all cards explicitly
+        movieCards.forEach(card => {
+            card.style.display = "none";
+        });
+
+        // Show the error message
+        if (!errorMessage) {
+            const errorDiv = document.createElement("div");
+            errorDiv.id = "noResultsMessage";
+            errorDiv.className = "no-results"; // Match the existing error message class
+            errorDiv.role = "alert";
+            errorDiv.textContent = "No results match your selected filters. Please adjust your filters and try again.";
+            resultsContainer.appendChild(errorDiv);
+        }
+    } else {
+        // Remove the error message if results are found
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+
+    updateClearFiltersVisibility();
 }

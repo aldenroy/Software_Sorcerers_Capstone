@@ -17,6 +17,9 @@
     --select-arrow-color: #333;
     --button-primary-bg: var(--link-color);
     --button-primary-text: #ffffff;
+    --scrollbar-background: #c1c1c1;
+    --scrollbar-thumb: #f1f1f1;
+    --scrollbar-thumb-hover: #a8a8a8;
 
     /* Profile card styling */
     --profile-card-bg: #f8f9fa;
@@ -44,6 +47,9 @@
     --bubble-user-color: #007bff;
     --bubble-bot-text: #212529;
     --bubble-user-text: #ffffff;
+    --bubble-link: #212529;
+    --bubble-hover: #000000;
+    
 
     /* Filter styling */
     --offcanvas-bg: #ffffff;
@@ -74,6 +80,9 @@ html[data-theme="dark"] {
     --select-arrow-color: #ffffff;
     --button-primary-bg: var(--link-color);
     --button-primary-text: #ffffff;
+    --scrollbar-background: #444444;
+    --scrollbar-thumb: #666666;
+    --scrollbar-thumb-hover: #888888;
 
     /* Profile card styling */
     --profile-card-bg: #2d2d2d;
@@ -102,7 +111,9 @@ html[data-theme="dark"] {
     --bubble-user-color: #2c2c2c;
     --bubble-bot-text: #000000;
     --bubble-user-text: #ffffff;
-
+    --bubble-link: #2c2c2c;
+    --bubble-hover: #000000;
+ 
     /* Filter styling */
     --offcanvas-bg: #2d2d2d;
     --offcanvas-text: #ffffff;
@@ -124,6 +135,7 @@ html[data-theme="high-contrast"] {
     --navbar-text: #ffff00;
     --settings-navbar-text: #000000;
     --navbar-bg: #000000;
+    --navbar-bg-hover: #333333;
     --footer-bg: #000000;
     --input-bg: #000000;
     --input-text: #ffff00;
@@ -132,6 +144,9 @@ html[data-theme="high-contrast"] {
     --select-arrow-color: #ffff00;
     --button-primary-bg: var(--link-color);
     --button-primary-text: #000000;
+    --scrollbar-background: #444444;
+    --scrollbar-thumb: #ffff00;
+    --scrollbar-thumb-hover: #cccc00;
 
     /* Profile card styling */
     --profile-card-bg: #1b1b1b;
@@ -159,6 +174,8 @@ html[data-theme="high-contrast"] {
     --bubble-user-color: #000000;
     --bubble-bot-text: #000000;
     --bubble-user-text: #ffff00;
+    --bubble-hover: #1b1b1b;
+    --bubble-link: #2c2c2c;
 
     /* Filter styling */
     --offcanvas-bg: #111111;
@@ -468,6 +485,13 @@ html[data-theme="high-contrast"] .nav-link.active {
     color: var(--settings-navbar-text) !important;
 }
 
+html[data-theme="high-contrast"] #navbar-primary a.nav-link:hover,
+.high-contrast-theme #navbar-primary a.nav-link:hover {
+    background-color: var(--navbar-bg-hover) !important;
+    color: var(--navbar-text);
+}
+
+
 
 
 /* Footer styling */
@@ -616,46 +640,50 @@ html[data-theme="dark"] select {
 .chat-bubble.bot-message {
     background-color: var(--bubble-color) !important;
     color: var(--bubble-bot-text) !important;
-    border-radius: 20px;
-    display: inline-block;
-    max-width: 70%;
-    word-wrap: break-word;
-    padding: 0.5rem 0.75rem;
-    border: none;
 }
 
 .chat-bubble.user-message {
     background-color: var(--bubble-user-color) !important;
     color: var(--bubble-user-text) !important;
-    border-radius: 20px;
-    display: inline-block;
-    max-width: 70%;
-    word-wrap: break-word;
-    padding: 0.5rem 0.75rem;
-    border: none;
-    text-align: left;
 }
 
 .chatbox-text {
     background-color: var(--bubble-color) !important;
     color: var(--bubble-text) !important;
-    border-radius: 20px;
-    display: inline-block;
-    max-width: 70%;
-    word-wrap: break-word;
-    padding: 0.5rem 0.75rem;
-    border: none;
 }
 
 .chatbox-title,
 .chatbox-dropdown {
     color: var(--bubble-text) !important;
-    border-radius: 20px;
-    display: inline-block;
-    max-width: 70%;
-    word-wrap: break-word;
-    padding: 0.5rem 0.75rem;
-    border: none;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-background) var(--scrollbar-thumb);
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    background-color: var(--scrollbar-background);
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+}
+
+
+.quoted-link {  
+color: var(--bubble-link);
+text-decoration: underline;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.quoted-link:hover {  
+color: var(--bubble-hover); 
+text-decoration: none;
 }
 
 
@@ -688,3 +716,96 @@ html[data-theme="dark"] select {
     background-color: var(--offcanvas-dropdown-hover);
     color: var(--offcanvas-dropdown-hover-text);
 }
+
+
+
+.dropdown-item {
+    background-color: var(--offcanvas-dropdown-bg);
+    color: var(--offcanvas-text);
+}
+
+select.form-control:hover, select.form-control:focus {
+    background-color: var(--offcanvas-dropdown-hover);
+    color: var(--offcanvas-dropdown-hover-text);
+}
+
+
+
+
+
+/* Chart text colors */
+:root {
+  --chart-title-color: var(--text-color);
+  --chart-label-color: var(--text-color);
+}
+.dark-theme,
+html[data-theme="dark"],
+.high-contrast-theme,
+html[data-theme="high-contrast"] {
+  --chart-title-color: var(--text-color);
+  --chart-label-color: var(--text-color);
+}
+
+/* Base table reset */
+#analysis-section table.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    /* Light Theme (default) */
+    #analysis-section table.table thead th {
+        background-color: var(--header-bg);
+        color: var(--text-color);
+    }
+
+    #analysis-section table.table tbody tr:nth-child(odd) > * {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    #analysis-section table.table tbody tr:nth-child(even) > * {
+        background-color: var(--header-bg);
+        color: var(--text-color);
+    }
+
+/* Dark Theme */
+.dark-theme #analysis-section table.table thead th,
+html[data-theme="dark"] #analysis-section table.table thead th {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme #analysis-section table.table tbody tr:nth-child(odd) > *,
+html[data-theme="dark"] #analysis-section table.table tbody tr:nth-child(odd) > * {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme #analysis-section table.table tbody tr:nth-child(even) > *,
+html[data-theme="dark"] #analysis-section table.table tbody tr:nth-child(even) > * {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* High-Contrast Theme */
+.high-contrast-theme #analysis-section table.table thead th,
+html[data-theme="high-contrast"] #analysis-section table.table thead th {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.high-contrast-theme #analysis-section table.table tbody tr:nth-child(odd) > *,
+html[data-theme="high-contrast"] #analysis-section table.table tbody tr:nth-child(odd) > * {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.high-contrast-theme #analysis-section table.table tbody tr:nth-child(even) > *,
+html[data-theme="high-contrast"] #analysis-section table.table tbody tr:nth-child(even) > * {
+    background-color: var(--header-bg) !important;
+    color: var(--text-color) !important;
+}
+

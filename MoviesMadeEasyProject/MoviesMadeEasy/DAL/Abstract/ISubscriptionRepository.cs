@@ -1,4 +1,5 @@
 ﻿using MoviesMadeEasy.Models;
+using MoviesMadeEasy.Models.DTO;
 
 
 namespace MoviesMadeEasy.DAL.Abstract
@@ -11,5 +12,8 @@ namespace MoviesMadeEasy.DAL.Abstract
         public List<UserStreamingService> GetUserSubscriptionsWithCost(int userId);
         List<UserStreamingService> GetUserSubscriptionRecords(int userId);
         decimal GetUserSubscriptionTotalMonthlyCost(int userId);
+        Task IncrementClickCountAsync(int userId, int streamingServiceId);
+        List<SubscriptionClickSummary> MonthlySubscriptionClicks(int userId);
+        List<SubscriptionClickSummary> LifetimeSubscriptionClicks(int userId);
     }
 }

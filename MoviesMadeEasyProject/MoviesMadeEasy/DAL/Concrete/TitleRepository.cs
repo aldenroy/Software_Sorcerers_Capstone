@@ -47,6 +47,12 @@ namespace MoviesMadeEasy.DAL.Concrete
 
             if (existingTitle != null)
             {
+                existingTitle.PosterUrl = title.PosterUrl;
+                existingTitle.Genres = title.Genres;
+                existingTitle.Rating = title.Rating;
+                existingTitle.Overview = title.Overview;
+                existingTitle.StreamingServices = title.StreamingServices;
+                existingTitle.LastUpdated = DateTime.UtcNow;
                 return existingTitle;
             }
             else
