@@ -786,34 +786,6 @@ function clearLetterFilter() {
     }
 }
 
-// Update the visibility of the "Clear Filters" button
-function updateClearFiltersVisibility() {
-  const clearBtn = document.getElementById("clearFilters");
-
-  // Check if any filters are applied
-  const sortDefault = document.getElementById("sortBy").value === "default";
-  const minYearElem = document.getElementById("minYear");
-  const maxYearElem = document.getElementById("maxYear");
-  const yearDefault =
-      minYearElem && maxYearElem
-          ? minYearElem.value === minYearElem.min && maxYearElem.value === maxYearElem.max
-          : true;
-  const minRatingElem = document.getElementById("minRating");
-  const maxRatingElem = document.getElementById("maxRating");
-  const ratingDefault =
-      minRatingElem && maxRatingElem
-          ? minRatingElem.value === minRatingElem.min && maxRatingElem.value === maxRatingElem.max
-          : true;
-  const genresChecked = !!document.querySelector("#genre-filters input:checked");
-  const streamingChecked = !!document.querySelector("#streaming-filters input:checked");
-  const letterFilterApplied = document.getElementById("letter-filter-dropdown").value !== "";
-
-  if (!sortDefault || !yearDefault || !ratingDefault || genresChecked || streamingChecked || letterFilterApplied) {
-      clearBtn.style.display = "inline-block";
-  } else {
-      clearBtn.style.display = "none";
-  }
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     const sortOptions = document.querySelectorAll(".dropdown-item.sort-option");

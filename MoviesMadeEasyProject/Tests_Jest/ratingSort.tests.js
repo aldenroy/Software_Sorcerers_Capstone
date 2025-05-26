@@ -17,6 +17,7 @@ describe("Audience Rating Filter", () => {
 
     document.body.innerHTML = `
       <input type="text" id="searchInput" value="Test Query" />
+      <div id="genre-filters"></div>
       <div id="results"></div>
       <div id="loadingSpinner" style="display: none;"></div>
       <select id="sortBy">
