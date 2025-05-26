@@ -52,7 +52,9 @@ html[data-font-type="open-dyslexic"] {
 }
 
 /* Apply font size globally */
-body {
+body,
+span,
+.quoted-link {
     font-size: var(--font-size-base, 20px) !important;
     font-family: var(--font-family) !important;
 }

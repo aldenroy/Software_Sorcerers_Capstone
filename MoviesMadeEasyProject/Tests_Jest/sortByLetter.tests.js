@@ -13,7 +13,8 @@ describe("Movie querying", () => {
         <option value="default">Sort by</option>
         <option value="titleAsc">Title (A-Z)</option>
         <option value="titleDesc">Title (Z-A)</option>
-      </select>
+      </select> 
+      <select id="letter-filter-dropdown"></select>
       <div id="results"></div>
       <div id="loadingSpinner"></div>
       <div id="genre-filters"></div>

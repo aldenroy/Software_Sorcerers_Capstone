@@ -1,0 +1,94 @@
+.chatbox-container {
+position: fixed;
+bottom: 0;
+right: 10px;
+width: 275px;
+z-index: 1050;
+font-family: sans-serif;
+}
+
+/* Toggle bar (always visible) */
+.chatbox-toggle {
+padding: 10px;
+border-radius: 10px 10px 0 0;
+cursor: pointer;
+}
+
+/* Chatbox body (initially hidden) */
+.chatbox-body {
+display: none;
+flex-direction: column;
+height: 400px;
+border: 1px solid #ddd;
+border-top: none;
+border-radius: 0 0 10px 10px;
+animation: slideUp 0.3s ease-out forwards;
+}
+
+/* When open */
+.chatbox-container.open .chatbox-body {
+display: flex;
+}
+
+/* Chevron toggle direction */
+#chatbox-chevron.bi-chevron-up::before {
+content: "\f286";
+}
+
+.chatbox-container.open #chatbox-chevron::before {
+content: "\f282"; 
+}
+
+@keyframes slideUp {
+from {
+    transform: translateY(10%);
+    opacity: 0;
+}
+to {
+    transform: translateY(0);
+    opacity: 1;
+}
+}
+
+
+
+.chat-bubble.bot-message {
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 90%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
+.chat-bubble.user-message {
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    text-align: left;
+}
+
+.chatbox-text {
+    display: block;
+    width: 100%;
+    border-radius: 20px;
+    display: inline-block;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    box-sizing: border-box; 
+}
+
+.chatbox-title,
+.chatbox-dropdown {
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
